@@ -347,6 +347,68 @@ const evalCases = [
 
 const evalFixtures = evalCases.map((c) => ({ ...c, expected: evaluateCase(c) }));
 
+// ── Prompts ───────────────────────────────────────────────────────────────
+
+const chatSpec = ui.openuiChatLibrary.toSpec();
+delete chatSpec.schema; // already in schemas.json
+
+const tools = [
+  "search_docs",
+  {
+    name: "list_tickets",
+    description: "Open support tickets",
+    inputSchema: {
+      type: "object",
+      properties: { status: { type: "string", enum: ["open", "closed"] }, limit: { type: "number" } },
+      required: ["status"],
+    },
+    outputSchema: {
+      type: "object",
+      properties: {
+        rows: { type: "array", items: { type: "object", properties: { id: { type: "string" } } } },
+        total: { type: "integer" },
+      },
+    },
+  },
+  { name: "ping", inputSchema: {}, outputSchema: undefined },
+];
+
+const smallSpec = {
+  components: {
+    Box: { signature: "Box(children: (Text | Box)[])", description: "A box" },
+    Text: { signature: "Text(value: string, tone?: \"a\" | \"b\")" },
+  },
+};
+
+// A slice of the chat library that still exercises ActionExpression,
+// $binding, groups and ungrouped components, to keep variant fixtures small.
+const sliceNames = ["Card", "TextContent", "Button", "Buttons", "Form", "FormControl", "Input", "Select", "SelectItem", "Table", "Col"];
+const sliceSpec = {
+  root: chatSpec.root,
+  components: Object.fromEntries(sliceNames.map((n) => [n, chatSpec.components[n]])),
+  componentGroups: [
+    { name: "Forms", components: ["Form", "FormControl", "Input", "Select", "SelectItem"], notes: ["- Forms note"] },
+    { name: "Buttons", components: ["Button", "Buttons", "Missing"] },
+  ],
+};
+
+const promptCases = [
+  { name: "chat-default", spec: chatSpec },
+  { name: "chat-options", spec: { ...chatSpec, ...ui.openuiChatPromptOptions } },
+  { name: "slice-bindings", spec: { ...sliceSpec, bindings: true } },
+  { name: "slice-tools", spec: { ...sliceSpec, tools, toolExamples: ['x = Query("list_tickets", {status: "open"}, {rows: []})'] } },
+  { name: "slice-tools-no-bindings", spec: { ...sliceSpec, tools, bindings: false } },
+  {
+    name: "slice-modes",
+    spec: { ...sliceSpec, editMode: true, inlineMode: true, preamble: "Custom preamble.", additionalRules: ["Be brief"], examples: ["a = 1"] },
+  },
+  { name: "slice-no-groups", spec: { ...sliceSpec, componentGroups: undefined } },
+  { name: "small-no-root", spec: smallSpec },
+  { name: "small-tools-only", spec: { ...smallSpec, toolCalls: true, bindings: false } },
+].map((c) => ({ ...c, expected: core.generatePrompt(c.spec) }));
+
+const chatComponentSpecs = chatSpec;
+
 function write(name, data, indent = 1) {
   mkdirSync(fixtures, { recursive: true });
   writeFileSync(join(fixtures, name), JSON.stringify(data, null, indent) + "\n");
@@ -357,7 +419,9 @@ write("parser.json", parserCases);
 write("streaming.json", streamingCases, 0);
 write("stream-set.json", setCases);
 write("evaluation.json", evalFixtures);
+write("prompts.json", promptCases);
+write("chat-spec.json", chatComponentSpecs);
 
 console.log(
-  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation fixtures`,
+  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation, ${promptCases.length} prompt fixtures`,
 );
