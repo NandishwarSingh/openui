@@ -82,7 +82,45 @@ const testSchema = {
   },
 };
 
-const schemas = { chat: { schema: chatSchema, root: "Card" }, test: { schema: testSchema, root: "Card" } };
+/** Props bound two-way to $state (lang-core's reactive()), per component. */
+function reactiveProps(library) {
+  const out = {};
+  for (const [name, comp] of Object.entries(library.components)) {
+    const keys = Object.entries(comp.props.shape ?? {})
+      .filter(([, schema]) => core.isReactiveSchema(schema))
+      .map(([key]) => key);
+    if (keys.length) out[name] = keys;
+  }
+  return out;
+}
+
+// The test schema has no Zod library behind it, so build the minimal shape
+// evaluateElementProps reads: components[name].props.shape[prop].
+const testReactive = { Input: ["value"] };
+const testLibrary = {
+  components: Object.fromEntries(
+    Object.entries(testSchema.$defs).map(([name, def]) => [
+      name,
+      {
+        props: {
+          shape: Object.fromEntries(
+            Object.keys(def.properties).map((key) => {
+              const schema = {};
+              if (testReactive[name]?.includes(key)) core.markReactive(schema);
+              return [key, schema];
+            }),
+          ),
+        },
+      },
+    ]),
+  ),
+};
+
+const schemas = {
+  chat: { schema: chatSchema, root: "Card", reactive: reactiveProps(ui.openuiChatLibrary) },
+  test: { schema: testSchema, root: "Card", reactive: testReactive },
+};
+const libraries = { chat: ui.openuiChatLibrary, test: testLibrary };
 
 // ── Corpus ────────────────────────────────────────────────────────────────
 
@@ -242,6 +280,73 @@ const setCases = edgeCases.slice(0, 6).map((c) => {
   return { name: c.name, schema: c.schema, steps };
 });
 
+// ── Evaluation ──────────────────────────────────────────────────────────
+
+const unwrap = (v) =>
+  v && typeof v === "object" && !Array.isArray(v) && "value" in v ? v.value : v;
+
+/** Parses, seeds a store like the renderer does, and evaluates the tree. */
+function evaluateCase(c) {
+  const result = parseWith(c.schema, c.input);
+  const store = core.createStore();
+  store.initialize(result.stateDeclarations, {});
+  for (const [key, value] of Object.entries(c.state ?? {})) store.set(key, value);
+  const ctx = {
+    getState: (name) => unwrap(store.get(name)),
+    resolveRef: (name) => (c.queryResults ?? {})[name] ?? null,
+  };
+  const errors = [];
+  const root = result.root
+    ? core.evaluateElementProps(result.root, { ctx, library: libraries[c.schema], store, errors })
+    : null;
+  return { root, errors };
+}
+
+const e = (name, input, extra = {}) => ({ name, schema: "test", input, ...extra });
+
+const evalCases = [
+  ...chatExamples,
+  e("operators", edgeCases.find((c) => c.name === "operators").input),
+  e("member-index", edgeCases.find((c) => c.name === "member-index").input),
+  e("actions", edgeCases.find((c) => c.name === "actions").input),
+  e("each", edgeCases.find((c) => c.name === "each").input),
+  e(
+    "builtins-all",
+    '$n = [5, "3", 9, "x", true]\n$rows = [{n: "b", v: 2}, {n: "a", v: 10}, {n: "c", v: "1"}]\nroot = Card([Text("" + @Count($n) + "|" + @Sum($n) + "|" + @Avg($n) + "|" + @Min($n) + "|" + @Max($n) + "|" + @First($n) + "|" + @Last($n) + "|" + @Round(-2.5) + "|" + @Round(1.005, 2) + "|" + @Abs(-3) + "|" + @Floor(1.7) + "|" + @Ceil(1.2)), Text(@Sort($rows, "v", "desc").n + ""), Text(@Sort($rows, "n").n + ""), Text(@Filter($rows, "v", ">", 1).n + ""), Text(@Filter($rows, "n", "contains", "a").n + ""), Text(@Filter($rows, "v", "==", "2").n + "")])',
+  ),
+  e(
+    "arithmetic-edges",
+    '$z = 0\nroot = Card([Text("" + (5 / $z) + "|" + (-7 % 3) + "|" + (7 % $z) + "|" + ("a" + null) + "|" + (null + 1) + "|" + (true + 1) + "|" + ("5" * "2") + "|" + ("x" - 1) + "|" + (0.1 + 0.2) + "|" + (1 / 3))])',
+  ),
+  e(
+    "truthiness-and-equality",
+    '$e = ""\n$z = 0\n$arr = []\nroot = Card([Text("" + ($e || "empty") + "|" + ($z && "no") + "|" + ($arr ? "arr-truthy" : "arr-falsy") + "|" + (1 == "1") + "|" + (null == 0) + "|" + ($missing == null) + "|" + !$e)])',
+  ),
+  e(
+    "ternary-components",
+    '$on = true\nroot = Card([$on ? Text("on", "l") : Button("off"), $on ? null : Text("hidden")])',
+  ),
+  e(
+    "ternary-components-off",
+    '$on = true\nroot = Card([$on ? Text("on", "l") : Button("off")])',
+    { state: { $on: false } },
+  ),
+  e("state-override", '$count = 1\nroot = Card([Text("count " + $count)])', { state: { $count: 41 } }),
+  e("reactive-binding", '$v = "hi"\nroot = Card([Input("name", $v), Input("plain", "x")])'),
+  e("reactive-assign", '$v = ""\nroot = Card([Input("name", $v = $value)])'),
+  e(
+    "query-results",
+    edgeCases.find((c) => c.name === "query-mutation").input,
+    { queryResults: { users: { rows: [{ id: 1 }, { id: 2 }] }, save: { status: "idle" } } },
+  ),
+  e(
+    "each-actions",
+    '$items = [{id: 1, t: "a"}, {id: 2, t: "b"}]\n$sel = 0\nroot = Card(@Each($items, it, Button(it.t, Action([@Set($sel, it.id), @ToAssistant("Pick " + it.t)]))))',
+  ),
+];
+
+const evalFixtures = evalCases.map((c) => ({ ...c, expected: evaluateCase(c) }));
+
 function write(name, data, indent = 1) {
   mkdirSync(fixtures, { recursive: true });
   writeFileSync(join(fixtures, name), JSON.stringify(data, null, indent) + "\n");
@@ -251,7 +356,8 @@ write("schemas.json", Object.fromEntries(Object.entries(schemas)));
 write("parser.json", parserCases);
 write("streaming.json", streamingCases, 0);
 write("stream-set.json", setCases);
+write("evaluation.json", evalFixtures);
 
 console.log(
-  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set fixtures`,
+  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation fixtures`,
 );

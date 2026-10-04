@@ -4220,7 +4220,36 @@
     }
    }
   },
-  "root": "Card"
+  "root": "Card",
+  "reactive": {
+   "Callout": [
+    "visible"
+   ],
+   "Input": [
+    "value"
+   ],
+   "TextArea": [
+    "value"
+   ],
+   "Select": [
+    "value"
+   ],
+   "DatePicker": [
+    "value"
+   ],
+   "Slider": [
+    "value"
+   ],
+   "CheckBoxGroup": [
+    "value"
+   ],
+   "RadioGroup": [
+    "value"
+   ],
+   "SwitchGroup": [
+    "value"
+   ]
+  }
  },
  "test": {
   "schema": {
@@ -4358,6 +4387,11 @@
     }
    }
   },
-  "root": "Card"
+  "root": "Card",
+  "reactive": {
+   "Input": [
+    "value"
+   ]
+  }
  }
 }

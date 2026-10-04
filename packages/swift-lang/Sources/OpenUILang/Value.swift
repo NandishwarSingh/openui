@@ -140,3 +140,9 @@ private func arrayIndex(_ key: String) -> UInt32? {
   guard let value = UInt32(key), value != UInt32.max, String(value) == key else { return nil }
   return value
 }
+
+extension OpenUIObject: ExpressibleByDictionaryLiteral {
+  public init(dictionaryLiteral elements: (String, OpenUIValue)...) {
+    self.init(elements)
+  }
+}
