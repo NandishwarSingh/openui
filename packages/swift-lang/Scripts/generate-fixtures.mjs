@@ -33,7 +33,13 @@ const testSchema = {
       properties: {
         children: {
           type: "array",
-          items: { anyOf: [{ $ref: "#/$defs/Text" }, { $ref: "#/$defs/Button" }, { $ref: "#/$defs/Chart" }] },
+          items: {
+            anyOf: [
+              { $ref: "#/$defs/Text" },
+              { $ref: "#/$defs/Button" },
+              { $ref: "#/$defs/Chart" },
+            ],
+          },
         },
         title: { type: "string" },
       },
@@ -139,7 +145,7 @@ const edgeCases = [
   t("required-default-fills", 'root = Card([x])\nx = Tagged(1, true, "x", null)'),
   t("unknown-component", 'root = Card([Mystery("a"), Text("b")])'),
   t("excess-args", 'root = Card([Text("a", "m", "extra", 4)])'),
-  t("type-mismatch-scalar", 'root = Card([Text(42)], 7)'),
+  t("type-mismatch-scalar", "root = Card([Text(42)], 7)"),
   t("enum-mismatch", 'root = Card([Text("a", "xl"), Button("b", null, "tertiary")])'),
   t("enum-partial-deferred", 'root = Card([Text("a", "x'),
   t("integer-boolean-const", 'root = Card([x])\nx = Tagged(1.5, "yes", "y", "loud")'),
@@ -149,7 +155,7 @@ const edgeCases = [
   ),
   t("array-items-pruned", 'root = Card([Chart(["a", 2, "c"], [1, "x", 3])])'),
   t("element-in-data-slot", 'root = Card([Chart([Text("a")], [1])])'),
-  t("unresolved-and-orphaned", "root = Card([a, missing])\na = Text(\"x\")\nlonely = Text(\"y\")"),
+  t("unresolved-and-orphaned", 'root = Card([a, missing])\na = Text("x")\nlonely = Text("y")'),
   t("cycle", "root = Card([a])\na = Card([b])\nb = Card([a])"),
   t("self-reference", "root = Card([root])"),
   t("no-root-first-component", 'x = 1\nmain = Card([Text("a")])\nother = Card([])'),
@@ -217,8 +223,8 @@ const edgeCases = [
     '$o = {b: 1, 2: "two", a: 3, 1: "one", "10": 10}\nroot = Card([Text("x")])',
   ),
   t("missing-commas", 'root = Card([Text("a") Text("b"), Text("c"),])'),
-  t("lowercase-builtin-name", 'root = Card([Text(@first([1]))])'),
-  t("unknown-tokens", "root = Card([Text(\"a\")]) ; ~ ^\n$ = 3\n= 4\nfoo"),
+  t("lowercase-builtin-name", "root = Card([Text(@first([1]))])"),
+  t("unknown-tokens", 'root = Card([Text("a")]) ; ~ ^\n$ = 3\n= 4\nfoo'),
   t(
     "combining-characters",
     'root = Card([Text("e\\u0301 cafe\\u0301"), Text("한국어"), Text("ok")])',
@@ -326,19 +332,17 @@ const evalCases = [
     "ternary-components",
     '$on = true\nroot = Card([$on ? Text("on", "l") : Button("off"), $on ? null : Text("hidden")])',
   ),
-  e(
-    "ternary-components-off",
-    '$on = true\nroot = Card([$on ? Text("on", "l") : Button("off")])',
-    { state: { $on: false } },
-  ),
-  e("state-override", '$count = 1\nroot = Card([Text("count " + $count)])', { state: { $count: 41 } }),
+  e("ternary-components-off", '$on = true\nroot = Card([$on ? Text("on", "l") : Button("off")])', {
+    state: { $on: false },
+  }),
+  e("state-override", '$count = 1\nroot = Card([Text("count " + $count)])', {
+    state: { $count: 41 },
+  }),
   e("reactive-binding", '$v = "hi"\nroot = Card([Input("name", $v), Input("plain", "x")])'),
   e("reactive-assign", '$v = ""\nroot = Card([Input("name", $v = $value)])'),
-  e(
-    "query-results",
-    edgeCases.find((c) => c.name === "query-mutation").input,
-    { queryResults: { users: { rows: [{ id: 1 }, { id: 2 }] }, save: { status: "idle" } } },
-  ),
+  e("query-results", edgeCases.find((c) => c.name === "query-mutation").input, {
+    queryResults: { users: { rows: [{ id: 1 }, { id: 2 }] }, save: { status: "idle" } },
+  }),
   e(
     "each-actions",
     '$items = [{id: 1, t: "a"}, {id: 2, t: "b"}]\n$sel = 0\nroot = Card(@Each($items, it, Button(it.t, Action([@Set($sel, it.id), @ToAssistant("Pick " + it.t)]))))',
@@ -359,7 +363,10 @@ const tools = [
     description: "Open support tickets",
     inputSchema: {
       type: "object",
-      properties: { status: { type: "string", enum: ["open", "closed"] }, limit: { type: "number" } },
+      properties: {
+        status: { type: "string", enum: ["open", "closed"] },
+        limit: { type: "number" },
+      },
       required: ["status"],
     },
     outputSchema: {
@@ -376,18 +383,34 @@ const tools = [
 const smallSpec = {
   components: {
     Box: { signature: "Box(children: (Text | Box)[])", description: "A box" },
-    Text: { signature: "Text(value: string, tone?: \"a\" | \"b\")" },
+    Text: { signature: 'Text(value: string, tone?: "a" | "b")' },
   },
 };
 
 // A slice of the chat library that still exercises ActionExpression,
 // $binding, groups and ungrouped components, to keep variant fixtures small.
-const sliceNames = ["Card", "TextContent", "Button", "Buttons", "Form", "FormControl", "Input", "Select", "SelectItem", "Table", "Col"];
+const sliceNames = [
+  "Card",
+  "TextContent",
+  "Button",
+  "Buttons",
+  "Form",
+  "FormControl",
+  "Input",
+  "Select",
+  "SelectItem",
+  "Table",
+  "Col",
+];
 const sliceSpec = {
   root: chatSpec.root,
   components: Object.fromEntries(sliceNames.map((n) => [n, chatSpec.components[n]])),
   componentGroups: [
-    { name: "Forms", components: ["Form", "FormControl", "Input", "Select", "SelectItem"], notes: ["- Forms note"] },
+    {
+      name: "Forms",
+      components: ["Form", "FormControl", "Input", "Select", "SelectItem"],
+      notes: ["- Forms note"],
+    },
     { name: "Buttons", components: ["Button", "Buttons", "Missing"] },
   ],
 };
@@ -396,11 +419,25 @@ const promptCases = [
   { name: "chat-default", spec: chatSpec },
   { name: "chat-options", spec: { ...chatSpec, ...ui.openuiChatPromptOptions } },
   { name: "slice-bindings", spec: { ...sliceSpec, bindings: true } },
-  { name: "slice-tools", spec: { ...sliceSpec, tools, toolExamples: ['x = Query("list_tickets", {status: "open"}, {rows: []})'] } },
+  {
+    name: "slice-tools",
+    spec: {
+      ...sliceSpec,
+      tools,
+      toolExamples: ['x = Query("list_tickets", {status: "open"}, {rows: []})'],
+    },
+  },
   { name: "slice-tools-no-bindings", spec: { ...sliceSpec, tools, bindings: false } },
   {
     name: "slice-modes",
-    spec: { ...sliceSpec, editMode: true, inlineMode: true, preamble: "Custom preamble.", additionalRules: ["Be brief"], examples: ["a = 1"] },
+    spec: {
+      ...sliceSpec,
+      editMode: true,
+      inlineMode: true,
+      preamble: "Custom preamble.",
+      additionalRules: ["Be brief"],
+      examples: ["a = 1"],
+    },
   },
   { name: "slice-no-groups", spec: { ...sliceSpec, componentGroups: undefined } },
   { name: "small-no-root", spec: smallSpec },
@@ -420,6 +457,17 @@ write("streaming.json", streamingCases, 0);
 write("stream-set.json", setCases);
 write("evaluation.json", evalFixtures);
 write("prompts.json", promptCases);
+
+// The chat examples, for the SwiftUI renderer's end-to-end render tests.
+mkdirSync(join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures"), { recursive: true });
+writeFileSync(
+  join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures", "chat-examples.json"),
+  JSON.stringify(
+    chatExamples.map(({ name, input }) => ({ name, input })),
+    null,
+    1,
+  ) + "\n",
+);
 write("chat-spec.json", chatComponentSpecs);
 
 console.log(

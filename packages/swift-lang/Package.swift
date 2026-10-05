@@ -16,5 +16,10 @@ let package = Package(
       dependencies: ["OpenUILang"],
       resources: [.copy("Fixtures")]
     ),
+    .testTarget(
+      name: "OpenUISwiftUITests",
+      dependencies: ["OpenUISwiftUI"],
+      resources: [.copy("Fixtures")]
+    ),
   ]
 )
