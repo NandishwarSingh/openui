@@ -8,7 +8,8 @@ public indirect enum PropType: Sendable, Equatable {
   case any
   case enumeration([String])
   case literal(OpenUIValue)
-  case array(PropType)
+  /// An array, optionally with a minimum length (`.min(n)` in Zod).
+  case array(PropType, minItems: Int? = nil)
   /// A nested object (`z.object`).
   case object([Prop])
   /// `Record<string, value>`.
@@ -131,7 +132,7 @@ private func baseTypeAnnotation(_ type: PropType) -> String {
   case .union(let options):
     return options.isEmpty
       ? "any" : options.map { typeAnnotation($0, binding: false) }.joined(separator: " | ")
-  case .array(let inner):
+  case .array(let inner, _):
     let innerType = typeAnnotation(inner, binding: false)
     if case .union = inner { return "(\(innerType))[]" }
     return "\(innerType)[]"
@@ -164,7 +165,11 @@ func jsonSchema(_ type: PropType) -> OpenUIValue {
     return ["type": "string", "enum": .array(values.map { .string($0) })]
   case .literal(let value):
     return ["type": .string(value.jsTypeof), "const": value]
-  case .array(let inner): return ["type": "array", "items": jsonSchema(inner)]
+  case .array(let inner, let minItems):
+    var schema: OpenUIObject = ["type": "array"]
+    if let minItems { schema["minItems"] = .number(Double(minItems)) }
+    schema["items"] = jsonSchema(inner)
+    return .object(schema)
   case .object(let props): return objectSchema(props)
   case .record(let value):
     return [
