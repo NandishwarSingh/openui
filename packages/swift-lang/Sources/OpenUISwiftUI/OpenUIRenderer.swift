@@ -9,11 +9,14 @@ import SwiftUI
 ///   event in send(event.humanFriendlyMessage)
 /// }
 /// ```
-public struct OpenUIRenderer: View {
+public struct OpenUIRenderer<QueryLoader: View>: View {
   let response: String?
   let isStreaming: Bool
+  let queryLoader: QueryLoader
   let onAction: ((ActionEvent) -> Void)?
   let onStateUpdate: ((OpenUIObject) -> Void)?
+  let onParseResult: ((ParseResult?) -> Void)?
+  let onError: (([OpenUIError]) -> Void)?
 
   @State private var context: OpenUIContext
 
@@ -23,19 +26,29 @@ public struct OpenUIRenderer: View {
   ///   - library: The components the response may use. Changing it requires a new view identity.
   ///   - initialState: Restored `$state` and form values, e.g. from a saved conversation.
   ///   - toolProvider: Handles `Query` and `Mutation` tool calls.
-  ///   - onStateUpdate: Called when `$state` or form values change.
+  ///   - queryLoader: Shown in the top trailing corner while queries load.
   ///   - onAction: Called for actions the host handles (continue the conversation, open a URL).
   ///     A trailing closure binds here.
+  ///   - onStateUpdate: Called when `$state` or form values change.
+  ///   - onParseResult: Called whenever the parse result changes.
+  ///   - onError: Called with errors an LLM can fix once the response finishes, and with `[]`
+  ///     when they clear. See `OpenUIRuntime.onError`.
   public init(
     response: String?, isStreaming: Bool = false, library: SwiftUILibrary,
     initialState: OpenUIObject? = nil, toolProvider: (any ToolProvider)? = nil,
+    queryLoader: QueryLoader,
     onAction: ((ActionEvent) -> Void)? = nil,
-    onStateUpdate: ((OpenUIObject) -> Void)? = nil
+    onStateUpdate: ((OpenUIObject) -> Void)? = nil,
+    onParseResult: ((ParseResult?) -> Void)? = nil,
+    onError: (([OpenUIError]) -> Void)? = nil
   ) {
     self.response = response
     self.isStreaming = isStreaming
+    self.queryLoader = queryLoader
     self.onAction = onAction
     self.onStateUpdate = onStateUpdate
+    self.onParseResult = onParseResult
+    self.onError = onError
     _context = State(
       initialValue: OpenUIContext(
         library: library, initialState: initialState, toolProvider: toolProvider))
@@ -48,6 +61,9 @@ public struct OpenUIRenderer: View {
         OpenUIElementView(element: root)
           .opacity(context.isQueryLoading ? 0.7 : 1)
           .animation(.easeInOut(duration: 0.2), value: context.isQueryLoading)
+          .overlay(alignment: .topTrailing) {
+            if context.isQueryLoading { queryLoader.padding(8) }
+          }
       }
     }
     .environment(context)
@@ -64,6 +80,34 @@ public struct OpenUIRenderer: View {
   private func syncHandlers() -> Bool {
     context.onAction = onAction
     context.onStateUpdate = onStateUpdate
+    context.onParseResult = onParseResult
+    context.onError = onError
     return true
+  }
+}
+
+extension OpenUIRenderer where QueryLoader == DefaultQueryLoader {
+  /// A renderer with the default query loading indicator.
+  public init(
+    response: String?, isStreaming: Bool = false, library: SwiftUILibrary,
+    initialState: OpenUIObject? = nil, toolProvider: (any ToolProvider)? = nil,
+    onAction: ((ActionEvent) -> Void)? = nil,
+    onStateUpdate: ((OpenUIObject) -> Void)? = nil,
+    onParseResult: ((ParseResult?) -> Void)? = nil,
+    onError: (([OpenUIError]) -> Void)? = nil
+  ) {
+    self.init(
+      response: response, isStreaming: isStreaming, library: library, initialState: initialState,
+      toolProvider: toolProvider, queryLoader: DefaultQueryLoader(), onAction: onAction,
+      onStateUpdate: onStateUpdate, onParseResult: onParseResult, onError: onError)
+  }
+}
+
+/// The small spinner shown while queries load.
+public struct DefaultQueryLoader: View {
+  public init() {}
+
+  public var body: some View {
+    ProgressView().controlSize(.small)
   }
 }

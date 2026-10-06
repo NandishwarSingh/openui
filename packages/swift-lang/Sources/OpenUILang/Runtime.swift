@@ -6,6 +6,12 @@ public protocol ComponentLibrary {
   var rootName: String? { get }
   /// Whether a prop binds two-way to `$state` (lang-core's `reactive()`).
   func isReactiveProp(_ component: String, _ prop: String) -> Bool
+  /// Component names in library order, listed in error hints.
+  var componentNames: [String] { get }
+}
+
+extension ComponentLibrary {
+  public var componentNames: [String] { paramMap.componentNames }
 }
 
 /// The framework-independent runtime behind a renderer: streaming parse,
@@ -21,6 +27,14 @@ public final class OpenUIRuntime {
   public var onAction: ((ActionEvent) -> Void)?
   /// Called when state changes after initialization.
   public var onStateUpdate: ((OpenUIObject) -> Void)?
+  /// Called whenever the parse result changes.
+  public var onParseResult: ((ParseResult?) -> Void)?
+  /// Called with structured errors an LLM can fix by changing the response:
+  /// parser validation errors with hints, a response without a root, and
+  /// failed Query/Mutation calls. Reported once streaming finishes, and with
+  /// `[]` when they clear or the next response starts streaming, so a
+  /// correction loop gets a clean signal. Matches react-lang's `onError`.
+  public var onError: (([OpenUIError]) -> Void)?
 
   public private(set) var parseResult: ParseResult?
   public private(set) var isStreaming = false
@@ -29,7 +43,11 @@ public final class OpenUIRuntime {
   private let initialState: OpenUIObject?
   private var storeInitKey: String?
   private var initializingStore = false
-  private var unsubscribe: (() -> Void)?
+  private var unsubscribers: [() -> Void] = []
+  private var response: String?
+  private var hasParsed = false
+  /// The errors last passed to `onError`; nil when nothing is reported.
+  private var reportedErrors: [OpenUIError]?
 
   public init(
     library: some ComponentLibrary, initialState: OpenUIObject? = nil,
@@ -39,16 +57,18 @@ public final class OpenUIRuntime {
     self.initialState = initialState
     self.streamParser = StreamParser(library.paramMap, rootName: library.rootName)
     self.queries = QueryManager(toolProvider: toolProvider)
-    unsubscribe = store.subscribe { [weak self] in
-      guard let self, !self.initializingStore else { return }
-      self.onStateUpdate?(self.store.snapshot)
-    }
+    unsubscribers.append(
+      store.subscribe { [weak self] in
+        guard let self, !self.initializingStore else { return }
+        self.onStateUpdate?(self.store.snapshot)
+      })
+    unsubscribers.append(queries.subscribe { [weak self] in self?.reportErrors() })
   }
 
   /// Stops query refreshes and drops listeners.
   public func dispose() {
-    unsubscribe?()
-    unsubscribe = nil
+    for unsubscribe in unsubscribers { unsubscribe() }
+    unsubscribers.removeAll()
     queries.dispose()
   }
 
@@ -57,11 +77,19 @@ public final class OpenUIRuntime {
   /// Feeds the latest full response text. Appended text parses incrementally.
   public func update(response: String?, isStreaming: Bool) {
     self.isStreaming = isStreaming
+    defer { reportErrors() }
+    let changed = !hasParsed || response != self.response
+    hasParsed = true
+    self.response = response
     guard let response, !response.isEmpty else {
       parseResult = nil
+      if changed { onParseResult?(nil) }
       return
     }
-    parseResult = streamParser.set(response)
+    if changed {
+      parseResult = streamParser.set(response)
+      onParseResult?(parseResult)
+    }
     initializeStoreIfNeeded()
     if !isStreaming { syncQueries() }
   }
@@ -87,6 +115,65 @@ public final class OpenUIRuntime {
       }
     }
     store.initialize(defaults: declarations, persisted: bindingDefaults)
+  }
+
+  // MARK: Errors
+
+  /// The errors `onError` reports for the current response and query state.
+  /// Ports react-lang's `useOpenUIErrors`. Prop evaluation and SwiftUI views
+  /// can't throw, so there are no `runtime-error` or `render-error` entries.
+  public var errors: [OpenUIError] {
+    var errors: [OpenUIError] = []
+    if let response, !response.isEmpty, parseResult?.root == nil {
+      errors.append(
+        OpenUIError(
+          source: .parser, code: "parse-failed",
+          message: "Code parsed but produced no renderable root component",
+          hint:
+            "The entire response must be valid openui-lang code starting with root = \(library.rootName ?? "Root")(...)"
+        ))
+    }
+    errors += (parseResult?.meta.errors ?? []).map(withHint)
+    errors += queries.snapshot.errors
+    return errors
+  }
+
+  private func reportErrors() {
+    guard let onError else { return }
+    if isStreaming {
+      if reportedErrors != nil {
+        reportedErrors = nil
+        onError([])
+      }
+      return
+    }
+    let errors = errors
+    guard errors != reportedErrors else { return }
+    reportedErrors = errors
+    onError(errors)
+  }
+
+  /// A validation error as an `OpenUIError`, with the fix hint lang-core's
+  /// `enrichErrors` adds.
+  private func withHint(_ error: ValidationError) -> OpenUIError {
+    var result = OpenUIError(
+      source: .parser, code: error.code.rawValue, message: error.message,
+      statementId: error.statementId, component: error.component,
+      path: error.path.isEmpty ? nil : error.path)
+    switch error.code {
+    case .unknownComponent where !library.componentNames.isEmpty:
+      result.hint = "Available components: \(library.componentNames.joined(separator: ", "))"
+    case .missingRequired, .nullRequired:
+      result.hint = library.paramMap[error.component].map { params in
+        let names = params.map { $0.required ? "\($0.name)*" : $0.name }
+        return "Signature: \(error.component)(\(names.joined(separator: ", "))) — * marks required"
+      }
+    case .inlineReserved:
+      result.hint = "Declare as a top-level statement: myVar = \(error.component)(...)"
+    default:
+      break
+    }
+    return result
   }
 
   // MARK: Evaluation

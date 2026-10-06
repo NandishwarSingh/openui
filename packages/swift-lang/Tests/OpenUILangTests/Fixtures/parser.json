@@ -5655,5 +5655,54 @@
    "queryStatements": [],
    "mutationStatements": []
   }
+ },
+ {
+  "name": "cloud-envelope",
+  "schema": "chat",
+  "input": "]]>openui:content?thesys=true\n```openui-lang\nroot = Card([h, t])\nh = CardHeader(\"Q3\", \"Revenue\")\nt = TextContent(\"Up 12%\")\n```\n]]>openui:end",
+  "expected": {
+   "root": {
+    "type": "element",
+    "typeName": "Card",
+    "props": {
+     "children": [
+      {
+       "type": "element",
+       "typeName": "CardHeader",
+       "props": {
+        "title": "Q3",
+        "subtitle": "Revenue"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "h"
+      },
+      {
+       "type": "element",
+       "typeName": "TextContent",
+       "props": {
+        "text": "Up 12%"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "t"
+      }
+     ]
+    },
+    "partial": false,
+    "hasDynamicProps": false,
+    "statementId": "root"
+   },
+   "meta": {
+    "incomplete": false,
+    "unresolved": [],
+    "orphaned": [],
+    "statementCount": 3,
+    "errors": []
+   },
+   "stateDeclarations": {},
+   "queryStatements": [],
+   "mutationStatements": []
+  }
  }
 ]

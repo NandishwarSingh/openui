@@ -161,6 +161,27 @@ import Testing
       RunLoop.main.run(until: Date().addingTimeInterval(0.3))
       #expect(host.fittingSize.height > 200, "\(name) rendered \(host.fittingSize)")
     }
+
+    @Test func passesParseResultsAndErrorsToTheHost() {
+      final class Received {
+        var parseResults = 0
+        var errors: [[OpenUIError]] = []
+      }
+      let received = Received()
+      let host = NSHostingView(
+        rootView: OpenUIRenderer(
+          response: "root = Card([Mystery(), TextContent(\"ok\")])",
+          library: OpenUIChatLibrary.library,
+          onParseResult: { _ in received.parseResults += 1 },
+          onError: { received.errors.append($0) }))
+      let window = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 420, height: 300), styleMask: [.borderless],
+        backing: .buffered, defer: false)
+      window.contentView = host
+      RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+      #expect(received.parseResults == 1)
+      #expect(received.errors.map { $0.map(\.code) } == [["unknown-component"]])
+    }
   }
 #endif
 

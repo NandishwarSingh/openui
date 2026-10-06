@@ -241,6 +241,8 @@ public struct Library<Content>: ComponentLibrary {
 
   public var rootName: String? { root }
 
+  public var componentNames: [String] { components.map(\.name) }
+
   public func component(named name: String) -> ComponentDefinition<Content>? {
     byName[name].map { components[$0] }
   }

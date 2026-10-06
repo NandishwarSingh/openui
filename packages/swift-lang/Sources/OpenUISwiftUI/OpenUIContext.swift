@@ -34,6 +34,8 @@ public final class OpenUIContext {
 
   @ObservationIgnored var onAction: ((ActionEvent) -> Void)?
   @ObservationIgnored var onStateUpdate: ((OpenUIObject) -> Void)?
+  @ObservationIgnored var onParseResult: ((ParseResult?) -> Void)?
+  @ObservationIgnored var onError: (([OpenUIError]) -> Void)?
   @ObservationIgnored private var unsubscribers: [() -> Void] = []
 
   public init(
@@ -45,6 +47,8 @@ public final class OpenUIContext {
       library: library, initialState: initialState, toolProvider: toolProvider)
     runtime.onAction = { [weak self] event in self?.onAction?(event) }
     runtime.onStateUpdate = { [weak self] state in self?.onStateUpdate?(state) }
+    runtime.onParseResult = { [weak self] result in self?.onParseResult?(result) }
+    runtime.onError = { [weak self] errors in self?.onError?(errors) }
     unsubscribers.append(runtime.store.subscribe { [weak self] in self?.revision += 1 })
     unsubscribers.append(runtime.queries.subscribe { [weak self] in self?.revision += 1 })
   }

@@ -232,6 +232,13 @@ const edgeCases = [
   ),
   t("truncated-mid-call", 'root = Card([a, b])\na = Text("one")\nb = Button("tw'),
   t("truncated-mid-object", 'root = Card([Chart(["a"], [1], {unit: "k'),
+  // OpenUI Cloud's wire format: a content marker, a fenced program, an end marker.
+  {
+    name: "cloud-envelope",
+    schema: "chat",
+    input:
+      ']]>openui:content?thesys=true\n```openui-lang\nroot = Card([h, t])\nh = CardHeader("Q3", "Revenue")\nt = TextContent("Up 12%")\n```\n]]>openui:end',
+  },
 ];
 
 // ── Fixture generation ────────────────────────────────────────────────────
@@ -511,6 +518,24 @@ const mergeCases = [
   },
 ].map((c) => ({ ...c, expected: core.mergeStatements(c.existing, c.patch, c.rootId) }));
 
+// ── Error hints ───────────────────────────────────────────────────────────
+
+// What react-lang's onError reports for parser errors: lang-core's enrichErrors.
+const chatNames = Object.keys(ui.openuiChatLibrary.components);
+const errorCases = [
+  ["unknown-component", 'root = Card([Mystery("a"), TextContent("b")])'],
+  ["missing-required", "root = Card([TextContent()])"],
+  ["null-required", "root = Card([TextContent(null)])"],
+  ["inline-reserved", 'root = Card([TextContent(Query("get", {}))])'],
+  ["excess-args", 'root = Card([CardHeader("a", "b", "c", "d")])'],
+  ["type-mismatch", "root = Card([TextContent(42)])"],
+  ["several", "root = Card([a, b])\na = Foo()\nb = Button()"],
+].map(([name, input]) => ({
+  name,
+  input,
+  expected: core.enrichErrors(parseWith("chat", input).meta.errors, chatSchema, chatNames),
+}));
+
 // ── Cloud config ──────────────────────────────────────────────────────────
 
 const cloudLibrary = {
@@ -609,6 +634,7 @@ write("stream-set.json", setCases);
 write("evaluation.json", evalFixtures);
 write("prompts.json", promptCases);
 write("merge.json", mergeCases);
+write("errors.json", errorCases);
 write("cloud.json", { cases: cloudCases, chat: chatCloud });
 
 // The chat examples, for the SwiftUI renderer's end-to-end render tests.
@@ -624,5 +650,5 @@ writeFileSync(
 write("chat-spec.json", chatComponentSpecs);
 
 console.log(
-  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation, ${promptCases.length} prompt, ${mergeCases.length} merge, ${cloudCases.length} cloud fixtures`,
+  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation, ${promptCases.length} prompt, ${mergeCases.length} merge, ${errorCases.length} error, ${cloudCases.length} cloud fixtures`,
 );

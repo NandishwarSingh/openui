@@ -206,7 +206,7 @@ public struct ParamDef: Sendable, Equatable {
   public var schema: OpenUIValue?
 }
 
-/// Positional parameter lists keyed by component name, in library order.
+/// Positional parameter lists keyed by component name, in schema `$defs` order.
 public struct ParamMap: Sendable, Equatable {
   public var componentNames: [String] = []
   private var params: [String: [ParamDef]] = [:]

@@ -386,6 +386,21 @@ extension ValidationError {
   }
 }
 
+extension OpenUIError {
+  public var jsonRepresentation: OpenUIValue {
+    var object = OpenUIObject()
+    object["source"] = .string(source.rawValue)
+    object["code"] = .string(code)
+    object["message"] = .string(message)
+    if let statementId { object["statementId"] = .string(statementId) }
+    if let component { object["component"] = .string(component) }
+    if let path { object["path"] = .string(path) }
+    if let toolName { object["toolName"] = .string(toolName) }
+    if let hint { object["hint"] = .string(hint) }
+    return .object(object)
+  }
+}
+
 extension ParseResult {
   public var jsonRepresentation: OpenUIValue {
     var meta = OpenUIObject()
