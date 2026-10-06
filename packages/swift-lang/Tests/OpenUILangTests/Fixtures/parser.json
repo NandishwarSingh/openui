@@ -5657,6 +5657,143 @@
   }
  },
  {
+  "name": "data-in-component-slot",
+  "schema": "test",
+  "input": "root = Card([Text(\"hi\"), { text: \"a\" }, \"b\", 3, [Text(\"x\")], true])",
+  "expected": {
+   "root": {
+    "type": "element",
+    "typeName": "Card",
+    "props": {
+     "children": [
+      {
+       "type": "element",
+       "typeName": "Text",
+       "props": {
+        "text": "hi"
+       },
+       "partial": false,
+       "hasDynamicProps": false
+      }
+     ]
+    },
+    "partial": false,
+    "hasDynamicProps": false,
+    "statementId": "root"
+   },
+   "meta": {
+    "incomplete": false,
+    "unresolved": [],
+    "orphaned": [],
+    "statementCount": 1,
+    "errors": [
+     {
+      "code": "type-mismatch",
+      "component": "Card",
+      "path": "/children/1",
+      "message": "field \"/children/1\" expects Text | Button | Chart but got plain object",
+      "statementId": "root"
+     },
+     {
+      "code": "type-mismatch",
+      "component": "Card",
+      "path": "/children/2",
+      "message": "field \"/children/2\" expects Text | Button | Chart but got string",
+      "statementId": "root"
+     },
+     {
+      "code": "type-mismatch",
+      "component": "Card",
+      "path": "/children/3",
+      "message": "field \"/children/3\" expects Text | Button | Chart but got number",
+      "statementId": "root"
+     },
+     {
+      "code": "type-mismatch",
+      "component": "Card",
+      "path": "/children/4",
+      "message": "field \"/children/4\" expects Text | Button | Chart but got array",
+      "statementId": "root"
+     },
+     {
+      "code": "type-mismatch",
+      "component": "Card",
+      "path": "/children/5",
+      "message": "field \"/children/5\" expects Text | Button | Chart but got boolean",
+      "statementId": "root"
+     }
+    ]
+   },
+   "stateDeclarations": {},
+   "queryStatements": [],
+   "mutationStatements": []
+  }
+ },
+ {
+  "name": "data-in-component-slot-via-ref",
+  "schema": "test",
+  "input": "root = Card(items)\nitems = [{ text: \"a\" }]",
+  "expected": {
+   "root": {
+    "type": "element",
+    "typeName": "Card",
+    "props": {
+     "children": []
+    },
+    "partial": false,
+    "hasDynamicProps": false,
+    "statementId": "root"
+   },
+   "meta": {
+    "incomplete": false,
+    "unresolved": [],
+    "orphaned": [],
+    "statementCount": 2,
+    "errors": [
+     {
+      "code": "type-mismatch",
+      "component": "Card",
+      "path": "/children/0",
+      "message": "field \"/children/0\" expects Text | Button | Chart but got plain object",
+      "statementId": "root"
+     }
+    ]
+   },
+   "stateDeclarations": {},
+   "queryStatements": [],
+   "mutationStatements": []
+  }
+ },
+ {
+  "name": "hoisted-data-def",
+  "schema": "hoisted",
+  "input": "root = Tree({ label: \"a\" })",
+  "expected": {
+   "root": {
+    "type": "element",
+    "typeName": "Tree",
+    "props": {
+     "node": {
+      "label": "a"
+     }
+    },
+    "partial": false,
+    "hasDynamicProps": false,
+    "statementId": "root"
+   },
+   "meta": {
+    "incomplete": false,
+    "unresolved": [],
+    "orphaned": [],
+    "statementCount": 1,
+    "errors": []
+   },
+   "stateDeclarations": {},
+   "queryStatements": [],
+   "mutationStatements": []
+  }
+ },
+ {
   "name": "cloud-envelope",
   "schema": "chat",
   "input": "]]>openui:content?thesys=true\n```openui-lang\nroot = Card([h, t])\nh = CardHeader(\"Q3\", \"Revenue\")\nt = TextContent(\"Up 12%\")\n```\n]]>openui:end",

@@ -4393,5 +4393,34 @@
     "value"
    ]
   }
+ },
+ "hoisted": {
+  "schema": {
+   "properties": {
+    "Tree": {}
+   },
+   "$defs": {
+    "Tree": {
+     "properties": {
+      "node": {
+       "$ref": "#/$defs/__schema0"
+      }
+     },
+     "required": [
+      "node"
+     ]
+    },
+    "__schema0": {
+     "type": "object",
+     "properties": {
+      "label": {
+       "type": "string"
+      }
+     }
+    }
+   }
+  },
+  "root": "Tree",
+  "reactive": {}
  }
 }

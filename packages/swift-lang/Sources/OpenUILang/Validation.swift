@@ -27,6 +27,24 @@ final class MaterializeContext {
 
 private let scalarTypeofs: Set<String> = ["string", "number", "boolean"]
 
+/// `{ $ref: "#/$defs/Name" }` → `"Name"`.
+private func refName(_ schema: OpenUIValue) -> String? {
+  guard let ref = schema["$ref"].stringValue else { return nil }
+  return ref.split(separator: "/", omittingEmptySubsequences: false).last.map(String.init)
+}
+
+/// The `$ref` names a slot allows: one for `$ref`, several for anyOf/oneOf.
+private func slotRefNames(_ schema: OpenUIObject) -> [String?] {
+  let options = schema["anyOf"]?.arrayValue ?? schema["oneOf"]?.arrayValue ?? [.object(schema)]
+  return options.map(refName)
+}
+
+/// True when every option of the slot is a `$ref` to a component.
+private func isOnlyComponentSlot(_ schema: OpenUIObject, _ ctx: MaterializeContext) -> Bool {
+  let names = slotRefNames(schema)
+  return !names.isEmpty && names.allSatisfy { name in name.map { ctx.cat?[$0] != nil } ?? false }
+}
+
 private func isCompositeSchema(_ schema: OpenUIObject) -> Bool {
   schema.contains("$ref") || schema.contains("anyOf") || schema.contains("oneOf")
     || schema.contains("allOf")
@@ -306,7 +324,21 @@ func validateSchemaValue(
   default:
     break
   }
-  if isCompositeSchema(s) { return false }
+  if isCompositeSchema(s) {
+    // Data (an object, array, string, number or boolean) in a component-only slot is invalid.
+    guard isOnlyComponentSlot(s, ctx) else { return false }
+    let actual: String
+    switch value {
+    case .array: actual = "array"
+    case .string: actual = "string"
+    case .number: actual = "number"
+    case .bool: actual = "boolean"
+    default: actual = "plain object"
+    }
+    let expected = slotRefNames(s).map { $0 ?? "" }.joined(separator: " | ")
+    pushValidationIssue(ctx, component, path, .typeMismatch(expected: expected, actual: actual))
+    return true
+  }
   switch s["type"] {
   case .string("object"): return validateObjectValue(&value, s, component, path, ctx)
   case .string("array"): return validateArrayValue(&value, s, component, path, ctx)

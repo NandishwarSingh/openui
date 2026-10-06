@@ -322,7 +322,10 @@ func preprocess(_ input: String) -> String {
 public func compileSchema(_ schema: OpenUIValue) -> ParamMap {
   var map = ParamMap()
   guard let defs = schema["$defs"].objectValue else { return map }
+  let components = schema["properties"].objectValue.map { Set($0.keys) }
   for (name, def) in defs {
+    // Skip non-component defs, e.g. zod's hoisted recursive schemas (__schema0).
+    if let components, !components.contains(name) { continue }
     let properties = def["properties"].objectValue ?? OpenUIObject()
     let required = (def["required"].arrayValue ?? []).compactMap(\.stringValue)
     map[name] = properties.keys.map { key in

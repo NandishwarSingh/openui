@@ -123,9 +123,20 @@ const testLibrary = {
   ),
 };
 
+// Zod hoists recursive data shapes into $defs (__schema0); only the names
+// under `properties` are components.
+const hoistedSchema = {
+  properties: { Tree: {} },
+  $defs: {
+    Tree: { properties: { node: { $ref: "#/$defs/__schema0" } }, required: ["node"] },
+    __schema0: { type: "object", properties: { label: { type: "string" } } },
+  },
+};
+
 const schemas = {
   chat: { schema: chatSchema, root: "Card", reactive: reactiveProps(ui.openuiChatLibrary) },
   test: { schema: testSchema, root: "Card", reactive: testReactive },
+  hoisted: { schema: hoistedSchema, root: "Tree", reactive: {} },
 };
 const libraries = { chat: ui.openuiChatLibrary, test: testLibrary };
 
@@ -232,6 +243,12 @@ const edgeCases = [
   ),
   t("truncated-mid-call", 'root = Card([a, b])\na = Text("one")\nb = Button("tw'),
   t("truncated-mid-object", 'root = Card([Chart(["a"], [1], {unit: "k'),
+  t(
+    "data-in-component-slot",
+    'root = Card([Text("hi"), { text: "a" }, "b", 3, [Text("x")], true])',
+  ),
+  t("data-in-component-slot-via-ref", 'root = Card(items)\nitems = [{ text: "a" }]'),
+  { name: "hoisted-data-def", schema: "hoisted", input: 'root = Tree({ label: "a" })' },
   // OpenUI Cloud's wire format: a content marker, a fenced program, an end marker.
   {
     name: "cloud-envelope",
