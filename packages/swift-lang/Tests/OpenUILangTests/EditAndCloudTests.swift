@@ -47,11 +47,10 @@ import Testing
   @Test func chatLibraryConfigMatchesLangCore() throws {
     // lang-core's config for openuiChatLibrary with its prompt options is
     // ~80 KB, so the fixture keeps its length and SHA-256.
-    let chatOptions = FixtureCase.all("prompts").first { $0.name == "chat-options" }!.value["spec"]
     let library = Library(
       components: ChatComponents.all.map { ComponentDefinition($0, content: ()) }, root: "Card",
       componentGroups: ChatComponents.groups)
-    let config = try library.cloudConfig(Self.promptOptions(chatOptions))
+    let config = try library.cloudConfig(ChatComponents.promptOptions)
 
     let expected = Self.fixtures["chat"]
     #expect(Double(config.utf16.count) == expected["length"].numberValue)

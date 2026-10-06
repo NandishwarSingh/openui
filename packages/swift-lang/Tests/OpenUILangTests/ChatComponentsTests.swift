@@ -53,6 +53,17 @@ import Testing
     #expect(ChatComponents.groups == expected)
   }
 
+  @Test func chatLibraryPromptWithItsOptionsMatchesLangCore() {
+    // What react-ui apps send: openuiChatLibrary with openuiChatPromptOptions.
+    let fixture = FixtureCase.all("prompts").first { $0.name == "chat-options" }!
+    let library = Library(
+      components: ChatComponents.all.map { ComponentDefinition($0, content: ()) }, root: "Card",
+      componentGroups: ChatComponents.groups)
+    let prompt = library.prompt(ChatComponents.promptOptions)
+    let expected = fixture.value["expected"].stringValue!
+    #expect(prompt == expected, "\(firstLineDifference(prompt, expected) ?? "")")
+  }
+
   @Test func chatLibraryPromptMatchesLangCore() {
     // The full chat prompt (no options) is one of the prompt fixtures.
     let fixture = FixtureCase.all("prompts").first { $0.name == "chat-default" }!
