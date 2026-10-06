@@ -217,6 +217,24 @@ import Testing
       #expect(textFields(host).first { $0.isEditable } === field)
     }
 
+    /// A finished response inside a stack (a restored chat message) must render
+    /// even though its text never changes after the view appears.
+    @Test func rendersAFinishedResponseNestedInAStack() {
+      let input = Self.examples[1].input
+      let host = NSHostingView(
+        rootView: VStack(alignment: .leading) {
+          Text("Earlier message")
+          OpenUIRenderer(response: input, library: OpenUIChatLibrary.library)
+        }
+        .frame(width: 420))
+      let window = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 420, height: 600), styleMask: [.borderless],
+        backing: .buffered, defer: false)
+      window.contentView = host
+      RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+      #expect(host.fittingSize.height > 400, "rendered \(host.fittingSize)")
+    }
+
     @Test func passesParseResultsAndErrorsToTheHost() {
       final class Received {
         var parseResults = 0

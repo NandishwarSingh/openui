@@ -56,7 +56,10 @@ public struct OpenUIRenderer<QueryLoader: View>: View {
 
   public var body: some View {
     let _ = syncHandlers()
-    Group {
+    // Not a Group: modifiers on a Group apply to its children, and before the
+    // first update there are none, so a nested renderer whose response never
+    // changes (a restored message) would never run the onChange below.
+    VStack(alignment: .leading, spacing: 0) {
       if let root = context.root {
         OpenUIElementView(element: root)
           .opacity(context.isQueryLoading ? 0.7 : 1)
