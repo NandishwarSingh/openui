@@ -32,11 +32,65 @@ private func labelOrder(_ props: ComponentProps) -> [String] {
   return props.array("labels").map(displayText).filter { seen.insert($0).inserted }
 }
 
+/// react-ui's `seriesCurve`: "linear", "step", and anything else (including a
+/// value still streaming in) is the default "natural", a monotone curve.
 private func interpolation(_ variant: String?) -> InterpolationMethod {
   switch variant {
-  case "natural": return .monotone
+  case "linear": return .linear
   case "step": return .stepCenter
-  default: return .linear
+  default: return .monotone
+  }
+}
+
+/// react-ui's default chart palette (OCEAN_DEFAULT), with colors picked from
+/// the middle of the ramp outwards like its `getDistributedColors`.
+enum ChartPalette {
+  static let ocean: [Color] = [
+    0x0D47A1, 0x1565C0, 0x1976D2, 0x1E88E5, 0x2196F3, 0x42A5F5, 0x64B5F6, 0x90CAF9, 0xBBDEFB,
+    0xE3F2FD, 0xEFF8FF,
+  ].map(color)
+
+  private static func color(_ hex: Int) -> Color {
+    let red = Double((hex >> 16) & 0xFF) / 255
+    let green = Double((hex >> 8) & 0xFF) / 255
+    let blue = Double(hex & 0xFF) / 255
+    return Color(red: red, green: green, blue: blue)
+  }
+
+  static func colors(_ count: Int) -> [Color] {
+    let n = ocean.count
+    let mid = n / 2
+    switch count {
+    case ...0: return []
+    case 1: return [ocean[mid]]
+    case 2: return [ocean[max(mid - 1, 0)], ocean[min(mid + 1, n - 1)]]
+    default:
+      let offset = (count - 1) / 2
+      return (0..<count).map { ocean[(((mid + $0 - offset) % n) + n) % n] }
+    }
+  }
+}
+
+/// Series names in order, for the color scale.
+private func seriesNames(_ props: ComponentProps) -> [String] {
+  var seen: Set<String> = []
+  return props.children("series").map { $0.text("category") }.filter { seen.insert($0).inserted }
+}
+
+extension View {
+  /// Colors chart series with react-ui's palette.
+  fileprivate func paletteScale(_ names: [String]) -> some View {
+    chartForegroundStyleScale(domain: names, range: ChartPalette.colors(names.count))
+  }
+
+  /// Horizontal grid lines only, as react-ui's cartesian charts draw them.
+  fileprivate func categoryAxisWithoutGrid() -> some View {
+    chartXAxis {
+      AxisMarks { _ in
+        AxisTick()
+        AxisValueLabel()
+      }
+    }
   }
 }
 
@@ -72,9 +126,12 @@ struct BarChartView: View {
           BarMark(x: .value("Label", point.label), y: .value("Value", point.value))
             .foregroundStyle(by: .value("Series", point.series))
             .position(by: .value("Series", point.series))
+            .cornerRadius(4)
         }
       }
       .chartXScale(domain: labelOrder(props))
+      .paletteScale(seriesNames(props))
+      .categoryAxisWithoutGrid()
       .chartXAxisLabel(props.text("xLabel"))
       .chartYAxisLabel(props.text("yLabel"))
     }
@@ -101,9 +158,11 @@ struct HorizontalBarChartView: View {
           )
           .foregroundStyle(by: .value("Series", point.series))
           .position(by: .value("Series", point.series))
+          .cornerRadius(4)
         }
       }
       .chartYScale(domain: labels)
+      .paletteScale(seriesNames(props))
       .chartYAxis {
         AxisMarks(preset: .aligned, position: .leading) { _ in
           AxisValueLabel(horizontalSpacing: 8)
@@ -126,11 +185,11 @@ struct LineChartView: View {
         LineMark(x: .value("Label", point.label), y: .value("Value", point.value))
           .foregroundStyle(by: .value("Series", point.series))
           .interpolationMethod(method)
-        PointMark(x: .value("Label", point.label), y: .value("Value", point.value))
-          .foregroundStyle(by: .value("Series", point.series))
-          .symbolSize(18)
+          .lineStyle(StrokeStyle(lineWidth: 2))
       }
       .chartXScale(domain: labelOrder(props))
+      .paletteScale(seriesNames(props))
+      .categoryAxisWithoutGrid()
       .chartXAxisLabel(props.text("xLabel"))
       .chartYAxisLabel(props.text("yLabel"))
     }
@@ -142,20 +201,29 @@ struct AreaChartView: View {
 
   var body: some View {
     let method = interpolation(props.string("variant"))
+    let names = seriesNames(props)
+    let colors = ChartPalette.colors(names.count)
     ChartFrame(props) {
       Chart(seriesPoints(props)) { point in
+        let color = colors[names.firstIndex(of: point.series) ?? 0]
+        // react-ui fills areas with a gradient from 60% opacity to clear.
         AreaMark(
           x: .value("Label", point.label), y: .value("Value", point.value),
-          stacking: .unstacked
+          series: .value("Series", point.series), stacking: .unstacked
         )
-        .foregroundStyle(by: .value("Series", point.series))
-        .opacity(0.25)
+        .foregroundStyle(
+          LinearGradient(
+            colors: [color.opacity(0.6), color.opacity(0)], startPoint: .top, endPoint: .bottom)
+        )
         .interpolationMethod(method)
         LineMark(x: .value("Label", point.label), y: .value("Value", point.value))
           .foregroundStyle(by: .value("Series", point.series))
           .interpolationMethod(method)
+          .lineStyle(StrokeStyle(lineWidth: 2))
       }
       .chartXScale(domain: labelOrder(props))
+      .chartForegroundStyleScale(domain: names, range: colors)
+      .categoryAxisWithoutGrid()
       .chartXAxisLabel(props.text("xLabel"))
       .chartYAxisLabel(props.text("yLabel"))
     }
@@ -202,6 +270,9 @@ struct PieChartView: View {
           .foregroundStyle(.clear)
       }
     }
+    .chartForegroundStyleScale(
+      domain: data.map(\.label), range: ChartPalette.colors(data.count)
+    )
     .chartLegend(position: .bottom, alignment: .leading)
     .rotationEffect(semi ? .degrees(-90) : .zero)
     .frame(height: theme.chartHeight)
@@ -214,6 +285,7 @@ struct RadialChartView: View {
 
   var body: some View {
     let data = slices(props)
+    let colors = ChartPalette.colors(props.array("values").count)
     let maximum = max(data.map(\.value).max() ?? 1, 1)
     HStack(spacing: theme.spacing) {
       ZStack {
@@ -224,7 +296,7 @@ struct RadialChartView: View {
             .padding(inset)
           Circle()
             .trim(from: 0, to: slice.value / maximum * 0.75)
-            .stroke(Self.color(slice.id), style: StrokeStyle(lineWidth: 10, lineCap: .round))
+            .stroke(colors[slice.id], style: StrokeStyle(lineWidth: 10, lineCap: .round))
             .rotationEffect(.degrees(-90))
             .padding(inset)
         }
@@ -233,7 +305,7 @@ struct RadialChartView: View {
       VStack(alignment: .leading, spacing: 4) {
         ForEach(data) { slice in
           HStack(spacing: 6) {
-            Circle().fill(Self.color(slice.id)).frame(width: 8, height: 8)
+            Circle().fill(colors[slice.id]).frame(width: 8, height: 8)
             Text(slice.label).font(.caption)
             Text(jsNumberToString(slice.value)).font(.caption.monospacedDigit())
               .foregroundStyle(.secondary)
@@ -243,18 +315,20 @@ struct RadialChartView: View {
     }
   }
 
-  static let palette: [Color] = [.blue, .green, .orange, .purple, .pink, .teal, .yellow, .red]
-  static func color(_ index: Int) -> Color { palette[index % palette.count] }
 }
 
 struct SingleStackedBarChartView: View {
   let props: ComponentProps
 
   var body: some View {
-    Chart(slices(props)) { slice in
+    let data = slices(props)
+    Chart(data) { slice in
       BarMark(x: .value("Value", slice.value), y: .value("Total", ""))
         .foregroundStyle(by: .value("Label", slice.label))
     }
+    .chartForegroundStyleScale(
+      domain: data.map(\.label), range: ChartPalette.colors(data.count)
+    )
     .chartYAxis(.hidden)
     .chartLegend(position: .bottom, alignment: .leading)
     .frame(height: 80)
@@ -282,15 +356,29 @@ struct ScatterChartView: View {
           Dot(id: dots.count, series: dataset.text("name"), x: x, y: y, z: point.number("z")))
       }
     }
+    let names = props.children("datasets").map { $0.text("name") }
     return Chart(dots) { dot in
       PointMark(x: .value(props.text("xLabel"), dot.x), y: .value(props.text("yLabel"), dot.y))
         .foregroundStyle(by: .value("Series", dot.series))
         .symbolSize(dot.z.map { max(20, min($0, 400)) } ?? 40)
     }
+    .chartXScale(domain: Self.domain(dots.map(\.x)))
+    .chartYScale(domain: Self.domain(dots.map(\.y)))
+    .chartForegroundStyleScale(domain: names, range: ChartPalette.colors(names.count))
     .chartXAxisLabel(props.text("xLabel"))
     .chartYAxisLabel(props.text("yLabel"))
     .chartLegend(position: .bottom, alignment: .leading)
     .frame(height: theme.chartHeight)
+  }
+
+  /// react-ui's `calculateScatterDomain`: the data range padded by 10% on each
+  /// side, never below zero.
+  static func domain(_ values: [Double]) -> ClosedRange<Double> {
+    guard let low = values.min(), let high = values.max() else { return 0...100 }
+    let padding = (high - low) * 0.1
+    let start = max(0, low - padding)
+    let end = high + padding
+    return end > start ? start...end : start...(start + 1)
   }
 }
 
@@ -344,7 +432,7 @@ struct RadarChartView: View {
             $0 < entry.values.count ? entry.values[$0] / maximum : 0
           }
           let shape = polygon(fractions)
-          let color = RadialChartView.color(index)
+          let color = ChartPalette.colors(series.count)[index]
           context.fill(shape, with: .color(color.opacity(0.18)))
           context.stroke(shape, with: .color(color), lineWidth: 2)
         }
@@ -353,7 +441,7 @@ struct RadarChartView: View {
       FlowLayout(spacing: 12) {
         ForEach(Array(series.enumerated()), id: \.offset) { index, entry in
           HStack(spacing: 6) {
-            Circle().fill(RadialChartView.color(index)).frame(width: 8, height: 8)
+            Circle().fill(ChartPalette.colors(series.count)[index]).frame(width: 8, height: 8)
             Text(entry.name).font(.caption).foregroundStyle(.secondary)
           }
         }

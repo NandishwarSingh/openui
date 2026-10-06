@@ -24,10 +24,11 @@ private func storedSelection(_ values: [String], single: Bool) -> OpenUIValue {
   return .array(values.map(OpenUIValue.string))
 }
 
-/// Field plumbing shared by Chips and OptionCards.
+/// Field plumbing shared by Chips (wrapping row) and OptionCards (card grid).
 private struct SelectionField<Option: View>: View {
   let props: ComponentProps
   let componentType: String
+  var grid = false
   @ViewBuilder let option: (ComponentProps, Bool, @escaping () -> Void) -> Option
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUIFormName) private var form
@@ -39,31 +40,47 @@ private struct SelectionField<Option: View>: View {
     let rules = parseStructuredRules(props["rules"])
     let selected = selection(
       stored: field.value, defaultValue: props["defaultValue"], single: single)
-    FlowLayout(spacing: 8) {
-      ForEach(Array(props.children("items").enumerated()), id: \.offset) { _, item in
-        let value = item.text("value")
-        option(item, selected.contains(value)) {
-          var next = selected
-          if single {
-            next = selected == [value] ? [] : [value]
-          } else if let index = next.firstIndex(of: value) {
-            next.remove(at: index)
-          } else {
-            next.append(value)
-          }
-          let stored = storedSelection(next, single: single)
-          field.setValue(stored)
-          if !rules.isEmpty {
-            validation?.validateField(field.name, value: stored, rules: rules)
+    let items = props.children("items")
+    Group {
+      if grid {
+        ResponsiveCardGrid(count: items.count, maxPerRow: 3) { index in
+          optionView(items[index], selected: selected, single: single, field: field, rules: rules)
+        }
+      } else {
+        FlowLayout(spacing: 8) {
+          ForEach(items.indices, id: \.self) { index in
+            optionView(items[index], selected: selected, single: single, field: field, rules: rules)
           }
         }
-        .disabled(item.bool("disabled") == true)
       }
     }
     .disabled(context.isStreaming)
     .formField(field.name, rules: rules, value: field.value)
     .onAppear { seedDefault(single: single, field: field) }
     .onChange(of: context.isStreaming) { seedDefault(single: single, field: field) }
+  }
+
+  private func optionView(
+    _ item: ComponentProps, selected: [String], single: Bool, field: StateField,
+    rules: [ParsedRule]
+  ) -> some View {
+    let value = item.text("value")
+    return option(item, selected.contains(value)) {
+      var next = selected
+      if single {
+        next = selected == [value] ? [] : [value]
+      } else if let index = next.firstIndex(of: value) {
+        next.remove(at: index)
+      } else {
+        next.append(value)
+      }
+      let stored = storedSelection(next, single: single)
+      field.setValue(stored)
+      if !rules.isEmpty {
+        validation?.validateField(field.name, value: stored, rules: rules)
+      }
+    }
+    .disabled(item.bool("disabled") == true)
   }
 
   /// Stores the default once streaming ends, without notifying the host.
@@ -107,11 +124,15 @@ private struct Chip: View {
         Text(item.text("label"))
       }
       .font(.subheadline)
-      .padding(.horizontal, 12)
+      .padding(.horizontal, 8)
       .padding(.vertical, 6)
-      .foregroundStyle(isOn ? Color.white : Color.primary)
-      .background(isOn ? Color.accentColor : theme.sunkSurface, in: Capsule())
-      .overlay(Capsule().strokeBorder(isOn ? Color.clear : theme.border))
+      .background(
+        isOn ? Color.primary.opacity(0.08) : .clear, in: RoundedRectangle(cornerRadius: 8)
+      )
+      .overlay(
+        RoundedRectangle(cornerRadius: 8).strokeBorder(isOn ? .primary : theme.interactiveBorder)
+      )
+      .contentShape(RoundedRectangle(cornerRadius: 8))
     }
     .buttonStyle(.plain)
     .accessibilityAddTraits(isOn ? .isSelected : [])
@@ -123,7 +144,7 @@ private struct Chip: View {
 struct OptionCardsView: View {
   let props: ComponentProps
   var body: some View {
-    SelectionField(props: props, componentType: "OptionCards") { item, isOn, toggle in
+    SelectionField(props: props, componentType: "OptionCards", grid: true) { item, isOn, toggle in
       OptionCardTile(item: item, isOn: isOn, action: toggle)
     }
   }
@@ -145,8 +166,10 @@ private struct OptionCardTile: View {
       VStack(alignment: .leading, spacing: 6) {
         switch item["topContent"] {
         case .element(let element) where element.typeName == "Icon":
-          Image(systemName: iconSymbol(item["topContent"]) ?? "circle").font(.title2)
-            .foregroundStyle(Color.accentColor)
+          Image(systemName: iconSymbol(item["topContent"]) ?? "circle")
+            .font(.system(size: 14))
+            .frame(width: 32, height: 32)
+            .background(theme.sunkSurface, in: RoundedRectangle(cornerRadius: 8))
         case .element:
           OpenUINode(item["topContent"]).frame(height: 90).clipped()
         default:
@@ -157,12 +180,13 @@ private struct OptionCardTile: View {
           Text(subtitle).font(.caption).foregroundStyle(.secondary)
         }
       }
-      .padding(12)
-      .frame(width: 160, alignment: .topLeading)
-      .background(theme.surface, in: RoundedRectangle(cornerRadius: theme.cornerRadius))
+      .padding(10)
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+      .background(isOn ? theme.sunkSurface : .clear, in: RoundedRectangle(cornerRadius: 14))
       .overlay(
-        RoundedRectangle(cornerRadius: theme.cornerRadius)
-          .strokeBorder(isOn ? Color.accentColor : theme.border, lineWidth: isOn ? 2 : 1))
+        RoundedRectangle(cornerRadius: 14).strokeBorder(isOn ? .primary : theme.interactiveBorder)
+      )
+      .contentShape(RoundedRectangle(cornerRadius: 14))
     }
     .buttonStyle(.plain)
     .accessibilityAddTraits(isOn ? .isSelected : [])

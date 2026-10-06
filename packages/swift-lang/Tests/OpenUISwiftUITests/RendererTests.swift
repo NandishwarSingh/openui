@@ -159,7 +159,9 @@ import Testing
         backing: .buffered, defer: false)
       window.contentView = host
       RunLoop.main.run(until: Date().addingTimeInterval(0.3))
-      #expect(host.fittingSize.height > 200, "\(name) rendered \(host.fittingSize)")
+      // The smallest example (a short table) is about 195pt; empty or collapsed
+      // renders are far below this.
+      #expect(host.fittingSize.height > 120, "\(name) rendered \(host.fittingSize)")
     }
 
     /// The bug vishxrad hit in the Angular port: an input recreated on every
@@ -249,5 +251,45 @@ let globalTestLibrary = SwiftUILibrary(
 @Suite struct GlobalLibraryTests {
   @Test func globalLibraryIsUsable() {
     #expect(globalTestLibrary.paramMap["Box"]?.map(\.name) == ["text"])
+  }
+}
+
+@Suite struct CitationTests {
+  @Test func splitsLikeRemarkCitations() {
+    #expect(
+      CitedMarkdown.segments("Big [1][2] news [3]. End")
+        == [.text("Big "), .citation([1, 2]), .text("news "), .citation([3]), .text(". End")])
+    #expect(CitedMarkdown.segments("No citations") == [.text("No citations")])
+    #expect(CitedMarkdown.segments("[1] [2]") == [.citation([1, 2])])
+  }
+}
+
+@MainActor
+@Suite struct MarkdownTests {
+  @Test func parsesMathAndTables() {
+    let blocks = MarkdownBlocks.parse(
+      "Intro\n$$\nA = P(1 + r)^n\n$$\n| a | b |\n|---|:-:|\n| 1 | 2 |\nAfter $$x$$")
+    #expect(
+      blocks == [
+        .paragraph("Intro"), .math("A = P(1 + r)^n"),
+        .table(header: ["a", "b"], rows: [["1", "2"]]),
+        .paragraph("After $$x$$"),
+      ])
+    #expect(MarkdownBlocks.parse("$$E = mc^2$$") == [.math("E = mc^2")])
+    // Without a separator row it's just text.
+    #expect(MarkdownBlocks.parse("| not | a table |") == [.paragraph("| not | a table |")])
+  }
+
+  @Test func onlyDoubleTildesStrikeThrough() {
+    let lone = InlineMarkdown.attributed("about ~$5K and ~4 days")
+    #expect(String(lone.characters) == "about ~$5K and ~4 days")
+    let double = InlineMarkdown.attributed("~~gone~~")
+    #expect(String(double.characters) == "gone")
+  }
+
+  @Test func scatterDomainPadsLikeReactUI() {
+    #expect(ScatterChartView.domain([150, 190]) == 146...194)
+    #expect(ScatterChartView.domain([1, 5]) == 0.6...5.4)
+    #expect(ScatterChartView.domain([]) == 0...100)
   }
 }

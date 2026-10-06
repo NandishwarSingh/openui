@@ -8,6 +8,7 @@ import SwiftUI
 struct TableView: View {
   let props: ComponentProps
   @State private var page = 0
+  @Environment(OpenUIContext.self) private var context
   @Environment(\.openUITheme) private var theme
 
   private static let pageSize = 10
@@ -26,53 +27,82 @@ struct TableView: View {
       stride(from: current * Self.pageSize, to: min(rowCount, (current + 1) * Self.pageSize), by: 1)
     )
 
-    VStack(alignment: .leading, spacing: theme.compactSpacing) {
-      ScrollView(.horizontal, showsIndicators: false) {
-        Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 8) {
-          GridRow {
-            ForEach(Array(columns.enumerated()), id: \.offset) { index, column in
-              Text(column.text("label"))
-                .font(.subheadline.weight(.semibold))
-                .gridColumnAlignment(isNumeric(column) ? .trailing : .leading)
-            }
-          }
-          Divider()
-          ForEach(rows, id: \.self) { row in
-            GridRow {
-              ForEach(Array(columns.enumerated()), id: \.offset) { index, column in
-                cell(row < data[index].count ? data[index][row] : .null, numeric: isNumeric(column))
-              }
-            }
-            if row != rows.last { Divider().opacity(0.5) }
-          }
+    if context.isQueryLoading && rowCount == 0 {
+      // Placeholder rows while a Query fills the table, like react-ui's skeleton.
+      VStack(alignment: .leading, spacing: 10) {
+        ForEach(0..<5, id: \.self) { _ in
+          RoundedRectangle(cornerRadius: 4).fill(theme.sunkSurface).frame(height: 14)
         }
-        .padding(.vertical, 4)
       }
-      if pages > 1 {
-        HStack {
-          Button("Previous") { page = max(0, current - 1) }.disabled(current == 0)
-          Spacer()
-          Text("\(current + 1) / \(pages)").font(.caption.monospacedDigit()).foregroundStyle(
-            .secondary)
-          Spacer()
-          Button("Next") { page = min(pages - 1, current + 1) }.disabled(current >= pages - 1)
+    } else if !columns.isEmpty {
+      VStack(alignment: .leading, spacing: theme.compactSpacing) {
+        // Full width like react-ui's table; scrolls sideways when the columns
+        // don't fit.
+        ViewThatFits(in: .horizontal) {
+          grid(columns, data, rows)
+          ScrollView(.horizontal, showsIndicators: false) {
+            grid(columns, data, rows).fixedSize(horizontal: true, vertical: false)
+          }
         }
-        .buttonStyle(.borderless)
-        .font(.caption)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(theme.border))
+        if pages > 1 {
+          HStack(spacing: 8) {
+            Spacer()
+            Button("Previous page", systemImage: "chevron.left") { page = max(0, current - 1) }
+              .disabled(current == 0)
+            Text("\(current + 1) / \(pages)").font(.caption.monospacedDigit())
+              .foregroundStyle(.secondary)
+            Button("Next page", systemImage: "chevron.right") {
+              page = min(pages - 1, current + 1)
+            }
+            .disabled(current >= pages - 1)
+          }
+          .labelStyle(.iconOnly)
+          .buttonStyle(.bordered)
+          .controlSize(.small)
+        }
       }
     }
   }
 
-  private func isNumeric(_ column: ComponentProps) -> Bool { column.string("type") == "number" }
+  private func grid(_ columns: [ComponentProps], _ data: [[OpenUIValue]], _ rows: [Int])
+    -> some View
+  {
+    Grid(alignment: .leading, horizontalSpacing: 0, verticalSpacing: 0) {
+      GridRow {
+        ForEach(columns.indices, id: \.self) { index in
+          Text(columns[index].text("label"))
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+      }
+      theme.border.frame(height: 1)
+      ForEach(rows.indices, id: \.self) { position in
+        let row = rows[position]
+        GridRow {
+          ForEach(columns.indices, id: \.self) { index in
+            cell(row < data[index].count ? data[index][row] : .null)
+              .padding(12)
+              .frame(maxWidth: .infinity, alignment: .leading)
+              // Every second row is tinted, as in react-ui.
+              .background(position % 2 == 1 ? theme.subtleSurface : .clear)
+          }
+        }
+        if position < rows.count - 1 { theme.border.frame(height: 1) }
+      }
+    }
+  }
 
   @ViewBuilder
-  private func cell(_ value: OpenUIValue, numeric: Bool) -> some View {
+  private func cell(_ value: OpenUIValue) -> some View {
     switch value {
     case .element, .array:
       OpenUINode(value)
     default:
-      Text(displayText(value))
-        .font(numeric ? .callout.monospacedDigit() : .callout)
+      Text(displayText(value)).font(.subheadline)
     }
   }
 }
@@ -164,14 +194,24 @@ private struct ListRow: View {
   }
 }
 
+/// "Related Queries" and a divided list of suggestions, like react-ui's
+/// FollowUpBlock; tapping one sends its text as the user's message.
 struct FollowUpBlockView: View {
   let props: ComponentProps
   @Environment(OpenUIContext.self) private var context
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 6) {
-      ForEach(Array(props.children("items").enumerated()), id: \.offset) { _, item in
-        FollowUpButton(text: item.text("text")) { context.triggerAction(item.text("text")) }
+    let items = props.children("items")
+    VStack(alignment: .leading, spacing: 0) {
+      Text("Related Queries")
+        .foregroundStyle(.secondary)
+        .padding(.vertical, 8)
+      theme.border.frame(height: 1)
+      ForEach(items.indices, id: \.self) { index in
+        let text = items[index].text("text")
+        FollowUpButton(text: text) { context.triggerAction(text) }
+        if index < items.count - 1 { theme.border.frame(height: 1) }
       }
     }
     .disabled(context.isStreaming)
@@ -195,13 +235,13 @@ private struct FollowUpButton: View {
 
   var body: some View {
     Button(action: action) {
-      HStack(spacing: 6) {
-        Image(systemName: "arrow.turn.down.right").font(.caption)
-        Text(text).multilineTextAlignment(.leading)
-      }
-      .font(.subheadline)
+      Text(text)
+        .multilineTextAlignment(.leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 8)
+        .contentShape(Rectangle())
     }
-    .buttonStyle(.borderless)
+    .buttonStyle(.plain)
   }
 }
 
@@ -249,67 +289,158 @@ private struct StepContent: View {
 
 // MARK: - Tabs, accordions and sections
 
+/// Underlined tabs. Until the user picks one, the selection follows the stream
+/// to whichever tab's content grew last, like react-ui's Tabs.
 struct TabsView: View {
   let props: ComponentProps
-  @State private var selected: String?
+  @State private var active: String?
+  @State private var userChose = false
+  @State private var contentSizes: [String: Int] = [:]
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    let items = props.children("items")
-    let current = selected ?? items.first?.text("value")
-    VStack(alignment: .leading, spacing: theme.spacing) {
-      Picker("", selection: Binding(get: { current ?? "" }, set: { selected = $0 })) {
-        ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-          Text(item.text("trigger")).tag(item.text("value"))
+    let items = props.children("items").filter { !$0["value"].isNullish }
+    let sizes = items.map {
+      (value: $0.text("value"), size: JSON.stringify($0["content"]).utf16.count)
+    }
+    if !items.isEmpty {
+      VStack(alignment: .leading, spacing: theme.spacing) {
+        ScrollViewReader { proxy in
+          ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 20) {
+              ForEach(items.indices, id: \.self) { index in
+                tab(items[index]).id(items[index].text("value"))
+              }
+            }
+          }
+          // Keep the active tab in view as the selection follows the stream.
+          .onChange(of: active) {
+            withAnimation { proxy.scrollTo(active, anchor: .center) }
+          }
+        }
+        if let item = items.first(where: { $0.text("value") == active }) {
+          OpenUINodes(item.array("content"))
         }
       }
-      .pickerStyle(.segmented)
-      .labelsHidden()
-      if let item = items.first(where: { $0.text("value") == current }) {
-        OpenUINodes(item.array("content"))
-      }
+      .onChange(of: sizes.map(\.size), initial: true) { followStream(sizes) }
     }
+  }
+
+  private func tab(_ item: ComponentProps) -> some View {
+    let value = item.text("value")
+    let isActive = value == active
+    return Button {
+      userChose = true
+      active = value
+    } label: {
+      Text(item.text("trigger"))
+        .font(.subheadline.weight(isActive ? .semibold : .regular))
+        .foregroundStyle(isActive ? .primary : .secondary)
+        .padding(.vertical, 6)
+        .overlay(alignment: .bottom) {
+          if isActive { Rectangle().fill(.primary).frame(height: 2) }
+        }
+    }
+    .buttonStyle(.plain)
+  }
+
+  private func followStream(_ sizes: [(value: String, size: Int)]) {
+    if active == nil { active = sizes.first?.value }
+    guard !userChose else { return }
+    var candidate: String?
+    for (value, size) in sizes where size > (contentSizes[value] ?? 0) { candidate = value }
+    contentSizes = Dictionary(sizes.map { ($0.value, $0.size) }, uniquingKeysWith: { $1 })
+    if let candidate { active = candidate }
   }
 }
 
+/// One item open at a time. Until the user opens or closes one, the newest
+/// item opens as it streams in, like react-ui's Accordion.
 struct AccordionView: View {
   let props: ComponentProps
+  @State private var open: String?
+  @State private var userChose = false
+  @State private var seenCount = 0
 
   var body: some View {
+    let items = props.children("items")
     VStack(alignment: .leading, spacing: 0) {
-      let items = props.children("items")
-      ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+      ForEach(items.indices, id: \.self) { index in
+        let value = items[index].text("value")
         Disclosure(
-          trigger: item.text("trigger"), content: item.array("content"), initiallyOpen: false)
+          trigger: items[index].text("trigger"), content: items[index].array("content"),
+          isOpen: Binding(
+            get: { open == value },
+            set: { isOpen in
+              userChose = true
+              open = isOpen ? value : nil
+            }))
         if index < items.count - 1 { Divider() }
       }
     }
+    .onChange(of: items.count, initial: true) {
+      if !userChose, items.count > seenCount, let newest = items.last {
+        open = newest.text("value")
+      }
+      seenCount = items.count
+    }
   }
 }
 
+/// Sections open as they stream in, then fold back to the first one when the
+/// response finishes (unless the user opened or closed one), like react-ui's
+/// SectionBlock. With `isFoldable: false` every section is shown.
 struct SectionBlockView: View {
   let props: ComponentProps
+  @State private var open: Set<String> = []
+  @State private var userChose = false
+  @State private var seenCount = 0
+  @Environment(OpenUIContext.self) private var context
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let sections = props.children("sections")
-    let foldable = props.bool("isFoldable") ?? true
-    VStack(alignment: .leading, spacing: foldable ? 0 : theme.spacing) {
-      ForEach(Array(sections.enumerated()), id: \.offset) { index, section in
-        if foldable {
-          // Sections open by default so they reveal content as it streams in.
-          Disclosure(
-            trigger: section.text("trigger"), content: section.array("content"), initiallyOpen: true
-          )
-          if index < sections.count - 1 { Divider() }
-        } else {
+    let values = sections.indices.map { sectionValue(sections[$0], $0) }
+    if props.bool("isFoldable") == false {
+      VStack(alignment: .leading, spacing: theme.spacing) {
+        ForEach(sections.indices, id: \.self) { index in
           VStack(alignment: .leading, spacing: theme.compactSpacing) {
-            Text(section.text("trigger")).font(.headline)
-            OpenUINodes(section.array("content"))
+            Text(sections[index].text("trigger")).font(.headline)
+            OpenUINodes(sections[index].array("content"))
           }
         }
       }
+    } else {
+      VStack(alignment: .leading, spacing: 0) {
+        ForEach(sections.indices, id: \.self) { index in
+          let value = values[index]
+          Disclosure(
+            trigger: sections[index].text("trigger"), content: sections[index].array("content"),
+            isOpen: Binding(
+              get: { open.contains(value) },
+              set: { isOpen in
+                userChose = true
+                if isOpen { open.insert(value) } else { open.remove(value) }
+              }))
+          if index < sections.count - 1 { Divider() }
+        }
+      }
+      .onChange(of: values.count, initial: true) {
+        if context.isStreaming, values.count > seenCount, !userChose, let last = values.last {
+          open.insert(last)
+        } else if open.isEmpty, let first = values.first {
+          open = [first]
+        }
+        seenCount = values.count
+      }
+      .onChange(of: context.isStreaming) { wasStreaming, isStreaming in
+        if wasStreaming, !isStreaming, !userChose, let first = values.first { open = [first] }
+      }
     }
+  }
+
+  private func sectionValue(_ section: ComponentProps, _ index: Int) -> String {
+    section["value"].isNullish ? String(index) : section.text("value")
   }
 }
 
@@ -329,13 +460,7 @@ struct TriggeredContentView: View {
 private struct Disclosure: View {
   let trigger: String
   let content: [OpenUIValue]
-  @State private var isOpen: Bool
-
-  init(trigger: String, content: [OpenUIValue], initiallyOpen: Bool) {
-    self.trigger = trigger
-    self.content = content
-    _isOpen = State(initialValue: initiallyOpen)
-  }
+  @Binding var isOpen: Bool
 
   var body: some View {
     DisclosureGroup(isExpanded: $isOpen) {

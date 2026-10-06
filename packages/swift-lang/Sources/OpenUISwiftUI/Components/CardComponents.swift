@@ -40,48 +40,140 @@ private func childString(_ node: OpenUIValue, _ key: String) -> String? {
   node.elementValue?.props[key]?.stringValue
 }
 
+private struct TextAlignmentKey: EnvironmentKey {
+  static let defaultValue = TextAlignment.leading
+}
+
+extension EnvironmentValues {
+  /// How text building blocks align, e.g. trailing in a snippet card's value column.
+  fileprivate var openUITextAlignment: TextAlignment {
+    get { self[TextAlignmentKey.self] }
+    set { self[TextAlignmentKey.self] = newValue }
+  }
+}
+
 // MARK: - Blocks
 
-/// Lays out card items in a two-column grid or a horizontal carousel and makes
-/// them clickable when the block has an action (and the response isn't streaming).
+/// Card layout sizes from react-ui: small blocks use 280pt carousel cards,
+/// medium ones 320pt (280pt in narrow blocks).
+private enum CardBlockSize {
+  case small, medium
+}
+
+/// react-ui's `getRowConfiguration`: how many cards go in each grid row.
+func cardRowConfiguration(_ count: Int, maxPerRow: Int) -> [Int] {
+  if count <= 0 { return [] }
+  if count == 1 { return [1] }
+  if maxPerRow == 2 {
+    return Array(repeating: 2, count: count / 2) + (count % 2 == 1 ? [1] : [])
+  }
+  if count % 3 == 0 { return Array(repeating: 3, count: count / 3) }
+  if count % 3 == 2 {
+    var rows = Array(repeating: 3, count: count / 3)
+    rows.insert(2, at: (rows.count + 1) / 2)
+    return rows
+  }
+  return Array(repeating: 3, count: (count - 4) / 3) + [2, 2]
+}
+
+/// Rows of up to `maxPerRow` cells, two columns in grids 768pt wide or less
+/// (an odd last cell spans both) and one column at 480pt or less, like
+/// react-ui's responsive card grids. Cells in a row share the tallest height.
+struct ResponsiveCardGrid<Cell: View>: View {
+  let count: Int
+  let maxPerRow: Int
+  var responsive = true
+  var spacing: CGFloat = 12
+  @ViewBuilder let cell: (Int) -> Cell
+  @State private var width: CGFloat = 0
+
+  var body: some View {
+    VStack(spacing: spacing) {
+      ForEach(rows, id: \.self) { row in
+        HStack(alignment: .top, spacing: spacing) {
+          ForEach(row, id: \.self) { index in
+            cell(index).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+          }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+      }
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .onGeometryChange(for: CGFloat.self) {
+      $0.size.width
+    } action: {
+      width = $0
+    }
+  }
+
+  /// Cell indices per row. Until the width is known, one per row.
+  private var rows: [[Int]] {
+    let perRow: [Int]
+    if responsive && width <= 480 {
+      perRow = Array(repeating: 1, count: count)
+    } else if responsive && width <= 768 {
+      perRow = cardRowConfiguration(count, maxPerRow: 2)
+    } else {
+      perRow = cardRowConfiguration(count, maxPerRow: maxPerRow)
+    }
+    var start = 0
+    return perRow.map { length in
+      defer { start += length }
+      return Array(start..<start + length)
+    }
+  }
+}
+
+/// Lays out card items like react-ui's CardBlockLayout: rows of up to
+/// `maxPerRow` cards, two columns in blocks 768pt wide or less (an odd last
+/// card spans both), one column at 480pt or less; or a horizontal carousel.
+/// Cards are clickable when the block has an action and the response isn't
+/// streaming.
 private struct CardBlockLayout<Item: View>: View {
   let props: ComponentProps
+  let size: CardBlockSize
+  let maxPerRow: Int
   let click: (Int, ComponentProps) -> (label: String, context: OpenUIObject)
   @ViewBuilder let item: (ComponentProps) -> Item
+  @State private var width: CGFloat = 0
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUIFormName) private var form
-  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let items = props.children("items")
-    let gap = props.number("gap").map { CGFloat($0) } ?? theme.spacing
+    let gap = props.number("gap").map { CGFloat($0) } ?? 12
     let clickable = props["action"].isTruthy && !context.isStreaming
-    if props.string("layout") == "carousel" {
-      ScrollView(.horizontal, showsIndicators: false) {
-        HStack(alignment: .top, spacing: gap) {
-          ForEach(Array(items.enumerated()), id: \.offset) { index, entry in
-            card(index, entry, clickable: clickable).frame(width: 240)
+    Group {
+      if props.string("layout") == "carousel" {
+        let cardWidth: CGFloat = size == .small || width <= 480 ? 280 : 320
+        ScrollView(.horizontal, showsIndicators: false) {
+          HStack(alignment: .top, spacing: gap) {
+            ForEach(items.indices, id: \.self) { index in
+              card(index, items[index], clickable: clickable).frame(width: cardWidth)
+            }
           }
+          .padding(.vertical, 4)
         }
-        .padding(.vertical, 2)
-      }
-    } else {
-      let columns = props.bool("responsive") == false ? 2 : min(2, max(items.count, 1))
-      LazyVGrid(
-        columns: Array(
-          repeating: GridItem(.flexible(), spacing: gap, alignment: .top), count: columns),
-        alignment: .leading, spacing: gap
-      ) {
-        ForEach(Array(items.enumerated()), id: \.offset) { index, entry in
-          card(index, entry, clickable: clickable)
+      } else {
+        ResponsiveCardGrid(
+          count: items.count, maxPerRow: maxPerRow, responsive: props.bool("responsive") != false,
+          spacing: gap
+        ) { index in
+          card(index, items[index], clickable: clickable)
         }
       }
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .onGeometryChange(for: CGFloat.self) {
+      $0.size.width
+    } action: {
+      width = $0
     }
   }
 
   @ViewBuilder
   private func card(_ index: Int, _ entry: ComponentProps, clickable: Bool) -> some View {
-    let content = item(entry).frame(maxWidth: .infinity, alignment: .topLeading)
+    let content = item(entry).environment(\.openUICardClickable, clickable)
     if clickable {
       Button {
         let (label, itemContext) = click(index, entry)
@@ -97,26 +189,51 @@ private struct CardBlockLayout<Item: View>: View {
   }
 }
 
-/// The bordered tile every card item sits on.
-private struct CardTile<Content: View>: View {
-  var padding: CGFloat = 12
-  var tint: Color? = nil
-  @ViewBuilder let content: Content
+private struct CardClickableKey: EnvironmentKey {
+  static let defaultValue = false
+}
+
+extension EnvironmentValues {
+  /// Whether the card being drawn is clickable (its block has an action).
+  fileprivate var openUICardClickable: Bool {
+    get { self[CardClickableKey.self] }
+    set { self[CardClickableKey.self] = newValue }
+  }
+}
+
+/// The chevron clickable cards show in a corner.
+private struct CardChevron: View {
+  var size: CGFloat = 14
+  var body: some View {
+    Image(systemName: "chevron.right").font(.system(size: size * 0.8, weight: .semibold))
+  }
+}
+
+/// The small-card surface: faint fill when static, raised with an
+/// interactive border and a light shadow when clickable.
+private struct SmallCardSurface: ViewModifier {
+  let clickable: Bool
   @Environment(\.openUITheme) private var theme
 
-  var body: some View {
-    VStack(alignment: .leading, spacing: 8) { content }
-      .padding(padding)
-      .frame(maxWidth: .infinity, alignment: .topLeading)
-      .background(tint ?? theme.surface, in: RoundedRectangle(cornerRadius: theme.cornerRadius))
-      .overlay(RoundedRectangle(cornerRadius: theme.cornerRadius).strokeBorder(theme.border))
+  func body(content: Content) -> some View {
+    content
+      .padding(10)
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+      .background(
+        clickable ? theme.surface : theme.subtleSurface, in: RoundedRectangle(cornerRadius: 14)
+      )
+      .overlay(
+        RoundedRectangle(cornerRadius: 14).strokeBorder(
+          clickable ? theme.interactiveBorder : theme.border)
+      )
+      .shadow(color: .black.opacity(clickable ? 0.05 : 0), radius: 2, y: 1)
   }
 }
 
 struct SnippetCardBlockView: View {
   let props: ComponentProps
   var body: some View {
-    CardBlockLayout(props: props) { index, item in
+    CardBlockLayout(props: props, size: .small, maxPerRow: 2) { index, item in
       let title = childString(item["lhs"], "title")
       return (
         title ?? item.string("id") ?? "Snippet card \(index + 1)",
@@ -139,40 +256,30 @@ struct SnippetCardItemView: View {
   var body: some View { SnippetCard(item: props) }
 }
 
+/// One row: the label on the left, the value (or a chevron) on the right.
 private struct SnippetCard: View {
   let item: ComponentProps
+  @Environment(\.openUICardClickable) private var clickable
 
   var body: some View {
-    let value = compactValue
-    CardTile {
-      // Side by side when it fits; otherwise the value moves under the label
-      // rather than squeezing it into mid-word breaks.
-      ViewThatFits(in: .horizontal) {
-        HStack(alignment: .center, spacing: 8) {
-          OpenUINode(item["lhs"]).fixedSize(horizontal: true, vertical: false)
-          Spacer(minLength: 8)
-          OpenUINode(value).fixedSize()
-        }
-        VStack(alignment: .leading, spacing: 8) {
-          OpenUINode(item["lhs"])
-          OpenUINode(value)
-        }
+    HStack(alignment: .center, spacing: 12) {
+      OpenUINode(item["lhs"]).frame(maxWidth: .infinity, alignment: .leading)
+      if !item["rhs"].isNullish {
+        OpenUINode(item["rhs"])
+          .environment(\.openUITextAlignment, .trailing)
+          .fixedSize()
+      } else if clickable {
+        CardChevron().foregroundStyle(.secondary)
       }
     }
-  }
-
-  /// The value sits small on the right, as in react-ui.
-  private var compactValue: OpenUIValue {
-    guard var rhs = item["rhs"].elementValue else { return item["rhs"] }
-    rhs.props["size"] = "xs"
-    return .element(rhs)
+    .modifier(SmallCardSurface(clickable: clickable))
   }
 }
 
 struct OverviewCardBlockView: View {
   let props: ComponentProps
   var body: some View {
-    CardBlockLayout(props: props) { index, item in
+    CardBlockLayout(props: props, size: .small, maxPerRow: 3) { index, item in
       let title = childString(item["top"], "title") ?? childString(item["top"], "value")
       let subtitle = childString(item["top"], "subtitle") ?? childString(item["top"], "subtext")
       return (
@@ -195,20 +302,31 @@ struct OverviewCardItemView: View {
   var body: some View { OverviewCard(item: props) }
 }
 
+/// A top slot (with the chevron) and a bottom metric, spread vertically.
 private struct OverviewCard: View {
   let item: ComponentProps
+  @Environment(\.openUICardClickable) private var clickable
+
   var body: some View {
-    CardTile {
-      OpenUINode(item["top"])
-      OpenUINode(item["bottom"])
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .top, spacing: 8) {
+        OpenUINode(item["top"]).frame(maxWidth: .infinity, alignment: .leading)
+        if clickable { CardChevron().foregroundStyle(.secondary) }
+      }
+      .frame(minHeight: 24, alignment: .top)
+      if !item["bottom"].isNullish {
+        Spacer(minLength: 18)
+        OpenUINode(item["bottom"])
+      }
     }
+    .modifier(SmallCardSurface(clickable: clickable))
   }
 }
 
 struct ContextCardBlockView: View {
   let props: ComponentProps
   var body: some View {
-    CardBlockLayout(props: props) { index, item in
+    CardBlockLayout(props: props, size: .small, maxPerRow: 3) { index, item in
       let title = contextTitle(item)
       return (
         title.isEmpty ? (item.string("id") ?? "Context card \(index + 1)") : title,
@@ -238,47 +356,59 @@ private func contextTitle(_ item: ComponentProps) -> String {
   }
 }
 
-/// A compact tinted card, or a photo card with a scrim when it has a
-/// background image.
+/// A small title (or Tag) at the top and bold body text at the bottom, on a
+/// tinted fill or a darkened photo.
 private struct ContextCard: View {
   let item: ComponentProps
+  @Environment(\.openUICardClickable) private var clickable
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let image = item.string("bgImageSrc").flatMap { $0.isEmpty ? nil : $0 }
-    VStack(alignment: .leading, spacing: 6) {
-      if case .element = item["title"] {
-        OpenUINode(item["title"])
-      } else {
-        Text(item.text("title")).font(.subheadline).opacity(0.75)
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .top, spacing: 8) {
+        Group {
+          if case .element = item["title"] {
+            OpenUINode(item["title"]).environment(\.openUITagOnImage, image != nil)
+          } else {
+            Text(item.text("title")).font(.subheadline)
+              .foregroundStyle(
+                image == nil ? AnyShapeStyle(.secondary) : AnyShapeStyle(.white.opacity(0.8)))
+          }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        if clickable { CardChevron(size: 16) }
       }
+      .frame(minHeight: 24, alignment: .top)
+      Spacer(minLength: 18)
       if let body = item.string("body"), !body.isEmpty {
-        Text(body).font(.headline)
+        Text(body).font(.body.weight(.semibold))
       }
     }
     .padding(12)
-    .frame(maxWidth: .infinity, minHeight: image == nil ? nil : 130, alignment: .bottomLeading)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     .foregroundStyle(image == nil ? Color.primary : Color.white)
     .background {
       if let image {
         RemoteImage(src: image, alt: item.text("bgImageAlt"))
           .overlay(
             LinearGradient(
-              colors: [.black.opacity(0.1), .black.opacity(0.7)], startPoint: .top,
+              colors: [.black.opacity(0.25), .black.opacity(0.65)], startPoint: .top,
               endPoint: .bottom))
+      } else if clickable || item.string("bgColor") == "gray" {
+        theme.sunkSurface
       } else {
-        item.string("bgColor") == "gray" ? theme.sunkSurface : theme.surface
+        theme.subtleSurface
       }
     }
-    .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadius))
-    .overlay(RoundedRectangle(cornerRadius: theme.cornerRadius).strokeBorder(theme.border))
+    .clipShape(RoundedRectangle(cornerRadius: 12))
   }
 }
 
 struct CompositeCardBlockView: View {
   let props: ComponentProps
   var body: some View {
-    CardBlockLayout(props: props) { index, item in
+    CardBlockLayout(props: props, size: .medium, maxPerRow: 2) { index, item in
       let header = item["header"].elementValue?.props ?? OpenUIObject()
       func pick(_ keys: String...) -> String? {
         keys.lazy.compactMap { header[$0]?.stringValue }.first
@@ -310,28 +440,39 @@ struct CompositeCardItemView: View {
   var body: some View { CompositeCard(item: props) }
 }
 
+/// Header, stacked body content, and a price-over-button footer.
 private struct CompositeCard: View {
   let item: ComponentProps
+  @Environment(\.openUICardClickable) private var clickable
+  @Environment(\.openUITheme) private var theme
+
   var body: some View {
-    CardTile {
+    VStack(alignment: .leading, spacing: 12) {
       OpenUINode(item["header"])
-      OpenUINodes(item.array("body"), spacing: 8)
+      OpenUINodes(item.array("body"), spacing: 12)
       let footer = item["footer"]
       if !footer["price"].isNullish || !footer["button"].isNullish {
-        HStack(alignment: .center) {
+        VStack(alignment: .leading, spacing: 8) {
           OpenUINode(footer["price"])
-          Spacer(minLength: 8)
-          OpenUINode(footer["button"])
+          OpenUINode(footer["button"]).environment(\.openUIButtonFillsWidth, true)
         }
       }
     }
+    .padding(12)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .background(
+      clickable ? theme.surface : theme.subtleSurface, in: RoundedRectangle(cornerRadius: 16)
+    )
+    .overlay(
+      RoundedRectangle(cornerRadius: 16).strokeBorder(
+        clickable ? theme.interactiveBorder : theme.border))
   }
 }
 
 struct VisualCardBlockView: View {
   let props: ComponentProps
   var body: some View {
-    CardBlockLayout(props: props) { index, item in
+    CardBlockLayout(props: props, size: .medium, maxPerRow: 3) { index, item in
       let bodyValue = item["body"].elementValue?.props["value"]?.stringValue
       let tagText = item["tag"].elementValue?.props["text"]?.stringValue
       let label = [bodyValue, tagText, item.string("id")].compactMap { $0 }.first { !$0.isEmpty }
@@ -356,26 +497,47 @@ struct VisualCardItemView: View {
   var body: some View { VisualCard(item: props) }
 }
 
-/// A photo-first card: full-bleed image, tag on top, bold text panel below.
+/// A photo-first card: the image fills the card, the tag and chevron sit on
+/// top, and the text panel floats over the bottom of the photo.
 private struct VisualCard: View {
   let item: ComponentProps
+  @Environment(\.openUICardClickable) private var clickable
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
-      RemoteImage(src: item.string("bgImageSrc"), alt: item.text("bgImageAlt"))
-        .frame(height: 140)
-        .clipped()
-        .overlay(alignment: .topLeading) {
-          OpenUINode(item["tag"])
-            .environment(\.openUITagOnImage, true)
-            .padding(8)
+      HStack(alignment: .top) {
+        OpenUINode(item["tag"]).environment(\.openUITagOnImage, true)
+        Spacer(minLength: 8)
+        if clickable {
+          CardChevron(size: 16)
+            .foregroundStyle(.white)
+            .padding(4)
+            .background(.black.opacity(0.4), in: RoundedRectangle(cornerRadius: 6))
         }
-      OpenUINode(item["body"]).padding(12)
+      }
+      .frame(minHeight: 24, alignment: .top)
+      .padding(12)
+      Spacer(minLength: 0)
+      if !item["body"].isNullish {
+        OpenUINode(item["body"])
+          .padding(.vertical, 8)
+          .padding(.horizontal, 10)
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .background(theme.surface, in: RoundedRectangle(cornerRadius: 10))
+          .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(theme.border))
+          .padding([.horizontal, .bottom], 12)
+      }
     }
-    .background(theme.surface)
-    .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadius))
-    .overlay(RoundedRectangle(cornerRadius: theme.cornerRadius).strokeBorder(theme.border))
+    .frame(maxWidth: .infinity, minHeight: 280, maxHeight: .infinity, alignment: .topLeading)
+    .background {
+      ZStack {
+        theme.subtleSurface
+        RemoteImage(src: item.string("bgImageSrc"), alt: item.text("bgImageAlt"))
+      }
+    }
+    .clipShape(RoundedRectangle(cornerRadius: 16))
+    .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(theme.border))
   }
 }
 
@@ -386,9 +548,10 @@ private struct VisualCard: View {
 struct TextLineView: View {
   let props: ComponentProps
   let bold: Bool
+  @Environment(\.openUITextAlignment) private var alignment
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 2) {
+    VStack(alignment: alignment == .trailing ? .trailing : .leading, spacing: 2) {
       Text(props.text("value"))
         .font(font.weight(bold ? .semibold : .regular))
         .monospacedDigit(props.string("variant") == "number")

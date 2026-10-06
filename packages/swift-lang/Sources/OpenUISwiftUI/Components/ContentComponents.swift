@@ -8,41 +8,87 @@ struct CardView: View {
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
+    let sources = props.array("sources")
     VStack(alignment: .leading, spacing: theme.spacing) {
       OpenUINodes(props.array("children"))
-      let sources = props.array("sources")
       if !sources.isEmpty {
         SourcesStrip(sources: sources)
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
     .surface("card")
+    .environment(\.openUICardSources, sources)
   }
 }
 
 /// Numbered references cited inline as [1], [2] in the card's text.
 private struct SourcesStrip: View {
   let sources: [OpenUIValue]
-  @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    VStack(alignment: .leading, spacing: theme.compactSpacing) {
-      Divider()
-      Text("Sources").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-      ForEach(Array(sources.enumerated()), id: \.offset) { index, source in
-        let title = displayText(source["title"])
-        let name = displayText(source["sourceName"])
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
-          Text("[\(index + 1)]").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-          if let url = source["url"].stringValue.flatMap(URL.init(string:)) {
-            Link(title, destination: url).font(.caption)
-          } else {
-            Text(title).font(.caption)
+    VStack(alignment: .leading, spacing: 8) {
+      Text("Sources").font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
+      ScrollView(.horizontal, showsIndicators: false) {
+        HStack(alignment: .top, spacing: 12) {
+          ForEach(sources.indices, id: \.self) { index in
+            SourceCard(source: sources[index])
           }
-          if !name.isEmpty { Text(name).font(.caption).foregroundStyle(.secondary) }
         }
       }
     }
+  }
+}
+
+/// One source, like react-ui's listed source: favicon and site name, then the
+/// title. Opens the source when it has a URL.
+private struct SourceCard: View {
+  let source: OpenUIValue
+  @Environment(\.openUITheme) private var theme
+
+  var body: some View {
+    let url = source["url"].stringValue.flatMap(URL.init(string:))
+    let card = VStack(alignment: .leading, spacing: 4) {
+      HStack(spacing: 8) {
+        Favicon(host: url?.host())
+        Text(displayText(source["sourceName"])).font(.caption.weight(.medium)).lineLimit(1)
+      }
+      Text(displayText(source["title"]))
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .lineLimit(2)
+        .multilineTextAlignment(.leading)
+    }
+    .padding(8)
+    .frame(width: 180, alignment: .topLeading)
+    .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(theme.border))
+    if let url {
+      Link(destination: url) { card }.buttonStyle(.plain)
+    } else {
+      card
+    }
+  }
+}
+
+/// A site's favicon from Google's favicon service, as react-ui uses, with a
+/// globe while it loads or when there's no URL.
+private struct Favicon: View {
+  let host: String?
+
+  var body: some View {
+    Group {
+      if let host, let url = URL(string: "https://www.google.com/s2/favicons?sz=128&domain=\(host)")
+      {
+        AsyncImage(url: url) { image in
+          image.resizable().scaledToFit()
+        } placeholder: {
+          Image(systemName: "globe").foregroundStyle(.secondary)
+        }
+      } else {
+        Image(systemName: "globe").foregroundStyle(.secondary)
+      }
+    }
+    .frame(width: 20, height: 20)
+    .clipShape(RoundedRectangle(cornerRadius: 4))
   }
 }
 
@@ -67,7 +113,8 @@ struct TextContentView: View {
   let props: ComponentProps
 
   var body: some View {
-    InlineMarkdown(props.text("text"))
+    // Full markdown with citations, like react-ui's TextContentWrapper.
+    MarkdownBlocks(props.text("text"), citations: true)
       .font(font)
       .frame(maxWidth: .infinity, alignment: .leading)
   }
@@ -312,12 +359,11 @@ struct TagBlockView: View {
   var body: some View {
     FlowLayout(spacing: theme.compactSpacing) {
       ForEach(Array(props.array("tags").enumerated()), id: \.offset) { _, tag in
+        let size = props.string("size")
         Text(displayText(tag))
           .font(font)
-          .padding(.horizontal, 8)
-          .padding(.vertical, 3)
-          .background(theme.sunkSurface, in: Capsule())
-          .overlay(Capsule().strokeBorder(theme.border))
+          .padding(tagPadding(size))
+          .background(theme.sunkSurface, in: RoundedRectangle(cornerRadius: tagRadius(size)))
       }
     }
   }

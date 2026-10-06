@@ -2,16 +2,25 @@ import SwiftUI
 
 /// Spacing, shapes and colors the built-in components use. Override parts of
 /// it with `.environment(\.openUITheme, theme)`.
+///
+/// The defaults follow react-ui's design tokens (spacing, radii, and the
+/// translucent fills and borders), so both renderers look alike.
 public struct OpenUITheme: Sendable {
   public var spacing: CGFloat = 12
   public var compactSpacing: CGFloat = 6
   public var cornerRadius: CGFloat = 10
   public var smallCornerRadius: CGFloat = 6
-  public var cardPadding: CGFloat = 16
+  public var cardPadding: CGFloat = 18
   public var accent: Color = .accentColor
-  public var surface: Color = .platformSecondaryBackground
-  public var sunkSurface: Color = .platformTertiaryBackground
-  public var border: Color = .secondary.opacity(0.25)
+  /// Raised surfaces such as clickable cards (react-ui's `foreground`).
+  public var surface: Color = .platformElevatedBackground
+  /// Recessed fills such as inputs (react-ui's `sunk`).
+  public var sunkSurface: Color = .primary.opacity(0.04)
+  /// The faint fill of static cards (react-ui's `sunk-light`).
+  public var subtleSurface: Color = .primary.opacity(0.02)
+  public var border: Color = .primary.opacity(0.06)
+  /// Borders of clickable cards (react-ui's `border-interactive`).
+  public var interactiveBorder: Color = .primary.opacity(0.12)
   public var chartHeight: CGFloat = 220
 
   public init() {}
@@ -31,16 +40,14 @@ extension EnvironmentValues {
 }
 
 extension Color {
-  static var platformSecondaryBackground: Color {
+  /// White in light mode and a raised gray in dark mode.
+  static var platformElevatedBackground: Color {
     #if os(macOS)
       Color(nsColor: .controlBackgroundColor)
     #else
-      Color(uiColor: .secondarySystemBackground)
+      Color(uiColor: .secondarySystemGroupedBackground)
     #endif
   }
-
-  /// A light recessed fill that works in light and dark mode on every platform.
-  static var platformTertiaryBackground: Color { Color.primary.opacity(0.06) }
 }
 
 /// Status colors shared by callouts, tags and form errors.
@@ -65,11 +72,12 @@ struct SurfaceModifier: ViewModifier {
       content
     case "sunk":
       content.padding(theme.cardPadding)
-        .background(theme.sunkSurface, in: RoundedRectangle(cornerRadius: theme.cornerRadius))
+        .background(theme.sunkSurface, in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(theme.border))
     default:
-      content.padding(theme.cardPadding)
-        .background(theme.surface, in: RoundedRectangle(cornerRadius: theme.cornerRadius))
-        .overlay(RoundedRectangle(cornerRadius: theme.cornerRadius).strokeBorder(theme.border))
+      // react-ui's "card" variant is a plain full-width column; the chat
+      // bubble around it provides the frame.
+      content
     }
   }
 }

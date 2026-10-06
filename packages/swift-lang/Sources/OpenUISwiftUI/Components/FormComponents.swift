@@ -23,12 +23,14 @@ struct FormControlView: View {
   @Environment(FormValidation.self) private var validation: FormValidation?
 
   var body: some View {
-    let fieldName = props.children("input").first?.string("name")
+    let input = props.children("input").first
+    let fieldName = input?.string("name")
+    let required = input?["rules"]["required"] == true
     VStack(alignment: .leading, spacing: 6) {
-      Text(props.text("label")).font(.subheadline.weight(.medium))
+      Text(props.text("label") + (required ? "*" : "")).font(.subheadline.weight(.medium))
       OpenUINode(props["input"])
       if let fieldName, let error = validation?.error(for: fieldName) {
-        Text(error).font(.caption).foregroundStyle(.red)
+        Label(error, systemImage: "exclamationmark.circle").font(.caption).foregroundStyle(.red)
       } else if let hint = props.string("hint"), !hint.isEmpty {
         Text(hint).font(.caption).foregroundStyle(.secondary)
       }
@@ -85,7 +87,8 @@ struct InputView: View {
           #endif
       }
     }
-    .textFieldStyle(.roundedBorder)
+    .textFieldStyle(.plain)
+    .fieldSurface()
     .disabled(context.isStreaming)
     .onSubmit {
       if !state.rules.isEmpty {
@@ -131,7 +134,8 @@ struct TextAreaView: View {
       axis: .vertical
     )
     .lineLimit(rows...max(rows, 12))
-    .textFieldStyle(.roundedBorder)
+    .textFieldStyle(.plain)
+    .fieldSurface()
     .disabled(context.isStreaming)
     .formField(state.field.name, rules: state.rules, value: state.field.value)
   }
@@ -141,6 +145,7 @@ struct TextAreaView: View {
 
 struct SelectView: View {
   let props: ComponentProps
+  @Environment(\.openUITheme) private var theme
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUIFormName) private var form
   @Environment(FormValidation.self) private var validation: FormValidation?
@@ -148,25 +153,40 @@ struct SelectView: View {
   var body: some View {
     let state = FieldContext(props, context: context, form: form)
     let items = props.children("items")
-    Picker(
-      props.text("placeholder"),
-      selection: Binding<String>(
-        get: { displayText(state.field.value) },
-        set: { newValue in
-          state.field.setValue(.string(newValue))
-          if !state.rules.isEmpty {
-            validation?.validateField(
-              state.field.name, value: .string(newValue), rules: state.rules)
-          }
-        })
-    ) {
-      Text(props.string("placeholder") ?? "Select…").tag("")
-      ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-        Text(item.text("label")).tag(item.text("value"))
+    let current = displayText(state.field.value)
+    let label = items.first { $0.text("value") == current }?.text("label")
+    // A full-width field like react-ui's select, opening a native menu.
+    Menu {
+      Picker(
+        props.text("placeholder"),
+        selection: Binding<String>(
+          get: { current },
+          set: { newValue in
+            state.field.setValue(.string(newValue))
+            if !state.rules.isEmpty {
+              validation?.validateField(
+                state.field.name, value: .string(newValue), rules: state.rules)
+            }
+          })
+      ) {
+        ForEach(items.indices, id: \.self) { index in
+          Text(items[index].text("label")).tag(items[index].text("value"))
+        }
       }
+      .pickerStyle(.inline)
+    } label: {
+      HStack {
+        Text(label ?? props.string("placeholder") ?? "Select…")
+          .foregroundStyle(label == nil ? .secondary : .primary)
+        Spacer()
+        Image(systemName: "chevron.down").font(.caption).foregroundStyle(.secondary)
+      }
+      .frame(maxWidth: .infinity)
+      .fieldSurface(border: theme.border)
+      .contentShape(Rectangle())
     }
-    .pickerStyle(.menu)
-    .labelsHidden()
+    .menuIndicator(.hidden)
+    .buttonStyle(.plain)
     .disabled(context.isStreaming)
     .formField(state.field.name, rules: state.rules, value: state.field.value)
   }
@@ -261,15 +281,19 @@ private struct BooleanGroup: View {
           }
           .buttonStyle(.plain)
         case .toggle:
-          Toggle(isOn: Binding(get: { isOn }, set: { _ in toggle() })) {
+          // The switch leads and the text follows, as in react-ui's SwitchItem.
+          HStack(alignment: .top, spacing: 8) {
+            Toggle(item.text("label"), isOn: Binding(get: { isOn }, set: { _ in toggle() }))
+              .toggleStyle(.switch)
+              .labelsHidden()
             VStack(alignment: .leading, spacing: 2) {
               Text(item.text("label"))
               if let description = item.string("description"), !description.isEmpty {
                 Text(description).font(.caption).foregroundStyle(.secondary)
               }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
           }
-          .toggleStyle(.switch)
         }
       }
     }
@@ -342,13 +366,32 @@ private let dayFormatter: DateFormatter = {
 
 struct DatePickerView: View {
   let props: ComponentProps
+  @Environment(\.openUITheme) private var theme
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUIFormName) private var form
   @Environment(FormValidation.self) private var validation: FormValidation?
 
   var body: some View {
     let state = FieldContext(props, context: context, form: form)
-    if props.string("mode") == "range" {
+    let isRange = props.string("mode") == "range"
+    if state.field.value.isNullish {
+      // Nothing is picked until the user picks it, so the form can't submit a
+      // date the user never chose.
+      Button {
+        let today = OpenUIValue.string(dayFormatter.string(from: Date()))
+        set(state, isRange ? .object(["from": today, "to": today]) : today)
+      } label: {
+        HStack {
+          Text(isRange ? "Select a range" : "Select a date").foregroundStyle(.secondary)
+          Spacer()
+          Image(systemName: "calendar").foregroundStyle(.secondary)
+        }
+        .fieldSurface(border: theme.border)
+      }
+      .buttonStyle(.plain)
+      .disabled(context.isStreaming)
+      .formField(state.field.name, rules: state.rules, value: state.field.value)
+    } else if isRange {
       VStack(alignment: .leading, spacing: 6) {
         rangePicker("From", key: "from", state)
         rangePicker("To", key: "to", state)
@@ -431,6 +474,13 @@ struct SliderView: View {
           Slider(value: binding, in: minimum...maximum)
         }
       }
+      HStack {
+        Text(compactNumber(minimum))
+        Spacer()
+        Text(compactNumber(maximum))
+      }
+      .font(.caption.monospacedDigit())
+      .foregroundStyle(.secondary)
     }
     .disabled(context.isStreaming)
     .formField(state.field.name, rules: state.rules, value: state.field.value)
@@ -441,6 +491,7 @@ struct SliderView: View {
 
 struct ButtonView: View {
   let props: ComponentProps
+  @Environment(\.openUIButtonFillsWidth) private var fillsWidth
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUIFormName) private var form
   @Environment(FormValidation.self) private var validation: FormValidation?
@@ -456,7 +507,7 @@ struct ButtonView: View {
       }
       context.triggerAction(label, form: form, action: action.isNullish ? nil : action)
     } label: {
-      Text(label)
+      Text(label).frame(maxWidth: fillsWidth ? .infinity : nil)
     }
     .modifier(ButtonVariant(variant: variant))
     .controlSize(controlSize)
@@ -483,6 +534,18 @@ struct ButtonView: View {
     case "large": return .large
     default: return .regular
     }
+  }
+}
+
+private struct ButtonFillsWidthKey: EnvironmentKey {
+  static let defaultValue = false
+}
+
+extension EnvironmentValues {
+  /// Whether buttons stretch to the available width, like a card footer's.
+  var openUIButtonFillsWidth: Bool {
+    get { self[ButtonFillsWidthKey.self] }
+    set { self[ButtonFillsWidthKey.self] = newValue }
   }
 }
 
@@ -513,5 +576,35 @@ struct ButtonsView: View {
         ForEach(NodeItem.list(buttons)) { OpenUINode($0.value) }
       }
     }
+  }
+}
+
+/// react-ui's slider labels: 1000 and up in short compact notation ("10k",
+/// "2.5m"), smaller numbers as JavaScript prints them.
+func compactNumber(_ number: Double) -> String {
+  guard number >= 1000 else { return jsNumberToString(number) }
+  return number.formatted(
+    .number.notation(.compactName).locale(Locale(identifier: "en_US"))
+  ).lowercased()
+}
+
+/// react-ui's field look: a faint fill, a 1pt border and 10pt corners.
+private struct FieldSurface: ViewModifier {
+  var border: Color?
+  @Environment(\.openUITheme) private var theme
+
+  func body(content: Content) -> some View {
+    content
+      .padding(.horizontal, 10)
+      .padding(.vertical, 8)
+      .background(theme.subtleSurface, in: RoundedRectangle(cornerRadius: 10))
+      .overlay(
+        RoundedRectangle(cornerRadius: 10).strokeBorder(border ?? theme.interactiveBorder))
+  }
+}
+
+extension View {
+  fileprivate func fieldSurface(border: Color? = nil) -> some View {
+    modifier(FieldSurface(border: border))
   }
 }

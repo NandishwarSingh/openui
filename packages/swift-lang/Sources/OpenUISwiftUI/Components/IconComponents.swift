@@ -411,11 +411,12 @@ struct TagLabel: View {
     }
     .font(font)
     .foregroundStyle(onImage ? Color.white : neutral ? Color.primary : color)
-    .padding(.horizontal, 8)
-    .padding(.vertical, 3)
+    .padding(tagPadding(size))
     // On a photo the variant tint isn't readable, so react-ui switches every
     // tag to white on translucent black there.
-    .background(onImage ? Color.black.opacity(0.4) : color.opacity(0.12), in: Capsule())
+    .background(
+      onImage ? Color.black.opacity(0.4) : color.opacity(0.12),
+      in: RoundedRectangle(cornerRadius: tagRadius(size)))
   }
 
   private var font: Font {
@@ -438,3 +439,15 @@ extension EnvironmentValues {
     set { self[TagOnImageKey.self] = newValue }
   }
 }
+
+/// react-ui's tag padding per size: 4/6, 6/8 and 8/12.
+func tagPadding(_ size: String?) -> EdgeInsets {
+  switch size {
+  case "sm": return EdgeInsets(top: 4, leading: 6, bottom: 4, trailing: 6)
+  case "lg": return EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
+  default: return EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8)
+  }
+}
+
+/// react-ui's tag corner radius: 6, or 8 for large tags.
+func tagRadius(_ size: String?) -> CGFloat { size == "lg" ? 8 : 6 }
