@@ -236,14 +236,15 @@ struct MarkdownBlocks: View {
 
     for rawLine in source.components(separatedBy: "\n") {
       let line = rawLine.trimmingCharacters(in: .whitespaces)
-      if math != nil {
+      if var lines = math {
         if line.hasSuffix("$$") {
-          math!.append(String(line.dropLast(2)))
-          blocks.append(
-            .math(math!.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)))
+          lines.append(String(line.dropLast(2)))
+          let tex = lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+          blocks.append(.math(tex))
           math = nil
         } else {
-          math!.append(rawLine)
+          lines.append(rawLine)
+          math = lines
         }
         continue
       }
@@ -274,7 +275,7 @@ struct MarkdownBlocks: View {
         continue
       }
       if code != nil {
-        code!.append(rawLine)
+        code?.append(rawLine)
         continue
       }
       if line.isEmpty {

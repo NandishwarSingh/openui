@@ -21,11 +21,10 @@ private enum RefResolution {
 /// Shared ref handling: cycle and missing-symbol detection, and Query/Mutation
 /// declarations becoming `RuntimeRef`s.
 private func lookupRef(_ name: String, _ ctx: MaterializeContext) -> RefResolution {
-  if ctx.visited.contains(name) || ctx.syms[name] == nil {
+  guard !ctx.visited.contains(name), let target = ctx.syms[name] else {
     ctx.unres.append(name)
     return .unresolved
   }
-  let target = ctx.syms[name]!
   ctx.markReached(name)
   if case .comp(let callee, _, _) = target, isReservedCall(callee) {
     let refType: RuntimeRefType = callee == ReservedCall.mutation ? .mutation : .query

@@ -131,7 +131,7 @@ private func buildResult(
   var syms: [String: ASTNode] = [:]
   var unreached: [String] = []
   for id in map.order {
-    let statement = map[id]!
+    guard let statement = map[id] else { continue }
     switch statement {
     case .state(_, let initial):
       syms[id] = initial
@@ -147,7 +147,7 @@ private func buildResult(
     syms: syms, cat: cat, partial: wasIncomplete, currentStatementId: entryId)
   ctx.unreached = unreached
   var root: ElementNode? = nil
-  if case .element(var element) = materializeValue(syms[entryId]!, ctx) {
+  if let entry = syms[entryId], case .element(var element) = materializeValue(entry, ctx) {
     element.statementId = entryId
     root = element
   }

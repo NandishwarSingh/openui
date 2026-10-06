@@ -262,7 +262,7 @@ public final class QueryManager {
       if rebuildSnapshot() { notify() }
       if queries[statementId]?.needsRefetch == true {
         queries[statementId]?.needsRefetch = false
-        startFetch(queries[statementId]!.cacheKey, statementId)
+        if let key = queries[statementId]?.cacheKey { startFetch(key, statementId) }
       }
     } else if rebuildSnapshot() {
       notify()
@@ -328,12 +328,12 @@ public final class QueryManager {
       }
 
       let interval = node.refreshInterval ?? 0
-      if interval != queries[node.statementId]!.refreshInterval {
-        queries[node.statementId]!.timer?.cancel()
-        queries[node.statementId]!.timer = nil
+      if interval != queries[node.statementId]?.refreshInterval {
+        queries[node.statementId]?.timer?.cancel()
+        queries[node.statementId]?.timer = nil
         if interval > 0 {
           let statementId = node.statementId
-          queries[node.statementId]!.timer = Task { [weak self] in
+          queries[node.statementId]?.timer = Task { [weak self] in
             while !Task.isCancelled {
               try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
               guard let self, !Task.isCancelled, !self.disposed, self.toolProvider != nil,
@@ -345,7 +345,7 @@ public final class QueryManager {
             }
           }
         }
-        queries[node.statementId]!.refreshInterval = interval
+        queries[node.statementId]?.refreshInterval = interval
       }
     }
     if rebuildSnapshot() { notify() }
@@ -404,8 +404,8 @@ public final class QueryManager {
   public func fireMutation(
     _ statementId: String, args: OpenUIObject, refreshQueryIds: [String]? = nil
   ) async -> Bool {
-    if disposed || toolProvider == nil { return false }
-    guard let mutation = mutations[statementId], mutation.result["status"].stringValue != "loading"
+    guard !disposed, let toolProvider, let mutation = mutations[statementId],
+      mutation.result["status"].stringValue != "loading"
     else { return false }
     let currentGeneration = generation
     mutations[statementId]?.result = ["status": "loading"]
@@ -414,7 +414,7 @@ public final class QueryManager {
 
     var success = false
     do {
-      let data = try await toolProvider!.callTool(mutation.toolName, arguments: args)
+      let data = try await toolProvider.callTool(mutation.toolName, arguments: args)
       if disposed || currentGeneration != generation { return false }
       mutations[statementId]?.result = ["status": "success", "data": data]
       mutations[statementId]?.error = nil

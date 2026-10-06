@@ -144,8 +144,10 @@ private func validationMessage(_ component: String, _ path: String, _ issue: Val
       + (signature.map { " — signature: \($0)" } ?? "")
   case .unknownComponent(let available):
     let list =
-      (available?.isEmpty == false)
-      ? ". Available components: \(available!.joined(separator: ", "))" : ""
+      available.flatMap {
+        $0.isEmpty ? nil : ". Available components: \($0.joined(separator: ", "))"
+      }
+      ?? ""
     return "Unknown component \"\(component)\" — not found in catalog or builtins\(list)"
   case .inlineReserved:
     return "\(component)() must be declared as a top-level statement, not used inline as a value"
@@ -216,7 +218,7 @@ private func validateObjectValue(
   if !ctx.partial {
     for key in required {
       let present = object.contains(key)
-      if !present || object[key]!.isNullish {
+      if object[key]?.isNullish ?? true {
         if let fallback = schemaDefaultValue(props[key]) {
           object[key] = fallback
           continue
@@ -230,7 +232,7 @@ private func validateObjectValue(
   }
   for key in props.keys where object.contains(key) {
     let sub = props[key]
-    var child = object[key]!
+    guard var child = object[key] else { continue }
     let childInvalid = validateSchemaValue(&child, sub, component, "\(path)/\(key)", ctx)
     object[key] = child
     if childInvalid,
