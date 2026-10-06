@@ -44,9 +44,11 @@ public struct OpenUINodes: View {
   public var body: some View {
     VStack(alignment: alignment, spacing: spacing) {
       ForEach(items) { item in
-        OpenUINode(item.value)
+        OpenUINode(item.value).transition(.openUIInsertion)
       }
     }
+    // Nodes keep their identity, so only newly streamed ones animate in.
+    .openUIAnimation(Motion.insertion, value: items.map(\.id))
   }
 }
 

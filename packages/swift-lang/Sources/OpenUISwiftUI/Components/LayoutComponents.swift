@@ -30,9 +30,7 @@ struct TableView: View {
     if context.isQueryLoading && rowCount == 0 {
       // Placeholder rows while a Query fills the table, like react-ui's skeleton.
       VStack(alignment: .leading, spacing: 10) {
-        ForEach(0..<5, id: \.self) { _ in
-          RoundedRectangle(cornerRadius: 4).fill(theme.sunkSurface).frame(height: 14)
-        }
+        ForEach(0..<5, id: \.self) { _ in SkeletonBlock(height: 14, cornerRadius: 4) }
       }
     } else if !columns.isEmpty {
       VStack(alignment: .leading, spacing: theme.compactSpacing) {
@@ -331,7 +329,7 @@ struct TabsView: View {
     let isActive = value == active
     return Button {
       userChose = true
-      active = value
+      withOpenUIAnimation(Motion.reveal) { active = value }
     } label: {
       Text(item.text("trigger"))
         .font(.subheadline.weight(isActive ? .semibold : .regular))
@@ -350,7 +348,9 @@ struct TabsView: View {
     var candidate: String?
     for (value, size) in sizes where size > (contentSizes[value] ?? 0) { candidate = value }
     contentSizes = Dictionary(sizes.map { ($0.value, $0.size) }, uniquingKeysWith: { $1 })
-    if let candidate { active = candidate }
+    if let candidate, candidate != active {
+      withOpenUIAnimation(Motion.reveal) { active = candidate }
+    }
   }
 }
 
@@ -380,7 +380,7 @@ struct AccordionView: View {
     }
     .onChange(of: items.count, initial: true) {
       if !userChose, items.count > seenCount, let newest = items.last {
-        open = newest.text("value")
+        withOpenUIAnimation(Motion.reveal) { open = newest.text("value") }
       }
       seenCount = items.count
     }
@@ -427,14 +427,16 @@ struct SectionBlockView: View {
       }
       .onChange(of: values.count, initial: true) {
         if context.isStreaming, values.count > seenCount, !userChose, let last = values.last {
-          open.insert(last)
+          withOpenUIAnimation(Motion.reveal) { _ = open.insert(last) }
         } else if open.isEmpty, let first = values.first {
           open = [first]
         }
         seenCount = values.count
       }
       .onChange(of: context.isStreaming) { wasStreaming, isStreaming in
-        if wasStreaming, !isStreaming, !userChose, let first = values.first { open = [first] }
+        if wasStreaming, !isStreaming, !userChose, let first = values.first {
+          withOpenUIAnimation(Motion.reveal) { open = [first] }
+        }
       }
     }
   }

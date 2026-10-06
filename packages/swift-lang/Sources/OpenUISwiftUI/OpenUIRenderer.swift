@@ -62,6 +62,7 @@ public struct OpenUIRenderer<QueryLoader: View>: View {
     VStack(alignment: .leading, spacing: 0) {
       if let root = context.root {
         OpenUIElementView(element: root)
+          .transition(.openUIInsertion)
           .opacity(context.isQueryLoading ? 0.7 : 1)
           .animation(.easeInOut(duration: 0.2), value: context.isQueryLoading)
           .overlay(alignment: .topTrailing) {

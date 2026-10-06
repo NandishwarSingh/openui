@@ -301,9 +301,9 @@ struct RemoteImage: View {
   var body: some View {
     Group {
       if fit {
-        AsyncImage(url: url) { phase in
+        AsyncImage(url: url, transaction: Self.fadeIn) { phase in
           if let image = phase.image {
-            image.resizable().scaledToFit()
+            image.resizable().scaledToFit().transition(.opacity)
           } else {
             placeholder(phase).frame(height: 160)
           }
@@ -312,9 +312,9 @@ struct RemoteImage: View {
       } else {
         Color.clear
           .overlay {
-            AsyncImage(url: url) { phase in
+            AsyncImage(url: url, transaction: Self.fadeIn) { phase in
               if let image = phase.image {
-                image.resizable().scaledToFill()
+                image.resizable().scaledToFill().transition(.opacity)
               } else {
                 placeholder(phase)
               }
@@ -329,11 +329,19 @@ struct RemoteImage: View {
 
   private var url: URL? { src.flatMap(URL.init(string:)) }
 
+  /// The photo fades in over its loading placeholder.
+  private static let fadeIn = Transaction(animation: .easeOut(duration: 0.25))
+
+  @ViewBuilder
   private func placeholder(_ phase: AsyncImagePhase) -> some View {
-    ZStack {
-      theme.sunkSurface
-      Image(systemName: phase.error == nil ? "photo" : "photo.badge.exclamationmark")
-        .font(.title2).foregroundStyle(.secondary)
+    if phase.error == nil, url != nil {
+      // Still loading: pulse like react-ui's skeletons.
+      GeometryReader { size in SkeletonBlock(height: size.size.height, cornerRadius: 0) }
+    } else {
+      ZStack {
+        theme.sunkSurface
+        Image(systemName: "photo.badge.exclamationmark").font(.title2).foregroundStyle(.secondary)
+      }
     }
   }
 }

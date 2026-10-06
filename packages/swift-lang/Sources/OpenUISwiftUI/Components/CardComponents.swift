@@ -85,29 +85,68 @@ struct ResponsiveCardGrid<Cell: View>: View {
   var responsive = true
   var spacing: CGFloat = 12
   @ViewBuilder let cell: (Int) -> Cell
-  @State private var width: CGFloat = 0
 
   var body: some View {
-    VStack(spacing: spacing) {
-      ForEach(rows, id: \.self) { row in
-        HStack(alignment: .top, spacing: spacing) {
-          ForEach(row, id: \.self) { index in
-            cell(index).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-          }
-        }
-        .fixedSize(horizontal: false, vertical: true)
+    CardGridLayout(maxPerRow: maxPerRow, responsive: responsive, spacing: spacing) {
+      ForEach(0..<count, id: \.self) { index in
+        cell(index).transition(.openUIInsertion)
       }
     }
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .onGeometryChange(for: CGFloat.self) {
-      $0.size.width
-    } action: {
-      width = $0
+    .openUIAnimation(Motion.insertion, value: count)
+  }
+}
+
+/// The grid behind `ResponsiveCardGrid`. As a `Layout` it reads the width it's
+/// offered while laying out, so the columns are right on the first frame
+/// instead of re-flowing once the width has been measured.
+struct CardGridLayout: Layout {
+  let maxPerRow: Int
+  let responsive: Bool
+  let spacing: CGFloat
+
+  func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+    guard let width = proposal.width, width.isFinite else {
+      // No width to fit (e.g. measuring an ideal size): one column.
+      let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+      let height = sizes.map(\.height).reduce(0, +) + spacing * CGFloat(max(sizes.count - 1, 0))
+      return CGSize(width: sizes.map(\.width).max() ?? 0, height: height)
+    }
+    let height = rows(subviews.count, width).reduce(into: CGFloat(0)) { total, row in
+      total += rowHeight(row, subviews, width)
+    }
+    return CGSize(
+      width: width, height: height + spacing * CGFloat(max(rowCount(subviews.count, width) - 1, 0)))
+  }
+
+  func placeSubviews(
+    in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+  ) {
+    var y = bounds.minY
+    for row in rows(subviews.count, bounds.width) {
+      let width = cellWidth(row.count, bounds.width)
+      let height = rowHeight(row, subviews, bounds.width)
+      for (column, index) in row.enumerated() {
+        subviews[index].place(
+          at: CGPoint(x: bounds.minX + CGFloat(column) * (width + spacing), y: y),
+          proposal: ProposedViewSize(width: width, height: height))
+      }
+      y += height + spacing
     }
   }
 
-  /// Cell indices per row. Until the width is known, one per row.
-  private var rows: [[Int]] {
+  private func cellWidth(_ columns: Int, _ width: CGFloat) -> CGFloat {
+    (width - spacing * CGFloat(columns - 1)) / CGFloat(columns)
+  }
+
+  private func rowHeight(_ row: [Int], _ subviews: Subviews, _ width: CGFloat) -> CGFloat {
+    let proposal = ProposedViewSize(width: cellWidth(row.count, width), height: nil)
+    return row.map { subviews[$0].sizeThatFits(proposal).height }.max() ?? 0
+  }
+
+  private func rowCount(_ count: Int, _ width: CGFloat) -> Int { rows(count, width).count }
+
+  /// Subview indices per row, using react-ui's breakpoints.
+  private func rows(_ count: Int, _ width: CGFloat) -> [[Int]] {
     let perRow: [Int]
     if responsive && width <= 480 {
       perRow = Array(repeating: 1, count: count)

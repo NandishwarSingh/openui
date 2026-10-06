@@ -2,9 +2,11 @@ import Charts
 import OpenUILang
 import SwiftUI
 
-/// One value of one series at one category label.
-private struct SeriesPoint: Identifiable {
-  let id: Int
+/// One value of one series at one category label. The id is the series and
+/// label (not the position), so a value that changes while streaming moves to
+/// its new place instead of being redrawn.
+private struct SeriesPoint: Identifiable, Equatable {
+  let id: String
   let label: String
   let series: String
   let value: Double
@@ -20,7 +22,9 @@ private func seriesPoints(_ props: ComponentProps) -> [SeriesPoint] {
     for (index, value) in series.array("values").enumerated() where index < labels.count {
       guard let number = value.numberValue, number.isFinite else { continue }
       points.append(
-        SeriesPoint(id: points.count, label: labels[index], series: name, value: number))
+        SeriesPoint(
+          id: "\(name)\u{1}\(labels[index])\u{1}\(index)", label: labels[index], series: name,
+          value: number))
     }
   }
   return points
@@ -94,20 +98,30 @@ extension View {
   }
 }
 
+/// Sizes a chart, puts its legend below, and shows a pulsing placeholder
+/// while the response streams in before any of its values have.
 private struct ChartFrame<Content: View>: View {
   let props: ComponentProps
+  let isEmpty: Bool
   let content: Content
+  @Environment(OpenUIContext.self) private var context
   @Environment(\.openUITheme) private var theme
 
-  init(_ props: ComponentProps, @ViewBuilder content: () -> Content) {
+  init(_ props: ComponentProps, isEmpty: Bool, @ViewBuilder content: () -> Content) {
     self.props = props
+    self.isEmpty = isEmpty
     self.content = content()
   }
 
   var body: some View {
-    content
-      .frame(height: props.number("height").map { CGFloat($0) } ?? theme.chartHeight)
-      .chartLegend(position: .bottom, alignment: .leading)
+    let height = props.number("height").map { CGFloat($0) } ?? theme.chartHeight
+    if isEmpty && (context.isStreaming || context.isQueryLoading) {
+      SkeletonBlock(height: height, cornerRadius: 8)
+    } else {
+      content
+        .frame(height: height)
+        .chartLegend(position: .bottom, alignment: .leading)
+    }
   }
 }
 
@@ -117,7 +131,7 @@ struct BarChartView: View {
   var body: some View {
     let points = seriesPoints(props)
     let stacked = props.string("variant") == "stacked"
-    ChartFrame(props) {
+    ChartFrame(props, isEmpty: points.isEmpty) {
       Chart(points) { point in
         if stacked {
           BarMark(x: .value("Label", point.label), y: .value("Value", point.value))
@@ -134,6 +148,8 @@ struct BarChartView: View {
       .categoryAxisWithoutGrid()
       .chartXAxisLabel(props.text("xLabel"))
       .chartYAxisLabel(props.text("yLabel"))
+      .chartEntrance(.grow)
+      .openUIAnimation(Motion.dataMorph, value: points)
     }
   }
 }
@@ -145,7 +161,7 @@ struct HorizontalBarChartView: View {
     let points = seriesPoints(props)
     let stacked = props.string("variant") == "stacked"
     let labels = labelOrder(props)
-    ChartFrame(props) {
+    ChartFrame(props, isEmpty: points.isEmpty) {
       Chart(points) { point in
         if stacked {
           BarMark(
@@ -171,6 +187,8 @@ struct HorizontalBarChartView: View {
       .frame(minHeight: CGFloat(labels.count) * 28)
       .chartXAxisLabel(props.text("xLabel"))
       .chartYAxisLabel(props.text("yLabel"))
+      .chartEntrance(.growSideways)
+      .openUIAnimation(Motion.dataMorph, value: points)
     }
   }
 }
@@ -180,8 +198,9 @@ struct LineChartView: View {
 
   var body: some View {
     let method = interpolation(props.string("variant"))
-    ChartFrame(props) {
-      Chart(seriesPoints(props)) { point in
+    let points = seriesPoints(props)
+    ChartFrame(props, isEmpty: points.isEmpty) {
+      Chart(points) { point in
         LineMark(x: .value("Label", point.label), y: .value("Value", point.value))
           .foregroundStyle(by: .value("Series", point.series))
           .interpolationMethod(method)
@@ -190,6 +209,8 @@ struct LineChartView: View {
       .chartXScale(domain: labelOrder(props))
       .paletteScale(seriesNames(props))
       .categoryAxisWithoutGrid()
+      .chartEntrance(.draw)
+      .openUIAnimation(Motion.dataMorph, value: points)
       .chartXAxisLabel(props.text("xLabel"))
       .chartYAxisLabel(props.text("yLabel"))
     }
@@ -203,8 +224,9 @@ struct AreaChartView: View {
     let method = interpolation(props.string("variant"))
     let names = seriesNames(props)
     let colors = ChartPalette.colors(names.count)
-    ChartFrame(props) {
-      Chart(seriesPoints(props)) { point in
+    let points = seriesPoints(props)
+    ChartFrame(props, isEmpty: points.isEmpty) {
+      Chart(points) { point in
         let color = colors[names.firstIndex(of: point.series) ?? 0]
         // react-ui fills areas with a gradient from 60% opacity to clear.
         AreaMark(
@@ -224,6 +246,8 @@ struct AreaChartView: View {
       .chartXScale(domain: labelOrder(props))
       .chartForegroundStyleScale(domain: names, range: colors)
       .categoryAxisWithoutGrid()
+      .chartEntrance(.draw)
+      .openUIAnimation(Motion.dataMorph, value: points)
       .chartXAxisLabel(props.text("xLabel"))
       .chartYAxisLabel(props.text("yLabel"))
     }
@@ -231,7 +255,7 @@ struct AreaChartView: View {
 }
 
 /// One labelled value of a 1D chart.
-private struct Slice: Identifiable {
+private struct Slice: Identifiable, Equatable {
   let id: Int
   let label: String
   let value: Double
@@ -276,6 +300,8 @@ struct PieChartView: View {
     .chartLegend(position: .bottom, alignment: .leading)
     .rotationEffect(semi ? .degrees(-90) : .zero)
     .frame(height: theme.chartHeight)
+    .openUIAnimation(Motion.dataMorph, value: data)
+    .fadeAppear()
   }
 }
 
@@ -313,8 +339,9 @@ struct RadialChartView: View {
         }
       }
     }
+    .openUIAnimation(Motion.dataMorph, value: data)
+    .fadeAppear()
   }
-
 }
 
 struct SingleStackedBarChartView: View {
@@ -332,6 +359,8 @@ struct SingleStackedBarChartView: View {
     .chartYAxis(.hidden)
     .chartLegend(position: .bottom, alignment: .leading)
     .frame(height: 80)
+    .openUIAnimation(Motion.dataMorph, value: data)
+    .chartEntrance(.growSideways)
   }
 }
 
@@ -369,6 +398,8 @@ struct ScatterChartView: View {
     .chartYAxisLabel(props.text("yLabel"))
     .chartLegend(position: .bottom, alignment: .leading)
     .frame(height: theme.chartHeight)
+    .openUIAnimation(Motion.dataMorph, value: dots.map(\.x) + dots.map(\.y))
+    .fadeAppear()
   }
 
   /// react-ui's `calculateScatterDomain`: the data range padded by 10% on each
@@ -438,6 +469,7 @@ struct RadarChartView: View {
         }
       }
       .frame(height: theme.chartHeight + 40)
+      .fadeAppear()
       FlowLayout(spacing: 12) {
         ForEach(Array(series.enumerated()), id: \.offset) { index, entry in
           HStack(spacing: 6) {
