@@ -166,8 +166,10 @@ func jsonSchema(_ type: PropType) -> OpenUIValue {
   case .literal(let value):
     return ["type": .string(value.jsTypeof), "const": value]
   case .array(let inner, let minItems):
-    var schema: OpenUIObject = ["type": "array"]
+    // Zod writes length checks before the type.
+    var schema = OpenUIObject()
     if let minItems { schema["minItems"] = .number(Double(minItems)) }
+    schema["type"] = "array"
     schema["items"] = jsonSchema(inner)
     return .object(schema)
   case .object(let props): return objectSchema(props)
@@ -253,11 +255,13 @@ public struct Library<Content>: ComponentLibrary {
   }
 
   private static func buildSchema(_ components: [ComponentDefinition<Content>]) -> OpenUIValue {
-    var defs = OpenUIObject()
     var properties = OpenUIObject()
     for component in components {
-      defs[component.name] = component.schema.jsonSchema
       properties[component.name] = ["$ref": .string("#/$defs/\(component.name)")]
+    }
+    var defs = OpenUIObject()
+    for name in definitionOrder(components) {
+      defs[name] = components.first { $0.name == name }!.schema.jsonSchema
     }
     var root: OpenUIObject = ["$schema": "https://json-schema.org/draft/2020-12/schema"]
     root["type"] = "object"
@@ -266,6 +270,37 @@ public struct Library<Content>: ComponentLibrary {
     root["additionalProperties"] = false
     root["$defs"] = .object(defs)
     return .object(root)
+  }
+
+  /// Zod adds a component to `$defs` the first time its depth-first walk of the
+  /// library reaches it, so a component referenced by an earlier one comes
+  /// before its own place in the list.
+  private static func definitionOrder(_ components: [ComponentDefinition<Content>]) -> [String] {
+    var order: [String] = []
+    var seen: Set<String> = []
+
+    func visit(_ name: String) {
+      guard !seen.contains(name), let component = components.first(where: { $0.name == name })
+      else { return }
+      seen.insert(name)
+      order.append(name)
+      for prop in component.schema.props { walk(prop.type) }
+    }
+
+    func walk(_ type: PropType) {
+      switch type {
+      case .component(let name): visit(name)
+      case .array(let element, _): walk(element)
+      case .record(let value): walk(value)
+      case .named(_, let underlying): walk(underlying)
+      case .object(let props): for prop in props { walk(prop.type) }
+      case .union(let options): for option in options { walk(option) }
+      case .string, .number, .boolean, .any, .enumeration, .literal: break
+      }
+    }
+
+    for component in components { visit(component.name) }
+    return order
   }
 
   /// The prompt inputs for this library.

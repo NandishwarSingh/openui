@@ -7,6 +7,7 @@
 // Each fixture pairs an input with what @openuidev/lang-core produces for it.
 // The Swift tests feed the same input to the Swift port and compare.
 
+import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -446,6 +447,156 @@ const promptCases = [
 
 const chatComponentSpecs = chatSpec;
 
+// ── Edit mode ─────────────────────────────────────────────────────────────
+
+const base = [
+  'root = Card([title, body, $filter], "Report")',
+  'title = TextContent("Q3", "large")',
+  "body = Table([colA, colB])",
+  'colA = Col("Region", ["EU", "US"])',
+  'colB = Col("Revenue", [1, 2])',
+  '$filter = "all"',
+].join("\n");
+
+const mergeCases = [
+  { name: "empty-existing", existing: "", patch: 'root = Card([a])\na = TextContent("x")' },
+  { name: "empty-patch", existing: base, patch: "  \n" },
+  { name: "replace", existing: base, patch: 'title = TextContent("Q4", "large")' },
+  {
+    name: "add-referenced",
+    existing: base,
+    patch: 'root = Card([title, body, note])\nnote = Callout("info", "Hi")',
+  },
+  { name: "add-unreferenced", existing: base, patch: 'orphan = TextContent("never shown")' },
+  { name: "delete", existing: base, patch: "body = null\nroot = Card([title])" },
+  { name: "gc-after-replace", existing: base, patch: 'body = TextContent("no table")' },
+  { name: "keeps-unused-state", existing: base, patch: "root = Card([title])\n$extra = 1" },
+  { name: "root-deleted", existing: base, patch: "root = null" },
+  { name: "fenced-patch", existing: base, patch: '```openui\ntitle = TextContent("Fenced")\n```' },
+  {
+    name: "multiline-and-strings",
+    existing: base,
+    patch:
+      'body = Table([\n  colA,\n  colB\n])\ntitle = TextContent("a ) ] } \\" \' \\n", "large")',
+  },
+  { name: "single-quotes", existing: base, patch: "title = TextContent('it\\'s (fine')" },
+  {
+    name: "crlf",
+    existing: base.replaceAll("\n", "\r\n"),
+    patch: 'title = TextContent("CRLF")\r\n',
+  },
+  {
+    name: "duplicate-existing",
+    existing: `${base}\ntitle = TextContent("dup")`,
+    patch: 'colA = Col("Area", [])',
+  },
+  { name: "delete-then-add", existing: base, patch: 'title = null\ntitle = TextContent("back")' },
+  {
+    name: "query-refs",
+    existing:
+      'root = Card([t])\nt = Table([c])\nc = Col("n", q.rows)\nq = Query("list", {}, {rows: []})',
+    patch: 'c = Col("name", q.rows)',
+  },
+  {
+    name: "custom-root",
+    existing: 'main = Card([a])\na = TextContent("x")\nb = TextContent("y")',
+    patch: 'a = TextContent("z")',
+    rootId: "main",
+  },
+  { name: "unclosed-patch", existing: base, patch: 'title = TextContent("cut' },
+  {
+    name: "chat-example",
+    existing: chatExamples[0].input,
+    patch: 'header = CardHeader("Edited", "by a patch")',
+  },
+].map((c) => ({ ...c, expected: core.mergeStatements(c.existing, c.patch, c.rootId) }));
+
+// ── Cloud config ──────────────────────────────────────────────────────────
+
+const cloudLibrary = {
+  root: "Card",
+  components: { Card: { signature: "Card(children: Text[])" } },
+  componentGroups: [{ name: "Layout", components: ["Card", "Text"], notes: ["- Note"] }],
+  schema: {
+    $defs: {
+      Card: {
+        properties: { children: { type: "array", items: { $ref: "#/$defs/Text" } } },
+        required: ["children"],
+      },
+      Text: { properties: { value: { type: "string" } }, required: ["value"] },
+    },
+  },
+};
+
+const brokenLibrary = {
+  root: "Missing",
+  components: {},
+  componentGroups: [{ name: "G", components: ["Card", "Nope"] }, { name: 1 }],
+  schema: {
+    $defs: {
+      Card: {
+        properties: {
+          children: { type: "array", items: { $ref: "#/$defs/Gone" } },
+          x: { $ref: "bad" },
+        },
+        required: ["children", "absent", 3],
+      },
+      Text: { properties: [] },
+      Bad: "nope",
+    },
+  },
+};
+
+function cloudCase(name, spec) {
+  try {
+    return { name, spec, expected: core.generateSystemPrompt({ cloud: true, ...spec }) };
+  } catch (error) {
+    return { name, spec, error: error.message };
+  }
+}
+
+const cloudCases = [
+  cloudCase("built-in", {}),
+  cloudCase("built-in-instructions", { instructions: "Answer in French." }),
+  cloudCase("built-in-empty-options", { promptOptions: { preamble: "" } }),
+  cloudCase("built-in-with-options", { promptOptions: { examples: [] } }),
+  cloudCase("library", { library: cloudLibrary }),
+  cloudCase("library-options", {
+    library: cloudLibrary,
+    promptOptions: {
+      preamble: "Be brief.",
+      additionalRules: ["One card"],
+      examples: ["a = 1"],
+      tools: ["x"],
+      editMode: true,
+    },
+    instructions: "Extra.",
+  }),
+  cloudCase("library-empty-strings", {
+    library: cloudLibrary,
+    promptOptions: { preamble: "" },
+    instructions: "",
+  }),
+  cloudCase("library-without-root", {
+    library: { ...cloudLibrary, root: undefined, componentGroups: undefined },
+  }),
+  cloudCase("library-with-id", { library: { ...cloudLibrary, id: "lib-1" } }),
+  cloudCase("broken-library", { library: brokenLibrary }),
+  cloudCase("no-defs", { library: { components: {}, schema: { $defs: {} } } }),
+  cloudCase("no-schema", { library: { root: "", components: {} } }),
+];
+
+// The chat library's Cloud config is ~80 KB, so only its digest is stored.
+const chatCloudConfig = core.generateSystemPrompt({
+  cloud: true,
+  library: ui.openuiChatLibrary.toSpec(),
+  promptOptions: ui.openuiChatPromptOptions,
+});
+const chatCloud = {
+  length: chatCloudConfig.length,
+  sha256: createHash("sha256").update(chatCloudConfig).digest("hex"),
+};
+
 function write(name, data, indent = 1) {
   mkdirSync(fixtures, { recursive: true });
   writeFileSync(join(fixtures, name), JSON.stringify(data, null, indent) + "\n");
@@ -457,6 +608,8 @@ write("streaming.json", streamingCases, 0);
 write("stream-set.json", setCases);
 write("evaluation.json", evalFixtures);
 write("prompts.json", promptCases);
+write("merge.json", mergeCases);
+write("cloud.json", { cases: cloudCases, chat: chatCloud });
 
 // The chat examples, for the SwiftUI renderer's end-to-end render tests.
 mkdirSync(join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures"), { recursive: true });
@@ -471,5 +624,5 @@ writeFileSync(
 write("chat-spec.json", chatComponentSpecs);
 
 console.log(
-  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation, ${promptCases.length} prompt fixtures`,
+  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation, ${promptCases.length} prompt, ${mergeCases.length} merge, ${cloudCases.length} cloud fixtures`,
 );

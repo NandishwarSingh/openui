@@ -21,7 +21,18 @@ import Testing
   }
 
   @Test func coversEveryComponentInLibraryOrder() {
-    #expect(ChatComponents.all.map(\.name) == Self.tsDefs.objectValue?.keys)
+    #expect(ChatComponents.all.map(\.name) == Self.tsSpec["components"].objectValue?.keys)
+  }
+
+  @Test func libraryJSONSchemaMatchesByteForByte() {
+    // Key order included: top-level properties follow library order, $defs
+    // follow Zod's depth-first discovery order.
+    let library = Library(
+      components: ChatComponents.all.map { ComponentDefinition($0, content: ()) }, root: "Card",
+      componentGroups: ChatComponents.groups)
+    let schema = JSON.stringify(library.toJSONSchema())
+    let expected = JSON.stringify(Fixtures.schemas["chat"]["schema"])
+    #expect(schema == expected, "\(firstLineDifference(schema, expected) ?? "")")
   }
 
   @Test func bindingsMatchReactiveProps() {
