@@ -40,6 +40,35 @@ import Testing
     #expect(manager.snapshot.errors.first?.hint == "Available tools: other")
   }
 
+  @Test func refetchRecoversFromAFailedQuery() async {
+    struct Unavailable: Error {}
+    final class Calls: @unchecked Sendable { var count = 0 }
+    let calls = Calls()
+    let manager = QueryManager(
+      toolProvider: FunctionToolProvider([
+        "flaky": { _ in
+          calls.count += 1
+          if calls.count == 1 { throw Unavailable() }
+          return ["ok": true]
+        }
+      ]))
+    manager.evaluateQueries([
+      QueryNode(
+        statementId: "q", toolName: "flaky", args: [:], defaults: ["ok": false],
+        refreshInterval: nil, deps: nil, complete: true)
+    ])
+    await settle()
+    #expect(manager.snapshot.errors.map(\.code) == ["tool-error"])
+    #expect(manager.result("q") == ["ok": false])
+
+    manager.invalidate(["q"])
+    #expect(manager.isLoading("q"))
+    await settle()
+    #expect(manager.snapshot.errors.isEmpty)
+    #expect(manager.result("q") == ["ok": true])
+    #expect(calls.count == 2)
+  }
+
   @Test func mutationSuccessAndFailure() async {
     let provider = FunctionToolProvider([
       "save": { args in ["saved": args["name"] ?? .null] },

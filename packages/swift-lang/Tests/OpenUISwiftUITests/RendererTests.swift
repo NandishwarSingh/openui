@@ -162,6 +162,59 @@ import Testing
       #expect(host.fittingSize.height > 200, "\(name) rendered \(host.fittingSize)")
     }
 
+    /// The bug vishxrad hit in the Angular port: an input recreated on every
+    /// update loses focus mid-typing. The AppKit text field behind the SwiftUI
+    /// input must be the same object across streamed updates and typing.
+    @Test func keepsInputViewsAcrossStreamingAndTyping() {
+      final class Model: ObservableObject {
+        @Published var response = """
+          $name = ""
+          root = Card([form, note])
+          form = Form("f", btns, [field])
+          btns = Buttons([Button("Save")])
+          field = FormControl("Name", Input("name", "Your name", "text", null, $name))
+          """
+        var state = OpenUIObject()
+      }
+      struct Harness: View {
+        @ObservedObject var model: Model
+        var body: some View {
+          OpenUIRenderer(
+            response: model.response, isStreaming: true, library: OpenUIChatLibrary.library,
+            onStateUpdate: { model.state = $0 }
+          )
+          .frame(width: 420)
+        }
+      }
+      func textFields(_ view: NSView) -> [NSTextField] {
+        let own = (view as? NSTextField).map { [$0] } ?? []
+        return own + view.subviews.flatMap(textFields)
+      }
+
+      let model = Model()
+      let host = NSHostingView(rootView: Harness(model: model))
+      let window = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 420, height: 400), styleMask: [.borderless],
+        backing: .buffered, defer: false)
+      window.contentView = host
+      RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+      let field = textFields(host).first { $0.isEditable }
+      #expect(field != nil)
+
+      // A later statement streams in after the field.
+      model.response += "\nnote = TextContent(\"Saved drafts appear here.\")"
+      RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+      #expect(textFields(host).first { $0.isEditable } === field)
+
+      // Typing writes $name, which re-evaluates the tree.
+      field?.stringValue = "Ada"
+      field?.sendAction(field?.action, to: field?.target)
+      NotificationCenter.default.post(name: NSControl.textDidChangeNotification, object: field)
+      RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+      #expect(model.state["$name"] == "Ada")
+      #expect(textFields(host).first { $0.isEditable } === field)
+    }
+
     @Test func passesParseResultsAndErrorsToTheHost() {
       final class Received {
         var parseResults = 0
