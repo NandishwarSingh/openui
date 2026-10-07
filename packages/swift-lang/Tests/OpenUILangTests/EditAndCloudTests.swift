@@ -67,3 +67,92 @@ import Testing
       editMode: value["editMode"].boolValue)
   }
 }
+
+/// The Cloud message format must split and wrap messages exactly like
+/// react-ui's sentinel parser.
+@Suite struct CloudMessageConformanceTests {
+  static let fixtures = Fixtures.load("messages")
+
+  static var cases: [FixtureCase] {
+    (fixtures["separate"].arrayValue ?? []).map {
+      FixtureCase(name: $0["name"].stringValue ?? "?", value: $0)
+    }
+  }
+
+  @Test(arguments: cases)
+  func separatesContentAndContext(_ fixture: FixtureCase) {
+    let parsed = separateContentAndContext(fixture.value["input"].stringValue!)
+    let expected = fixture.value["expected"]
+    #expect(parsed.content == expected["content"].stringValue)
+    #expect(parsed.contextString == expected["contextString"].stringValue)
+    #expect(parsed.contentHeader == expected["contentHeader"].stringValue)
+    #expect(parsed.end == (expected["end"].boolValue ?? false))
+  }
+
+  @Test func detectsLangSyntax() {
+    for entry in Self.fixtures["langSyntax"].arrayValue ?? [] {
+      let input = entry["input"].stringValue!
+      #expect(hasLangSyntax(input) == entry["expected"].boolValue, "\(input.debugDescription)")
+    }
+    #expect(!hasLangSyntax(nil))
+  }
+
+  @Test func parsesArtifacts() {
+    for entry in Self.fixtures["artifacts"].arrayValue ?? [] {
+      let input = entry["input"].stringValue!
+      let parsed = parseArtifactSentinel(input)
+      let expected = entry["expected"]
+      guard expected != .null else {
+        #expect(parsed == nil, "\(input.debugDescription)")
+        continue
+      }
+      let header = expected["header"]
+      #expect(parsed?.header.artifactId == header["artifact_id"].stringValue)
+      #expect(parsed?.header.type.rawValue == header["type"].stringValue)
+      #expect(parsed?.header.name == header["name"].stringValue)
+      #expect(parsed?.header.version == header["version"].stringValue)
+      #expect(parsed?.program == expected["program"].stringValue)
+    }
+  }
+
+  @Test func wraps() {
+    let wrap = Self.fixtures["wrap"]
+    #expect(wrapContent("root = X()") == wrap["content"].stringValue)
+    #expect(
+      wrapContentWithHeader("root = X()", "]]>openui:content?thesys=true")
+        == wrap["contentWithHeader"].stringValue)
+    #expect(wrapContentWithHeader("root = X()", nil) == wrap["contentWithoutHeader"].stringValue)
+    #expect(wrapContext(#"[{"a":1}]"#) == wrap["context"].stringValue)
+  }
+
+  /// The two messages react-ui's chat builds (GenUIAssistantMessage).
+  @Test func buildsChatMessages() throws {
+    var event = ActionEvent(
+      type: BuiltinActionType.continueConversation, humanFriendlyMessage: "Book it")
+    #expect(
+      continueConversationMessage(event)
+        == "]]>openui:content\nBook it\n]]>openui:context\n[\"User clicked: Book it\"]")
+    event.formState = ["form": ["seats": ["value": 2, "componentType": "Input"]]]
+    #expect(
+      continueConversationMessage(event)
+        == #"]]>openui:content\#nBook it\#n]]>openui:context\#n["User clicked: Book it",{"form":{"seats":{"value":2,"componentType":"Input"}}}]"#
+    )
+
+    let state: OpenUIObject = ["$tab": "b"]
+    let saved = messageWithState(
+      content: "root = X()", contentHeader: "]]>openui:content?thesys=true", state: state)
+    #expect(
+      saved == "]]>openui:content?thesys=true\nroot = X()\n]]>openui:context\n[{\"$tab\":\"b\"}]")
+    #expect(
+      messageWithState(content: "root = X()", contentHeader: nil, state: [:])
+        == wrapContent("root = X()"))
+
+    // Round trip: what was saved comes back as the renderer's initial state.
+    let parsed = separateContentAndContext(saved)
+    #expect(parsed.content == "root = X()")
+    #expect(initialState(fromContext: parsed.contextString) == state)
+    #expect(initialState(fromContext: #"{"a":1}"#) == ["a": 1])
+    #expect(initialState(fromContext: "[null]") == nil)
+    #expect(initialState(fromContext: "not json") == nil)
+  }
+}

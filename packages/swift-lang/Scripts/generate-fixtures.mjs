@@ -639,6 +639,89 @@ const chatCloud = {
   sha256: createHash("sha256").update(chatCloudConfig).digest("hex"),
 };
 
+// ── Cloud messages ────────────────────────────────────────────────────────
+
+// react-ui doesn't export its sentinel parser, so read the source directly
+// (Node strips the TypeScript types).
+const sentinel = await import(join(packages, "react-ui", "src", "utils", "sentinelParser.ts"));
+
+const messageInputs = [
+  ["empty", ""],
+  ["plain text", "Just some text"],
+  ["content only", "]]>openui:content\nroot = Card([])"],
+  ["content with header attrs", "]]>openui:content?thesys=true&libraryVersion=0.1.0\nroot = Card([])"],
+  ["content and context", ']]>openui:content\nroot = Card([])\n]]>openui:context\n[{"f":1}]'],
+  ["context only", 'Hello\n]]>openui:context\n["User clicked: Go"]'],
+  ["context then content", ']]>openui:context\n[1]\n]]>openui:content\nroot = X()'],
+  ["last content wins", "]]>openui:content\nold\n]]>openui:content\nnew"],
+  ["crlf separators", "]]>openui:content\r\nroot = X()\r\n]]>openui:context\r\n[1]"],
+  ["end marker", "]]>openui:content\nroot = X()\n]]>openui:end"],
+  ["end marker with attrs", "]]>openui:content\nroot = X()\n]]>openui:end?status=done"],
+  ["text after end marker", "]]>openui:content\nroot = X()\n]]>openui:end\ntrailing"],
+  ["end between sections", "]]>openui:content\na\n]]>openui:end\n]]>openui:context\n[1]"],
+  ["two end markers", "]]>openui:content\na\n]]>openui:end\n]]>openui:end"],
+  ["crlf before end", "]]>openui:content\na\r\n]]>openui:end"],
+  ["partial tail one char", "]]>openui:content\nroot = X()\n]"],
+  ["partial tail sentinel", "]]>openui:content\nroot = X()\n]]>openui:"],
+  ["partial context marker", "]]>openui:content\nroot = X()\n]]>openui:cont"],
+  ["partial end marker", "]]>openui:content\nroot = X()\n]]>openui:e"],
+  ["bracket that isn't a marker", "]]>openui:content\nx = [1, 2]"],
+  ["marker header without newline", "]]>openui:content"],
+  ["markers on one line", "]]>openui:content]]>openui:context\n[1]"],
+  ["emoji", "]]>openui:content\nroot = TextContent(\"🙂 hi\")\n]]>openui:context\n[\"🎉\"]"],
+  ["legacy xml", '<content thesys="true">root = X()</content>\n<context>[{"a":1}]</context>'],
+  ["legacy content only", "<content>root = X()</content>  "],
+  ["legacy context only", 'text\n<context>["x"]</context>\n'],
+  ["legacy unclosed", "<content>root = X()"],
+  ["legacy text after context", "<context>[1]</context> more"],
+];
+
+const langSyntaxInputs = [
+  "```openui-lang\nroot = X()\n```",
+  "root = X()",
+  "root=X()",
+  "  root = X()",
+  "intro\n\troot = X()",
+  "intro\n\n  root\n= X()",
+  "rooted = 1",
+  "x root = 1",
+  "Just text",
+  "",
+];
+
+const artifactInputs = [
+  ']]>openui:artifact {"artifact_id":"a1","type":"slides","name":"Deck","version":"2"}\nroot = X()',
+  ']]>openui:artifact {"artifact_id":"a2","type":"presentation"}\nprogram',
+  ']]>openui:artifact {"artifact_id":"a3","type":"report","name":""}',
+  ']]>openui:artifact {"artifact_id":"","type":"report"}\nx',
+  ']]>openui:artifact {"type":"report"}\nx',
+  ']]>openui:artifact {"artifact_id":"a4","type":"video"}\nx',
+  ']]>openui:artifact {"artifact_id":"a5","type":"report","version":7}\nx',
+  "]]>openui:artifact not json\nx",
+  "]]>openui:artifact []\nx",
+  ']]>openui:artifact{"artifact_id":"a6","type":"report"}\nx',
+  "]]>openui:content\nroot = X()",
+];
+
+const messageCases = {
+  separate: messageInputs.map(([name, input]) => ({
+    name,
+    input,
+    expected: sentinel.separateContentAndContext(input),
+  })),
+  langSyntax: langSyntaxInputs.map((input) => ({ input, expected: sentinel.hasLangSyntax(input) })),
+  artifacts: artifactInputs.map((input) => ({
+    input,
+    expected: sentinel.parseArtifactSentinel(input),
+  })),
+  wrap: {
+    content: sentinel.wrapContent("root = X()"),
+    contentWithHeader: sentinel.wrapContentWithHeader("root = X()", "]]>openui:content?thesys=true"),
+    contentWithoutHeader: sentinel.wrapContentWithHeader("root = X()", undefined),
+    context: sentinel.wrapContext('[{"a":1}]'),
+  },
+};
+
 function write(name, data, indent = 1) {
   mkdirSync(fixtures, { recursive: true });
   writeFileSync(join(fixtures, name), JSON.stringify(data, null, indent) + "\n");
@@ -653,6 +736,7 @@ write("prompts.json", promptCases);
 write("merge.json", mergeCases);
 write("errors.json", errorCases);
 write("cloud.json", { cases: cloudCases, chat: chatCloud });
+write("messages.json", messageCases);
 
 // The chat examples, for the SwiftUI renderer's end-to-end render tests.
 mkdirSync(join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures"), { recursive: true });
@@ -667,5 +751,5 @@ writeFileSync(
 write("chat-spec.json", chatComponentSpecs);
 
 console.log(
-  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation, ${promptCases.length} prompt, ${mergeCases.length} merge, ${errorCases.length} error, ${cloudCases.length} cloud fixtures`,
+  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation, ${promptCases.length} prompt, ${mergeCases.length} merge, ${errorCases.length} error, ${cloudCases.length} cloud, ${messageCases.separate.length} message fixtures`,
 );
