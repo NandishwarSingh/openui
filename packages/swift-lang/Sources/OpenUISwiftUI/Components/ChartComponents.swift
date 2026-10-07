@@ -148,12 +148,17 @@ enum CategoryLabels {
   static let gap: CGFloat = 8
   static let minWidth: CGFloat = 40
 
-  /// Draw every `interval`-th label, each up to `width` wide.
+  /// Draw every `interval`-th label, each up to `width` wide. Past react-ui's
+  /// rule, it thins further while labels would still be cut off, as long as
+  /// at least three stay: "Month 0, Month 2, Month 4" reads better than seven
+  /// "Month…".
   static func layout(widest: CGFloat, slot: CGFloat, count: Int) -> (interval: Int, width: CGFloat)
   {
     guard slot > 0, count > 0 else { return (1, slot) }
     let needed = min(widest, minWidth) + gap
-    let interval = min(count, max(1, Int((needed / slot).rounded(.up))))
+    var interval = min(count, max(1, Int((needed / slot).rounded(.up))))
+    let sparsest = max(interval, (count + 2) / 3)
+    while slot * CGFloat(interval) - gap < widest, interval < sparsest { interval += 1 }
     return (interval, slot * CGFloat(interval) - gap)
   }
 
@@ -202,6 +207,7 @@ private struct CategoryAxis: ViewModifier {
                 ? CategoryLabels.place(text: text, center: center, width: labelWidth, plot: plot)
                 : (text, 0)
               Text(label)
+                .font(.caption2)
                 .lineLimit(1)
                 .frame(width: size)
                 .fixedSize()

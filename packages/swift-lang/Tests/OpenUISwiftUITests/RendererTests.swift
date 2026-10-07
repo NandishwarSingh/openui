@@ -919,8 +919,19 @@ let globalTestLibrary = SwiftUILibrary(
     let layout = CategoryLabels.layout(widest: 70, slot: 40, count: 8)
     #expect(layout.interval == 2)
     #expect(layout.width == 72)
-    // Only up to 40pt of a long label counts, as in react-ui.
-    #expect(CategoryLabels.layout(widest: 300, slot: 10, count: 20).interval == 5)
+    // react-ui's rule alone when the labels then fit: 48pt needed in 10pt slots.
+    #expect(CategoryLabels.layout(widest: 40, slot: 10, count: 20).interval == 5)
+  }
+
+  /// Past react-ui's rule: thinning further beats cutting every label off,
+  /// down to three labels.
+  @Test func thinsRatherThanTruncates() {
+    // Seven "Month n" labels, 48pt wide, in 53pt slots: every second one.
+    let months = CategoryLabels.layout(widest: 48, slot: 53, count: 7)
+    #expect(months.interval == 2)
+    #expect(months.width >= 48)
+    // Labels too long for any thinning keep at least three.
+    #expect(CategoryLabels.layout(widest: 500, slot: 40, count: 9).interval == 3)
   }
 
   @Test func neverSkipsPastTheLastCategory() {
