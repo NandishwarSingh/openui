@@ -48,6 +48,11 @@ public final class OpenUIRuntime {
   private var hasParsed = false
   /// The errors last passed to `onError`; nil when nothing is reported.
   private var reportedErrors: [OpenUIError]?
+  private var streamObservation = StreamObservation()
+
+  /// Whether to publish `react-lang:stream` events on `Observability.shared`
+  /// (react-lang's `publishObservability`).
+  public var publishesObservability = true
 
   public init(
     library: some ComponentLibrary, initialState: OpenUIObject? = nil,
@@ -62,7 +67,11 @@ public final class OpenUIRuntime {
         guard let self, !self.initializingStore else { return }
         self.onStateUpdate?(self.store.snapshot)
       })
-    unsubscribers.append(queries.subscribe { [weak self] in self?.reportErrors() })
+    unsubscribers.append(
+      queries.subscribe { [weak self] in
+        self?.reportErrors()
+        self?.publishStream()
+      })
   }
 
   /// Stops query refreshes and drops listeners.
@@ -89,7 +98,10 @@ public final class OpenUIRuntime {
   /// Feeds the latest full response text. Appended text parses incrementally.
   public func update(response: String?, isStreaming: Bool) {
     self.isStreaming = isStreaming
-    defer { reportErrors() }
+    defer {
+      reportErrors()
+      publishStream()
+    }
     let changed = !hasParsed || response != self.response
     hasParsed = true
     self.response = response
@@ -163,6 +175,52 @@ public final class OpenUIRuntime {
     guard errors != reportedErrors else { return }
     reportedErrors = errors
     onError(errors)
+  }
+
+  // MARK: Observability
+
+  /// Publishes the stream lifecycle like react-lang's
+  /// `useStreamingObservability`: each streamed chunk, then the settled
+  /// response with its errors (as an error event when there are any).
+  private func publishStream() {
+    guard publishesObservability else { return }
+    let errors = isStreaming ? [] : self.errors
+    let errorJSON = errors.map(\.jsonRepresentation)
+    guard
+      let update = streamObservation.advance(
+        isStreaming: isStreaming, response: response,
+        settledErrorKey: isStreaming ? nil : JSON.stringify(.array(errorJSON)))
+    else { return }
+    let timing = streamObservation.timing()
+    guard Observability.shared.hasListeners else { return }
+
+    var detail: OpenUIObject = [
+      "id": .string(update.id), "kind": .string(streamEventKind),
+      "phase": .string(update.phase.rawValue), "updateIndex": .number(Double(update.updateIndex)),
+      "response": response.map(OpenUIValue.string) ?? .null,
+      "responseLength": .number(Double(response?.utf16.count ?? 0)),
+    ]
+    if let meta = parseResult?.meta {
+      detail["parser"] = [
+        "incomplete": .bool(meta.incomplete),
+        "unresolved": .array(meta.unresolved.map { .string($0) }),
+        "orphaned": .array(meta.orphaned.map { .string($0) }),
+        "statementCount": .number(Double(meta.statementCount)),
+      ]
+    }
+    let settled = update.phase == .settled
+    if settled {
+      detail["errors"] = .array(errorJSON)
+      detail["errorCount"] = .number(Double(errors.count))
+    }
+    for (key, value) in timing { detail[key] = value }
+    detail["message"] = .string(
+      !settled
+        ? "OpenUI Lang is streaming"
+        : errors.isEmpty
+          ? "OpenUI Lang settled"
+          : "OpenUI Lang settled with \(errors.count) error\(errors.count == 1 ? "" : "s")")
+    Observability.shared.emit(settled && !errors.isEmpty ? .error : .info, detail)
   }
 
   /// A validation error as an `OpenUIError`, with the fix hint lang-core's

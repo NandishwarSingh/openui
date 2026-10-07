@@ -31,6 +31,7 @@ public struct OpenUIRenderer<QueryLoader: View>: View {
   ///   - library: The components the response may use. Changing it requires a new view identity.
   ///   - initialState: Restored `$state` and form values, e.g. from a saved conversation.
   ///   - toolProvider: Handles `Query` and `Mutation` tool calls.
+  ///   - publishObservability: Whether to publish stream events on `Observability.shared`.
   ///   - queryLoader: Shown in the top trailing corner while queries load.
   ///   - onAction: Called for actions the host handles (continue the conversation, open a URL).
   ///     A trailing closure binds here.
@@ -41,7 +42,7 @@ public struct OpenUIRenderer<QueryLoader: View>: View {
   public init(
     response: String?, isStreaming: Bool = false, library: SwiftUILibrary,
     initialState: OpenUIObject? = nil, toolProvider: (any ToolProvider)? = nil,
-    queryLoader: QueryLoader,
+    publishObservability: Bool = true, queryLoader: QueryLoader,
     onAction: ((ActionEvent) -> Void)? = nil,
     onStateUpdate: ((OpenUIObject) -> Void)? = nil,
     onParseResult: ((ParseResult?) -> Void)? = nil,
@@ -61,7 +62,8 @@ public struct OpenUIRenderer<QueryLoader: View>: View {
       wrappedValue: ContextHolder(
         OpenUIContext(
           library: library, initialState: initialState, toolProvider: toolProvider,
-          response: response, isStreaming: isStreaming)))
+          publishObservability: publishObservability, response: response,
+          isStreaming: isStreaming)))
   }
 
   public var body: some View {
@@ -106,14 +108,15 @@ extension OpenUIRenderer where QueryLoader == DefaultQueryLoader {
   public init(
     response: String?, isStreaming: Bool = false, library: SwiftUILibrary,
     initialState: OpenUIObject? = nil, toolProvider: (any ToolProvider)? = nil,
-    onAction: ((ActionEvent) -> Void)? = nil,
+    publishObservability: Bool = true, onAction: ((ActionEvent) -> Void)? = nil,
     onStateUpdate: ((OpenUIObject) -> Void)? = nil,
     onParseResult: ((ParseResult?) -> Void)? = nil,
     onError: (([OpenUIError]) -> Void)? = nil
   ) {
     self.init(
       response: response, isStreaming: isStreaming, library: library, initialState: initialState,
-      toolProvider: toolProvider, queryLoader: DefaultQueryLoader(), onAction: onAction,
+      toolProvider: toolProvider, publishObservability: publishObservability,
+      queryLoader: DefaultQueryLoader(), onAction: onAction,
       onStateUpdate: onStateUpdate, onParseResult: onParseResult, onError: onError)
   }
 }

@@ -46,7 +46,8 @@ public final class OpenUIContext {
   ///   ``update(response:isStreaming:)`` is called.
   public init(
     library: SwiftUILibrary, initialState: OpenUIObject? = nil,
-    toolProvider: (any ToolProvider)? = nil, response: String? = nil, isStreaming: Bool = false
+    toolProvider: (any ToolProvider)? = nil, publishObservability: Bool = true,
+    response: String? = nil, isStreaming: Bool = false
   ) {
     self.library = library
     self.runtime = OpenUIRuntime(
@@ -57,6 +58,7 @@ public final class OpenUIContext {
     runtime.onError = { [weak self] errors in self?.onError?(errors) }
     unsubscribers.append(runtime.store.subscribe { [weak self] in self?.revision += 1 })
     unsubscribers.append(runtime.queries.subscribe { [weak self] in self?.revision += 1 })
+    runtime.publishesObservability = publishObservability
     runtime.preload(response: response, isStreaming: isStreaming)
   }
 

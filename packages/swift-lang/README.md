@@ -152,15 +152,25 @@ Schemas serialize to the same JSON Schema `lang-core` libraries produce: `schema
 
 ### Rendering
 
-| API                                                                                                                                | Description                                                                                                                 |
-| ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `OpenUIRenderer(response:isStreaming:library:initialState:toolProvider:queryLoader:onAction:onStateUpdate:onParseResult:onError:)` | Renders a response. `queryLoader` replaces the small spinner shown while queries load.                                      |
-| `OpenUINode(value)` / `OpenUINodes(values)`                                                                                        | Render child props (elements, arrays, text) inside a component.                                                             |
-| `ComponentProps`                                                                                                                   | `string`, `text`, `number`, `bool`, `array`, `elements`, `children` accessors that tolerate partial values while streaming. |
+| API                                                                                                                                                     | Description                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `OpenUIRenderer(response:isStreaming:library:initialState:toolProvider:publishObservability:queryLoader:onAction:onStateUpdate:onParseResult:onError:)` | Renders a response. `queryLoader` replaces the small spinner shown while queries load.                                      |
+| `OpenUINode(value)` / `OpenUINodes(values)`                                                                                                             | Render child props (elements, arrays, text) inside a component.                                                             |
+| `ComponentProps`                                                                                                                                        | `string`, `text`, `number`, `bool`, `array`, `elements`, `children` accessors that tolerate partial values while streaming. |
 
 ### Errors
 
 `onError` receives the same structured errors as react-lang's `onError`, for an automated correction loop: parser validation errors with fix hints (available components, the expected signature), `parse-failed` when a finished response has no root, and failed `Query`/`Mutation` calls. Errors are reported once the response finishes streaming, and `onError([])` is called when they clear or the next response starts. `OpenUIError.jsonRepresentation` gives the same JSON shape as lang-core's `OpenUIError`.
+
+### Observability
+
+`Observability.shared` ports `@openuidev/observability`: a bus that sinks (logging, analytics, a debugging view) listen to with `listen(_:_:)` or `listenAll(_:)`. As each response streams and settles, the runtime emits react-lang's `react-lang:stream` events with the same fields (a stable `id`, `phase`, `updateIndex`, the response, parser metadata, errors and timings), so a sink built for the web reads them too. A settled response with errors is an `error`-level event. Pass `publishObservability: false` to the renderer to stop them.
+
+```swift
+Observability.shared.listen([.error]) { event in
+  logger.error("\(event.detail["message"]?.stringValue ?? "")")
+}
+```
 
 ### Context Helpers
 
