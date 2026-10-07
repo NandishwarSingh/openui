@@ -237,13 +237,16 @@ Conform your own type to `ToolProvider` for other backends.
 
 `library.toJSONSchema()` produces the same document as `library.toJSONSchema()` in `lang-core` (component schemas under `$defs`, props in positional order), and the parser compiles positional parameters from it. When reading a schema from JSON, use `JSON.parse(_:)`, which keeps object key order.
 
-## Differences from lang-core
+## Differences from the JavaScript packages
 
 - A component inside `@Each` or a ternary that binds a reactive prop to `$state` writes the typed value. In `lang-core` that binding is re-evaluated and nested, so typing writes `undefined`.
 - Composite values (arrays, objects) have no identity in Swift, so `==` between two of them is always false. In JavaScript it's true only for the same instance.
 - Prop evaluation and SwiftUI views can't throw, so `onError` never reports `runtime-error` or `render-error`.
 - `$$` math in text content shows as source; there's no native TeX renderer.
 - Code is highlighted with Prism's `vscDarkPlus` and `oneLight` colors by a small built-in tokenizer covering common languages (C-family, JSON, markup, Python, Ruby, shell, YAML, SQL), not by Prism's grammars.
+- Touch has no hover, so a chart's tooltip opens on a tap and stays until the same spot is tapped again (or another chart's opens), where react-ui shows it while a finger moves. Hover states need a pointer: the Mac, or an iPad with a trackpad.
+- Editable table cells are always text fields, which suits touch, rather than react-ui's select-then-edit cells. With a keyboard, Up and Down move between rows and Enter moves down; Escape doesn't undo an edit.
+- The image gallery's mosaic has fixed proportions instead of taking its height from the loaded images, so it doesn't jump when they arrive, and the viewer shows each image's `details`.
 - Not ported: `jsonToOpenUI`, the deprecated `enrichErrors` (its hints are in `onError`), and the server-side `artifactTool` from `@openuidev/lang-core/cloud`.
 
 ## Testing Locally
