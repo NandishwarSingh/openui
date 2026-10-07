@@ -192,6 +192,32 @@ import Testing
       #expect(errors.allSatisfy { $0.jsonRepresentation["source"] == "parser" }, "\(errors)")
     }
 
+    /// Numbers a response can hold but a layout can't use (1e999, 0/0, a
+    /// billion slider steps) render without crashing or hanging.
+    @Test(arguments: [
+      #"TextArea("n", "p", 1e999)"#,
+      #"Slider("s", "discrete", 0, 1e999, 1)"#,
+      #"Slider("s", "discrete", 0, 1000000, 0.001)"#,
+      #"Slider("s", "continuous", 0/0, 10, 1)"#,
+      #"Slider("s", "continuous", 0, 100, 1, [10, 1e999])"#,
+      #"BarChart(["A"], [Series("S", [1])], "grouped", "x", "y", 1e999)"#,
+      #"RadarChart(["A", "B", "C"], [Series("S", [1, 1e999, 3])])"#,
+      #"ScatterChart([ScatterSeries("S", [Point(1, 2), Point(0/0, 1)])])"#,
+    ])
+    func rendersNumbersALayoutCantUse(_ component: String) {
+      let host = NSHostingView(
+        rootView: OpenUIRenderer(
+          response: "root = Card([a])\na = \(component)", library: OpenUIChatLibrary.library
+        )
+        .frame(width: 420))
+      let window = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 420, height: 600), styleMask: [.borderless],
+        backing: .buffered, defer: false)
+      window.contentView = host
+      RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+      #expect(host.fittingSize.height > 20, "\(component) rendered \(host.fittingSize)")
+    }
+
     /// Offered exactly its ideal height (a fixed frame, a self-sizing cell),
     /// a response lays out at that height. A VStack split the height by
     /// flexibility instead, cutting wrapping text short next to a row with a
@@ -589,6 +615,20 @@ let globalTestLibrary = SwiftUILibrary(
     #expect(
       SliderView.errors([90, 10], minimum: 0, maximum: 100) == ["Min must be less than max", ""])
     #expect(SliderView.errors([.nan], minimum: 0, maximum: 100) == ["Invalid number"])
+  }
+
+  /// A discrete slider lists its steps in menus only while there are few,
+  /// and a huge range doesn't build them all to find out.
+  @Test func listsStepsOnlyWhileFew() {
+    #expect(SliderValueControls.options(0, 10, 2.5, limit: 200) == [0, 2.5, 5, 7.5, 10])
+    #expect(SliderValueControls.options(0, 199, 1, limit: 200)?.count == 200)
+    #expect(SliderValueControls.options(0, 200, 1, limit: 200) == nil)
+    #expect(SliderValueControls.options(0, 1_000_000, 0.001, limit: 200) == nil)
+  }
+
+  @Test func clampsToBounds() {
+    #expect(RangeSlider.clamp(140, to: 0...100) == 100)
+    #expect(RangeSlider.clamp(-3, to: 0...100) == 0)
   }
 }
 

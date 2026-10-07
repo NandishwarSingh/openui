@@ -29,6 +29,22 @@ import Testing
     #expect(manager.result("unknown") == .null)
   }
 
+  /// A refresh interval comes straight from the response, so one too large
+  /// to schedule (or infinite) mustn't bring the app down.
+  @Test func survivesHugeRefreshIntervals() async {
+    let manager = QueryManager(toolProvider: FunctionToolProvider(["tick": { _ in 1 }]))
+    for interval in [Double.infinity, 1e30] {
+      manager.evaluateQueries([
+        QueryNode(
+          statementId: "q", toolName: "tick", args: [:], defaults: 0, refreshInterval: interval,
+          deps: nil, complete: true)
+      ])
+      await settle()
+    }
+    #expect(manager.result("q") == 1)
+    manager.dispose()
+  }
+
   @Test func reportsMissingTools() async {
     let manager = QueryManager(toolProvider: FunctionToolProvider(["other": { _ in .null }]))
     manager.evaluateQueries([

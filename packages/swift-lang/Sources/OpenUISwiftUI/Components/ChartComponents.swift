@@ -258,7 +258,8 @@ private struct ChartFrame<Content: View>: View {
   }
 
   var body: some View {
-    let height = max(props.number("height").map { CGFloat($0) } ?? theme.chartHeight, minHeight)
+    let height = max(
+      props.number("height").flatMap(\.finite).map { CGFloat($0) } ?? theme.chartHeight, minHeight)
     if isEmpty && (context.isStreaming || context.isQueryLoading) {
       SkeletonBlock(height: height, cornerRadius: 8)
     } else {
@@ -779,7 +780,10 @@ struct ScatterChartView: View {
     var dots: [Dot] = []
     for dataset in props.children("datasets") {
       for point in dataset.children("points") {
-        guard let x = point.number("x"), let y = point.number("y") else { continue }
+        // Like the other charts, a point that isn't a finite number is skipped.
+        guard let x = point.number("x").flatMap(\.finite),
+          let y = point.number("y").flatMap(\.finite)
+        else { continue }
         dots.append(
           Dot(id: dots.count, series: dataset.text("name"), x: x, y: y, z: point.number("z")))
       }
@@ -830,8 +834,13 @@ struct RadarChartView: View {
 
   var body: some View {
     let labels = props.array("labels").map(displayText)
+    // A value that isn't a finite number draws at the center, so it can't
+    // become the maximum that scales every other value to nothing.
     let all = props.children("series").map { series in
-      (name: series.text("category"), values: series.array("values").map { $0.numberValue ?? 0 })
+      (
+        name: series.text("category"),
+        values: series.array("values").map { $0.numberValue.flatMap(\.finite) ?? 0 }
+      )
     }
     let colors = SeriesColors(all.map(\.name), theme.chartRamp(theme.radarChartPalette))
     let series = all.filter { !hidden.contains($0.name) }

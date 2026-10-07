@@ -370,9 +370,12 @@ public final class QueryManager {
         queries[node.statementId]?.timer = nil
         if interval > 0 {
           let statementId = node.statementId
+          // At most setInterval's longest delay (2³¹−1 ms): the interval comes
+          // from the response, and an infinite one can't be slept for.
+          let nanoseconds = UInt64(min(interval, 2_147_483.647) * 1_000_000_000)
           queries[node.statementId]?.timer = Task { [weak self] in
             while !Task.isCancelled {
-              try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+              try? await Task.sleep(nanoseconds: nanoseconds)
               guard let self, !Task.isCancelled, !self.disposed, self.toolProvider != nil,
                 let current = self.queries[statementId]
               else { return }

@@ -290,7 +290,7 @@ struct EditableTableView: View {
     _ position: Cell, rowId: String, column: OpenUIValue, value: OpenUIValue?, rowCount: Int
   ) -> some View {
     let index = position.column
-    let width = column["width"].numberValue.map { CGFloat($0) } ?? 120
+    let width = column["width"].numberValue.flatMap(\.finite).map { CGFloat(max($0, 40)) } ?? 120
     let original = displayText(value ?? .null)
     let binding = Binding<String>(
       get: { edits[rowId, index] ?? original },
@@ -313,7 +313,6 @@ struct EditableTableView: View {
           .onSubmit { _ = move(1, from: position, rowCount: rowCount) }
           .onKeyPress(.upArrow) { move(-1, from: position, rowCount: rowCount) }
           .onKeyPress(.downArrow) { move(1, from: position, rowCount: rowCount) }
-
       }
     }
     .frame(width: width)

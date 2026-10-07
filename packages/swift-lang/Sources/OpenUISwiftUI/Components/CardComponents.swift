@@ -197,7 +197,7 @@ private struct CardBlockLayout<Item: View>: View {
 
   var body: some View {
     let items = props.children("items")
-    let gap = props.number("gap").map { CGFloat($0) } ?? 12
+    let gap = props.number("gap").flatMap(\.finite).map { CGFloat(max($0, 0)) } ?? 12
     let clickable = props["action"].isTruthy && !context.isStreaming
     Group {
       if props.string("layout") == "carousel" {
@@ -718,7 +718,7 @@ struct ImageTextView: View {
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    let size = CGFloat(props.number("imageSize") ?? 40)
+    let size = CGFloat(min(max(props.number("imageSize").flatMap(\.finite) ?? 40, 0), 400))
     let vertical = props.string("layout") == "vertical"
     let layout =
       vertical

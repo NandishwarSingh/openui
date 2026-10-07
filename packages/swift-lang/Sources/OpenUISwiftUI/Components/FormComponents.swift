@@ -124,7 +124,8 @@ struct TextAreaView: View {
 
   var body: some View {
     let state = FieldContext(props, context: context, form: form)
-    let rows = max(Int(props.number("rows") ?? 3), 1)
+    // At most a screenful: the count comes from the response.
+    let rows = Int(min(max(props.number("rows").flatMap(\.finite) ?? 3, 1), 20))
     TextField(
       props.text("placeholder"),
       text: Binding(
@@ -462,11 +463,14 @@ struct SliderView: View {
 
   var body: some View {
     let state = FieldContext(props, context: context, form: form)
-    let minimum = props.number("min") ?? 0
-    let maximum = max(props.number("max") ?? 100, minimum)
+    // The bounds come from the response; one that isn't a finite number
+    // (1e999, 0/0) falls back to react-ui's default rather than breaking the range.
+    let minimum = props.number("min").flatMap(\.finite) ?? 0
+    let maximum = max(props.number("max").flatMap(\.finite) ?? 100, minimum)
     let discrete = props.string("variant") == "discrete"
     // react-ui steps a continuous slider by at least 1.
-    let step = discrete ? max(props.number("step") ?? 1, 0.0001) : max(1, props.number("step") ?? 1)
+    let step =
+      props.number("step").flatMap(\.finite).map { discrete ? max($0, 0.0001) : max($0, 1) } ?? 1
     let stored = state.field.value.isNullish ? props["defaultValue"] : state.field.value
     let values = (stored.arrayValue ?? []).compactMap(\.numberValue)
     let current = values.isEmpty ? [minimum] : Array(values.prefix(2))
@@ -494,15 +498,24 @@ struct SliderView: View {
       }
       if current.count > 1 {
         RangeSlider(
-          lower: min(current[0], current[1]), upper: max(current[0], current[1]),
+          lower: RangeSlider.clamp(min(current[0], current[1]), to: minimum...maximum),
+          upper: RangeSlider.clamp(max(current[0], current[1]), to: minimum...maximum),
           bounds: minimum...maximum, step: step
         ) { set([$0, $1]) }
-      } else {
+      } else if (maximum - minimum) / step <= 100 {
         Slider(
           value: Binding(
-            get: { min(max(current[0], minimum), maximum) },
+            get: { RangeSlider.clamp(current[0], to: minimum...maximum) },
             set: { set([$0]) }),
           in: minimum...maximum, step: step)
+      } else {
+        // On the Mac a stepped Slider draws a tick mark per step, and AppKit
+        // never finishes laying out millions of them; the value snaps here.
+        Slider(
+          value: Binding(
+            get: { RangeSlider.clamp(current[0], to: minimum...maximum) },
+            set: { set([RangeSlider.snap($0, bounds: minimum...maximum, step: step)]) }),
+          in: minimum...maximum)
       }
       HStack {
         Text(compactNumber(minimum))
@@ -532,7 +545,7 @@ struct SliderView: View {
 
 /// The values beside a slider's label: number fields, or menus of the steps
 /// when the slider is discrete.
-private struct SliderValueControls: View {
+struct SliderValueControls: View {
   let values: [Double]
   let minimum: Double
   let maximum: Double
@@ -546,13 +559,13 @@ private struct SliderValueControls: View {
   private static let maximumMenuOptions = 200
 
   var body: some View {
-    let options = discrete ? Self.options(minimum, maximum, step) : []
-    let useMenus = discrete && options.count <= Self.maximumMenuOptions
+    let options =
+      discrete ? Self.options(minimum, maximum, step, limit: Self.maximumMenuOptions) : nil
     HStack(spacing: 6) {
       if values.count > 1 {
         let lower = values[0]
         let upper = values[1]
-        if useMenus {
+        if let options {
           menu(lower, options.filter { $0 < upper }) { onChange([$0, upper].sorted()) }
           separator
           menu(upper, options.filter { $0 > lower }) { onChange([lower, $0].sorted()) }
@@ -563,7 +576,7 @@ private struct SliderValueControls: View {
             onChange([lower, $0])
           }
         }
-      } else if useMenus {
+      } else if let options {
         menu(values[0], options) { onChange([$0]) }
       } else {
         SliderValueField(value: values[0], hasError: !(errors.first ?? "").isEmpty) {
@@ -593,11 +606,13 @@ private struct SliderValueControls: View {
     .fixedSize()
   }
 
-  /// Every step from `minimum` to `maximum`, like react-ui's option list.
-  static func options(_ minimum: Double, _ maximum: Double, _ step: Double) -> [Double] {
-    let count = Int(((maximum - minimum) / step).rounded(.down)) + 1
-    guard count > 0 else { return [] }
-    return (0..<count).map { minimum + Double($0) * step }
+  /// Every step from `minimum` to `maximum`, like react-ui's option list, or
+  /// nil when there are more than `limit` of them.
+  static func options(_ minimum: Double, _ maximum: Double, _ step: Double, limit: Int) -> [Double]?
+  {
+    let steps = ((maximum - minimum) / step).rounded(.down)
+    guard steps.isFinite, steps >= 0, steps < Double(limit) else { return steps < 0 ? [] : nil }
+    return (0...Int(steps)).map { minimum + Double($0) * step }
   }
 }
 
@@ -716,11 +731,15 @@ struct RangeSlider: View {
     }
   }
 
+  static func clamp(_ value: Double, to bounds: ClosedRange<Double>) -> Double {
+    min(max(value, bounds.lowerBound), bounds.upperBound)
+  }
+
   /// The nearest step to `value`, within `bounds`.
   static func snap(_ value: Double, bounds: ClosedRange<Double>, step: Double) -> Double {
-    guard step > 0 else { return min(max(value, bounds.lowerBound), bounds.upperBound) }
+    guard step > 0 else { return clamp(value, to: bounds) }
     let steps = ((value - bounds.lowerBound) / step).rounded()
-    return min(max(bounds.lowerBound + steps * step, bounds.lowerBound), bounds.upperBound)
+    return clamp(bounds.lowerBound + steps * step, to: bounds)
   }
 }
 

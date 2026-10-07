@@ -53,3 +53,9 @@ public func displayText(_ value: OpenUIValue) -> String {
   default: return ""
   }
 }
+
+extension Double {
+  /// The number, or nil when it's infinite or NaN. Numbers in a response can
+  /// be either (1e999, 0/0), and as sizes or ranges they'd break the layout.
+  var finite: Double? { isFinite ? self : nil }
+}
