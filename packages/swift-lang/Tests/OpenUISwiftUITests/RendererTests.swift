@@ -630,6 +630,11 @@ let globalTestLibrary = SwiftUILibrary(
     #expect(RangeSlider.clamp(140, to: 0...100) == 100)
     #expect(RangeSlider.clamp(-3, to: 0...100) == 0)
   }
+
+  @Test func mapsTrackOffsetsToValues() {
+    #expect(RangeSlider.value(at: 50, track: 200, bounds: 0...100) == 25)
+    #expect(RangeSlider.value(at: 200, track: 200, bounds: 10...20) == 20)
+  }
 }
 
 /// The highlighter's token kinds, standing in for Prism's.

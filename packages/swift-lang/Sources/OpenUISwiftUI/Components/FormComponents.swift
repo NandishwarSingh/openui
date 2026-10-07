@@ -661,6 +661,10 @@ struct RangeSlider: View {
   let step: Double
   let onChange: @MainActor (Double, Double) -> Void
   @Environment(\.isEnabled) private var isEnabled
+  /// Where each thumb (keyed by whether it's the lower one) was when its drag
+  /// began. A drag's translation is from there, not from where the thumb has
+  /// moved to since.
+  @State private var dragStarts: [Bool: CGFloat] = [:]
   private let thumbSize: CGFloat = 24
 
   var body: some View {
@@ -699,10 +703,13 @@ struct RangeSlider: View {
       .gesture(
         DragGesture(minimumDistance: 0)
           .onChanged { drag in
-            let span = bounds.upperBound - bounds.lowerBound
-            let position = offset(value, track) + drag.translation.width
-            move(isLower: isLower, to: bounds.lowerBound + Double(position / track) * span)
+            let start = dragStarts[isLower] ?? offset(value, track)
+            dragStarts[isLower] = start
+            move(
+              isLower: isLower,
+              to: Self.value(at: start + drag.translation.width, track: track, bounds: bounds))
           }
+          .onEnded { _ in dragStarts[isLower] = nil }
       )
       .accessibilityElement()
       .accessibilityLabel(isLower ? "Minimum" : "Maximum")
@@ -729,6 +736,11 @@ struct RangeSlider: View {
     } else {
       onChange(lower, max(snapped, lower))
     }
+  }
+
+  /// The value at `offset` points along a `track` that spans `bounds`.
+  static func value(at offset: CGFloat, track: CGFloat, bounds: ClosedRange<Double>) -> Double {
+    bounds.lowerBound + Double(offset / track) * (bounds.upperBound - bounds.lowerBound)
   }
 
   static func clamp(_ value: Double, to bounds: ClosedRange<Double>) -> Double {
