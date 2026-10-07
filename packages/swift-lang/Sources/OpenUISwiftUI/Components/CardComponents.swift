@@ -174,7 +174,6 @@ private struct CardBlockLayout<Item: View>: View {
   let maxPerRow: Int
   let click: (Int, ComponentProps) -> (label: String, context: OpenUIObject)
   @ViewBuilder let item: (ComponentProps) -> Item
-  @State private var width: CGFloat = 0
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUIFormName) private var form
 
@@ -184,14 +183,14 @@ private struct CardBlockLayout<Item: View>: View {
     let clickable = props["action"].isTruthy && !context.isStreaming
     Group {
       if props.string("layout") == "carousel" {
-        let cardWidth: CGFloat = size == .small || width <= 480 ? 280 : 320
-        ScrollView(.horizontal, showsIndicators: false) {
-          HStack(alignment: .top, spacing: gap) {
-            ForEach(items.indices, id: \.self) { index in
-              card(index, items[index], clickable: clickable).frame(width: cardWidth)
+        CarouselScroller(count: items.count, spacing: gap, fade: 48, verticalPadding: 4) { index in
+          card(index, items[index], clickable: clickable)
+            // Sized from the visible width in the same layout pass: measuring
+            // it into state instead lays the cards out at the wrong width for a
+            // frame, then changes their height.
+            .containerRelativeFrame(.horizontal) { width, _ in
+              size == .small || width <= 480 ? 280 : 320
             }
-          }
-          .padding(.vertical, 4)
         }
       } else {
         ResponsiveCardGrid(
@@ -203,11 +202,6 @@ private struct CardBlockLayout<Item: View>: View {
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
-    .onGeometryChange(for: CGFloat.self) {
-      $0.size.width
-    } action: {
-      width = $0
-    }
   }
 
   @ViewBuilder

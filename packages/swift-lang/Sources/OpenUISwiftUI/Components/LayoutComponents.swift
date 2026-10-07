@@ -477,21 +477,111 @@ private struct Disclosure: View {
 
 // MARK: - Carousel
 
-/// Slides scroll horizontally; each slide is an array of content.
+/// Slides scroll horizontally, like react-ui's Carousel: 280-point cards
+/// (248 on narrow screens) with buttons to step through them.
 struct CarouselView: View {
   let props: ComponentProps
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    ScrollView(.horizontal, showsIndicators: false) {
-      HStack(alignment: .top, spacing: theme.spacing) {
-        ForEach(Array(props.array("children").enumerated()), id: \.offset) { _, slide in
-          OpenUINodes(slide.arrayValue ?? [slide])
-            .frame(width: 260, alignment: .topLeading)
-            .surface(props.string("variant") ?? "card")
-        }
-      }
-      .padding(.vertical, 2)
+    let slides = props.array("children")
+    let fill = props.string("variant") == "sunk" ? theme.subtleSurface : theme.surface
+    CarouselScroller(
+      count: slides.count, spacing: 12, fade: 40, showsButtons: true, equalHeights: true
+    ) {
+      index in
+      OpenUINodes(slides[index].arrayValue ?? [slides[index]])
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(12)
+        .background(fill, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(theme.border))
+        .containerRelativeFrame(.horizontal) { width, _ in width <= 400 ? 248 : 280 }
     }
+  }
+}
+
+/// A horizontal row that scrolls like react-ui's carousels: items snap to the
+/// leading edge, an edge fades out where there's more to scroll, and optional
+/// buttons step one item at a time. Whether it can scroll only drives the
+/// fades and buttons, never a size, so it can't feed back into layout.
+struct CarouselScroller<Item: View>: View {
+  let count: Int
+  var spacing: CGFloat
+  /// How far an edge fades out: 40 for react-ui's Carousel, its `space-3xl`
+  /// (48) for card blocks.
+  var fade: CGFloat
+  var showsButtons = false
+  /// Stretches items to the tallest one, as a flex row does.
+  var equalHeights = false
+  var verticalPadding: CGFloat = 2
+  @ViewBuilder let item: (Int) -> Item
+  @State private var position: Int?
+  @State private var content = CGRect.zero
+  @State private var visibleWidth: CGFloat = 0
+  @Environment(\.openUITheme) private var theme
+
+  var body: some View {
+    let canScrollBack = content.minX < -1
+    let canScrollOn = content.maxX > visibleWidth + 1
+    ScrollView(.horizontal, showsIndicators: false) {
+      HStack(alignment: .top, spacing: spacing) {
+        ForEach(0..<count, id: \.self) { item($0).id($0) }
+      }
+      .fixedSize(horizontal: false, vertical: equalHeights)
+      .scrollTargetLayout()
+      .padding(.vertical, verticalPadding)
+      .onGeometryChange(for: CGRect.self) {
+        $0.frame(in: .scrollView)
+      } action: {
+        content = $0
+      }
+    }
+    .scrollTargetBehavior(.viewAligned)
+    .scrollPosition(id: $position, anchor: .leading)
+    // Items and their images arrive after the first layout; stay at the start
+    // instead of wherever the old content ended.
+    .defaultScrollAnchor(.leading)
+    .onGeometryChange(for: CGFloat.self) {
+      $0.size.width
+    } action: {
+      visibleWidth = $0
+    }
+    .mask {
+      HStack(spacing: 0) {
+        LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
+          .frame(width: canScrollBack ? fade : 0)
+        Rectangle()
+        LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
+          .frame(width: canScrollOn ? fade : 0)
+      }
+    }
+    .overlay(alignment: .leading) {
+      if showsButtons && canScrollBack { stepButton(-1) }
+    }
+    .overlay(alignment: .trailing) {
+      if showsButtons && canScrollOn { stepButton(1) }
+    }
+  }
+
+  /// react-ui's small square secondary button, half over the edge.
+  private func stepButton(_ step: Int) -> some View {
+    Button {
+      withOpenUIAnimation(Motion.reveal) {
+        position = min(max((position ?? 0) + step, 0), count - 1)
+      }
+    } label: {
+      Image(systemName: step < 0 ? "chevron.left" : "chevron.right")
+        .font(.footnote.weight(.semibold))
+        .frame(width: 28, height: 28)
+        .background(theme.surface, in: RoundedRectangle(cornerRadius: theme.smallCornerRadius))
+        .overlay(
+          RoundedRectangle(cornerRadius: theme.smallCornerRadius).strokeBorder(
+            theme.interactiveBorder)
+        )
+        .shadow(color: .black.opacity(0.08), radius: 3, y: 1)
+    }
+    .buttonStyle(.plain)
+    .accessibilityLabel(step < 0 ? "Previous" : "Next")
+    .offset(x: step < 0 ? -12 : 12)
   }
 }
