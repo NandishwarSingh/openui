@@ -649,10 +649,13 @@ const messageInputs = [
   ["empty", ""],
   ["plain text", "Just some text"],
   ["content only", "]]>openui:content\nroot = Card([])"],
-  ["content with header attrs", "]]>openui:content?thesys=true&libraryVersion=0.1.0\nroot = Card([])"],
+  [
+    "content with header attrs",
+    "]]>openui:content?thesys=true&libraryVersion=0.1.0\nroot = Card([])",
+  ],
   ["content and context", ']]>openui:content\nroot = Card([])\n]]>openui:context\n[{"f":1}]'],
   ["context only", 'Hello\n]]>openui:context\n["User clicked: Go"]'],
-  ["context then content", ']]>openui:context\n[1]\n]]>openui:content\nroot = X()'],
+  ["context then content", "]]>openui:context\n[1]\n]]>openui:content\nroot = X()"],
   ["last content wins", "]]>openui:content\nold\n]]>openui:content\nnew"],
   ["crlf separators", "]]>openui:content\r\nroot = X()\r\n]]>openui:context\r\n[1]"],
   ["end marker", "]]>openui:content\nroot = X()\n]]>openui:end"],
@@ -668,7 +671,7 @@ const messageInputs = [
   ["bracket that isn't a marker", "]]>openui:content\nx = [1, 2]"],
   ["marker header without newline", "]]>openui:content"],
   ["markers on one line", "]]>openui:content]]>openui:context\n[1]"],
-  ["emoji", "]]>openui:content\nroot = TextContent(\"🙂 hi\")\n]]>openui:context\n[\"🎉\"]"],
+  ["emoji", ']]>openui:content\nroot = TextContent("🙂 hi")\n]]>openui:context\n["🎉"]'],
   ["legacy xml", '<content thesys="true">root = X()</content>\n<context>[{"a":1}]</context>'],
   ["legacy content only", "<content>root = X()</content>  "],
   ["legacy context only", 'text\n<context>["x"]</context>\n'],
@@ -716,11 +719,39 @@ const messageCases = {
   })),
   wrap: {
     content: sentinel.wrapContent("root = X()"),
-    contentWithHeader: sentinel.wrapContentWithHeader("root = X()", "]]>openui:content?thesys=true"),
+    contentWithHeader: sentinel.wrapContentWithHeader(
+      "root = X()",
+      "]]>openui:content?thesys=true",
+    ),
     contentWithoutHeader: sentinel.wrapContentWithHeader("root = X()", undefined),
     context: sentinel.wrapContext('[{"a":1}]'),
   },
 };
+
+// ── Chart number formats ─────────────────────────────────────────────────
+//
+// react-ui's axis and tooltip formatters, imported from source like
+// sentinelParser. toLocaleString follows the machine's locale, so it's pinned
+// to en-US here; the Swift tests format with the same locale.
+
+const charts = join(packages, "react-ui", "src", "components", "Charts");
+const { numberTickFormatter } = await import(join(charts, "utils", "styleUtils.ts"));
+const { tooltipNumberFormatter } = await import(
+  join(charts, "shared", "core", "PortalTooltip", "utils", "index.ts")
+);
+const toLocaleString = Number.prototype.toLocaleString;
+Number.prototype.toLocaleString = function (locales, options) {
+  return toLocaleString.call(this, locales ?? "en-US", options);
+};
+const chartFormatCases = [
+  0, 1, -1, 7, 0.5, 0.125, 1.005, 1.25, 12.345, -0.04, 0.005, 999, 999.99, 1000, 1250, 9999, 10000,
+  15500, -2500, 99999.5, 100000, 123456, 999999, 1234567, -7654321, 2.5e9, 1e12, 15e12, 1.23456,
+].map((value) => ({
+  value,
+  tick: numberTickFormatter(value),
+  tooltip: tooltipNumberFormatter(value),
+}));
+Number.prototype.toLocaleString = toLocaleString;
 
 function write(name, data, indent = 1) {
   mkdirSync(fixtures, { recursive: true });
@@ -749,7 +780,11 @@ writeFileSync(
   ) + "\n",
 );
 write("chat-spec.json", chatComponentSpecs);
+writeFileSync(
+  join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures", "chart-formats.json"),
+  JSON.stringify(chartFormatCases, null, 1) + "\n",
+);
 
 console.log(
-  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation, ${promptCases.length} prompt, ${mergeCases.length} merge, ${errorCases.length} error, ${cloudCases.length} cloud, ${messageCases.separate.length} message fixtures`,
+  `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation, ${promptCases.length} prompt, ${mergeCases.length} merge, ${errorCases.length} error, ${cloudCases.length} cloud, ${messageCases.separate.length} message, ${chartFormatCases.length} chart format fixtures`,
 );

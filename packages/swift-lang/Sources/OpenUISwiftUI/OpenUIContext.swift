@@ -32,6 +32,10 @@ public final class OpenUIContext {
   /// Bumped whenever the response, `$state` or query results change.
   public private(set) var revision = 0
 
+  /// The chart whose tooltip is open. A tapped tooltip stays open until it's
+  /// tapped again, so opening another one closes it.
+  var chartWithTooltip: UUID?
+
   @ObservationIgnored var onAction: ((ActionEvent) -> Void)?
   @ObservationIgnored var onStateUpdate: ((OpenUIObject) -> Void)?
   @ObservationIgnored var onParseResult: ((ParseResult?) -> Void)?

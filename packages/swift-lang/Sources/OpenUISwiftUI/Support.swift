@@ -342,6 +342,8 @@ struct MarkdownBlocks: View {
 /// Lays children out in rows, wrapping to the next row when one is full.
 struct FlowLayout: Layout {
   var spacing: CGFloat = 8
+  /// `.center` centers each row, like react-ui's centered legends.
+  var alignment = HorizontalAlignment.leading
 
   func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
     let rows = arrange(subviews, width: proposal.width ?? .infinity)
@@ -355,7 +357,7 @@ struct FlowLayout: Layout {
   ) {
     var y = bounds.minY
     for row in arrange(subviews, width: bounds.width) {
-      var x = bounds.minX
+      var x = alignment == .center ? bounds.minX + (bounds.width - row.width) / 2 : bounds.minX
       for index in row.indices {
         let size = subviews[index].sizeThatFits(.unspecified)
         subviews[index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))

@@ -78,28 +78,44 @@ enum ChartPalette {
   }
 }
 
-/// Series names in order, for the color scale.
+/// Series names in order.
 private func seriesNames(_ props: ComponentProps) -> [String] {
   var seen: Set<String> = []
   return props.children("series").map { $0.text("category") }.filter { seen.insert($0).inserted }
 }
 
-/// Colors chart series with the theme's palette.
-private struct PaletteScale: ViewModifier {
+/// A chart's series and their colors. Colors are assigned over every series,
+/// so hiding one from the legend doesn't recolor the rest.
+private struct SeriesColors {
   let names: [String]
-  @Environment(\.openUITheme) private var theme
+  let colors: [Color]
 
-  func body(content: Content) -> some View {
-    content.chartForegroundStyleScale(
-      domain: names, range: ChartPalette.colors(names.count, theme.chartPalette))
+  init(_ names: [String], _ palette: [Color]?) {
+    self.names = names
+    colors = ChartPalette.colors(names.count, palette)
+  }
+
+  func color(_ name: String) -> Color {
+    names.firstIndex(of: name).map { colors[$0] } ?? .gray
+  }
+
+  var legend: [LegendEntry] {
+    zip(names, colors).map { LegendEntry(id: $0, label: $0, color: $1) }
   }
 }
 
-extension View {
-  fileprivate func paletteScale(_ names: [String]) -> some View {
-    modifier(PaletteScale(names: names))
+/// The tooltip for one category: each visible series' value there.
+private func seriesTooltip(
+  _ label: String, _ points: [SeriesPoint], _ series: SeriesColors
+) -> ChartTooltipContent? {
+  let items = points.filter { $0.label == label }.map {
+    ChartTooltipContent.Item(
+      name: $0.series, value: ChartFormat.tooltip($0.value), color: series.color($0.series))
   }
+  return items.isEmpty ? nil : ChartTooltipContent(label: label, items: items)
+}
 
+extension View {
   /// Horizontal grid lines only, as react-ui's cartesian charts draw them.
   fileprivate func categoryAxisWithoutGrid() -> some View {
     chartXAxis {
@@ -109,20 +125,41 @@ extension View {
       }
     }
   }
+
+  /// react-ui's value axis: on the leading side, with grid lines and its tick
+  /// format (1.3K, 2.5M).
+  fileprivate func valueAxis(_ axis: Axis = .vertical) -> some View {
+    let marks = AxisMarks(position: axis == .vertical ? .leading : .bottom) { value in
+      AxisGridLine()
+      AxisValueLabel {
+        if let number = value.as(Double.self) { Text(ChartFormat.tick(number)) }
+      }
+    }
+    return Group {
+      if axis == .vertical { chartYAxis { marks } } else { chartXAxis { marks } }
+    }
+  }
 }
 
-/// Sizes a chart, puts its legend below, and shows a pulsing placeholder
-/// while the response streams in before any of its values have.
+/// Sizes a chart and puts react-ui's legend under it, or shows a pulsing
+/// placeholder while the response streams in before any of its values have.
 private struct ChartFrame<Content: View>: View {
   let props: ComponentProps
   let isEmpty: Bool
+  let legend: [LegendEntry]
+  let hidden: Binding<Set<String>>?
   let content: Content
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUITheme) private var theme
 
-  init(_ props: ComponentProps, isEmpty: Bool, @ViewBuilder content: () -> Content) {
+  init(
+    _ props: ComponentProps, isEmpty: Bool, legend: [LegendEntry],
+    hidden: Binding<Set<String>>? = nil, @ViewBuilder content: () -> Content
+  ) {
     self.props = props
     self.isEmpty = isEmpty
+    self.legend = legend
+    self.hidden = hidden
     self.content = content()
   }
 
@@ -131,20 +168,59 @@ private struct ChartFrame<Content: View>: View {
     if isEmpty && (context.isStreaming || context.isQueryLoading) {
       SkeletonBlock(height: height, cornerRadius: 8)
     } else {
+      VStack(spacing: 12) {
+        AxisTitles(props) {
+          content
+            .frame(height: height)
+            .chartLegend(.hidden)
+        }
+        if !legend.isEmpty { ChartLegend(entries: legend, hidden: hidden) }
+      }
+    }
+  }
+}
+
+/// react-ui's condensed charts put the axis titles outside the plot: the y
+/// title above it, the x title centered below. Outside the chart, a missing
+/// title takes no room (Swift Charts keeps room for an empty one), and one
+/// that streams in after the data doesn't rebuild the chart.
+private struct AxisTitles<Content: View>: View {
+  let x: String
+  let y: String
+  let content: Content
+
+  init(_ props: ComponentProps, @ViewBuilder content: () -> Content) {
+    x = props.text("xLabel")
+    y = props.text("yLabel")
+    self.content = content()
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      if !y.isEmpty {
+        Text(y).font(.caption).foregroundStyle(.secondary).padding(.bottom, 8)
+      }
       content
-        .frame(height: height)
-        .chartLegend(position: .bottom, alignment: .leading)
+      if !x.isEmpty {
+        Text(x).font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity)
+      }
     }
   }
 }
 
 struct BarChartView: View {
   let props: ComponentProps
+  @State private var hidden: Set<String> = []
+  @State private var selection: ChartSelection?
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    let points = seriesPoints(props)
+    let all = seriesPoints(props)
+    let points = all.filter { !hidden.contains($0.series) }
+    let series = SeriesColors(seriesNames(props), theme.chartPalette)
+    let labels = labelOrder(props)
     let stacked = props.string("variant") == "stacked"
-    ChartFrame(props, isEmpty: points.isEmpty) {
+    ChartFrame(props, isEmpty: all.isEmpty, legend: series.legend, hidden: $hidden) {
       Chart(points) { point in
         if stacked {
           BarMark(x: .value("Label", point.label), y: .value("Value", point.value))
@@ -156,11 +232,17 @@ struct BarChartView: View {
             .cornerRadius(4)
         }
       }
-      .chartXScale(domain: labelOrder(props))
-      .paletteScale(seriesNames(props))
+      .chartXScale(domain: labels)
+      .chartForegroundStyleScale(domain: series.names, range: series.colors)
       .categoryAxisWithoutGrid()
-      .chartXAxisLabel(props.text("xLabel"))
-      .chartYAxisLabel(props.text("yLabel"))
+      .valueAxis()
+      .categoryPicker(
+        $selection, crosshairBehind: true, tooltip: { seriesTooltip($0, points, series) }
+      ) { proxy, plot, label in
+        if let x = proxy.position(forX: label) {
+          BandHighlight(center: x, slot: plot.width / CGFloat(max(labels.count, 1)), plot: plot)
+        }
+      }
       .chartEntrance(.grow)
       .openUIAnimation(Motion.dataMorph, value: points)
     }
@@ -169,12 +251,17 @@ struct BarChartView: View {
 
 struct HorizontalBarChartView: View {
   let props: ComponentProps
+  @State private var hidden: Set<String> = []
+  @State private var selection: ChartSelection?
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    let points = seriesPoints(props)
+    let all = seriesPoints(props)
+    let points = all.filter { !hidden.contains($0.series) }
+    let series = SeriesColors(seriesNames(props), theme.chartPalette)
     let stacked = props.string("variant") == "stacked"
     let labels = labelOrder(props)
-    ChartFrame(props, isEmpty: points.isEmpty) {
+    ChartFrame(props, isEmpty: all.isEmpty, legend: series.legend, hidden: $hidden) {
       Chart(points) { point in
         if stacked {
           BarMark(
@@ -191,15 +278,24 @@ struct HorizontalBarChartView: View {
         }
       }
       .chartYScale(domain: labels)
-      .paletteScale(seriesNames(props))
+      .chartForegroundStyleScale(domain: series.names, range: series.colors)
       .chartYAxis {
         AxisMarks(preset: .aligned, position: .leading) { _ in
           AxisValueLabel(horizontalSpacing: 8)
         }
       }
+      .valueAxis(.horizontal)
       .frame(minHeight: CGFloat(labels.count) * 28)
-      .chartXAxisLabel(props.text("xLabel"))
-      .chartYAxisLabel(props.text("yLabel"))
+      .categoryPicker(
+        $selection, axis: .vertical, crosshairBehind: true,
+        tooltip: { seriesTooltip($0, points, series) }
+      ) { proxy, plot, label in
+        if let y = proxy.position(forY: label) {
+          BandHighlight(
+            center: y, slot: plot.height / CGFloat(max(labels.count, 1)), plot: plot,
+            axis: .vertical)
+        }
+      }
       .chartEntrance(.growSideways)
       .openUIAnimation(Motion.dataMorph, value: points)
     }
@@ -208,11 +304,16 @@ struct HorizontalBarChartView: View {
 
 struct LineChartView: View {
   let props: ComponentProps
+  @State private var hidden: Set<String> = []
+  @State private var selection: ChartSelection?
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let method = interpolation(props.string("variant"))
-    let points = seriesPoints(props)
-    ChartFrame(props, isEmpty: points.isEmpty) {
+    let all = seriesPoints(props)
+    let points = all.filter { !hidden.contains($0.series) }
+    let series = SeriesColors(seriesNames(props), theme.chartPalette)
+    ChartFrame(props, isEmpty: all.isEmpty, legend: series.legend, hidden: $hidden) {
       Chart(points) { point in
         LineMark(x: .value("Label", point.label), y: .value("Value", point.value))
           .foregroundStyle(by: .value("Series", point.series))
@@ -220,28 +321,47 @@ struct LineChartView: View {
           .lineStyle(StrokeStyle(lineWidth: 2))
       }
       .chartXScale(domain: labelOrder(props))
-      .paletteScale(seriesNames(props))
+      .chartForegroundStyleScale(domain: series.names, range: series.colors)
       .categoryAxisWithoutGrid()
+      .valueAxis()
+      .categoryPicker($selection, tooltip: { seriesTooltip($0, points, series) }) {
+        proxy, plot, label in
+        lineCrosshair(proxy, plot, label, points, series)
+      }
       .chartEntrance(.draw)
       .openUIAnimation(Motion.dataMorph, value: points)
-      .chartXAxisLabel(props.text("xLabel"))
-      .chartYAxisLabel(props.text("yLabel"))
     }
+  }
+}
+
+@ViewBuilder
+private func lineCrosshair(
+  _ proxy: ChartProxy, _ plot: CGRect, _ label: String, _ points: [SeriesPoint],
+  _ series: SeriesColors
+) -> some View {
+  if let x = proxy.position(forX: label) {
+    LineCrosshair(
+      x: x, plot: plot,
+      dots: points.filter { $0.label == label }.compactMap { point in
+        proxy.position(forY: point.value).map { (y: $0, color: series.color(point.series)) }
+      })
   }
 }
 
 struct AreaChartView: View {
   let props: ComponentProps
+  @State private var hidden: Set<String> = []
+  @State private var selection: ChartSelection?
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let method = interpolation(props.string("variant"))
-    let names = seriesNames(props)
-    let colors = ChartPalette.colors(names.count, theme.chartPalette)
-    let points = seriesPoints(props)
-    ChartFrame(props, isEmpty: points.isEmpty) {
+    let series = SeriesColors(seriesNames(props), theme.chartPalette)
+    let all = seriesPoints(props)
+    let points = all.filter { !hidden.contains($0.series) }
+    ChartFrame(props, isEmpty: all.isEmpty, legend: series.legend, hidden: $hidden) {
       Chart(points) { point in
-        let color = colors[names.firstIndex(of: point.series) ?? 0]
+        let color = series.color(point.series)
         // react-ui fills areas with a gradient from 60% opacity to clear.
         AreaMark(
           x: .value("Label", point.label), y: .value("Value", point.value),
@@ -258,18 +378,21 @@ struct AreaChartView: View {
           .lineStyle(StrokeStyle(lineWidth: 2))
       }
       .chartXScale(domain: labelOrder(props))
-      .chartForegroundStyleScale(domain: names, range: colors)
+      .chartForegroundStyleScale(domain: series.names, range: series.colors)
       .categoryAxisWithoutGrid()
+      .valueAxis()
+      .categoryPicker($selection, tooltip: { seriesTooltip($0, points, series) }) {
+        proxy, plot, label in
+        lineCrosshair(proxy, plot, label, points, series)
+      }
       .chartEntrance(.draw)
       .openUIAnimation(Motion.dataMorph, value: points)
-      .chartXAxisLabel(props.text("xLabel"))
-      .chartYAxisLabel(props.text("yLabel"))
     }
   }
 }
 
 /// One labelled value of a 1D chart.
-private struct Slice: Identifiable, Equatable {
+struct Slice: Identifiable, Equatable {
   let id: Int
   let label: String
   let value: Double
@@ -285,105 +408,268 @@ private func slices(_ props: ComponentProps) -> [Slice] {
   }
 }
 
+/// Pie and radial slices as react-ui orders them: largest first (a stable
+/// sort, like JavaScript's), each with its color from the middle of the ramp
+/// outwards in that order.
+func sortedSlices(_ slices: [Slice], _ palette: [Color]?) -> [(slice: Slice, color: Color)] {
+  let sorted = slices.enumerated().sorted {
+    $0.element.value != $1.element.value
+      ? $0.element.value > $1.element.value : $0.offset < $1.offset
+  }.map(\.element)
+  return Array(zip(sorted, ChartPalette.colors(sorted.count, palette)))
+}
+
+/// Where pie slices are: Swift Charts starts at 12 o'clock and goes clockwise,
+/// with the radius half the shorter side.
+enum PieGeometry {
+  /// The index of the slice under `point`, or nil outside the ring. A
+  /// semicircle is drawn turned a quarter to the left, so its angles are too.
+  static func slice(
+    at point: CGPoint, in size: CGSize, values: [Double], innerRatio: CGFloat, semicircle: Bool
+  ) -> Int? {
+    let dx = point.x - size.width / 2
+    let dy = point.y - size.height / 2
+    let radius = min(size.width, size.height) / 2
+    let distance = (dx * dx + dy * dy).squareRoot()
+    guard distance <= radius, distance >= radius * innerRatio else { return nil }
+    var angle = atan2(Double(dx), Double(-dy)) + (semicircle ? Double.pi / 2 : 0)
+    angle = angle.truncatingRemainder(dividingBy: 2 * .pi)
+    if angle < 0 { angle += 2 * .pi }
+    let total = values.reduce(0, +) * (semicircle ? 2 : 1)
+    guard total > 0 else { return nil }
+    var end = 0.0
+    for (index, value) in values.enumerated() {
+      end += value / total * 2 * .pi
+      if angle < end { return index }
+    }
+    return nil
+  }
+}
+
 struct PieChartView: View {
   let props: ComponentProps
+  @State private var hidden: Set<String> = []
+  @State private var selection: ChartSelection?
+  @State private var legendHover: String?
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    let data = slices(props)
+    let all = sortedSlices(slices(props), theme.chartPalette)
+    let visible = all.filter { !hidden.contains(String($0.slice.id)) }
     let donut = props.string("variant") == "donut"
     let semi = props.string("appearance") == "semiCircular"
-    let total = data.reduce(0) { $0 + $1.value }
-    Chart {
-      ForEach(data) { slice in
-        SectorMark(
-          angle: .value("Value", slice.value), innerRadius: .ratio(donut ? 0.6 : 0),
-          angularInset: 1
-        )
-        .foregroundStyle(by: .value("Label", slice.label))
+    let total = visible.reduce(0) { $0 + $1.slice.value }
+    let active = selection?.key ?? legendHover
+    VStack(spacing: 12) {
+      Chart {
+        ForEach(visible, id: \.slice.id) { slice, color in
+          SectorMark(
+            angle: .value("Value", slice.value), innerRadius: .ratio(donut ? 0.6 : 0),
+            angularInset: 1
+          )
+          .foregroundStyle(color)
+          .opacity(active == nil || active == String(slice.id) ? 1 : 0.4)
+          .accessibilityLabel(slice.label)
+          .accessibilityValue(ChartFormat.tooltip(slice.value))
+        }
+        if semi, total > 0 {
+          // A transparent half that keeps the visible slices on the top half.
+          SectorMark(angle: .value("Value", total), innerRadius: .ratio(donut ? 0.6 : 0))
+            .foregroundStyle(.clear)
+        }
       }
-      if semi, total > 0 {
-        // A transparent half that keeps the visible slices on the top half.
-        SectorMark(angle: .value("Value", total), innerRadius: .ratio(donut ? 0.6 : 0))
-          .foregroundStyle(.clear)
+      .rotationEffect(semi ? .degrees(-90) : .zero)
+      .overlay {
+        GeometryReader { geometry in
+          ZStack(alignment: .topLeading) {
+            PickSurface(selection: $selection) { point in
+              PieGeometry.slice(
+                at: point, in: geometry.size, values: visible.map(\.slice.value),
+                innerRatio: donut ? 0.6 : 0, semicircle: semi
+              ).map { String(visible[$0].slice.id) }
+            }
+            if let key = selection?.key, let anchor = selection?.location,
+              let (slice, color) = visible.first(where: { String($0.slice.id) == key })
+            {
+              TooltipPlacement(anchor: anchor) {
+                ChartTooltip(
+                  content: ChartTooltipContent(
+                    label: slice.label,
+                    items: [
+                      .init(
+                        name: slice.label, value: ChartFormat.tooltip(slice.value), color: color)
+                    ]
+                  ))
+              }
+              .allowsHitTesting(false)
+            }
+          }
+        }
       }
+      .frame(height: theme.chartHeight)
+      .openUIAnimation(Motion.dataMorph, value: visible.map(\.slice))
+      .fadeAppear()
+      ChartLegend(
+        entries: all.map {
+          LegendEntry(id: String($0.slice.id), label: $0.slice.label, color: $0.color)
+        },
+        hidden: $hidden, highlighted: $legendHover)
     }
-    .chartForegroundStyleScale(
-      domain: data.map(\.label), range: ChartPalette.colors(data.count, theme.chartPalette)
-    )
-    .chartLegend(position: .bottom, alignment: .leading)
-    .rotationEffect(semi ? .degrees(-90) : .zero)
-    .frame(height: theme.chartHeight)
-    .openUIAnimation(Motion.dataMorph, value: data)
-    .fadeAppear()
   }
 }
 
 struct RadialChartView: View {
   let props: ComponentProps
+  @State private var hidden: Set<String> = []
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    let data = slices(props)
-    let colors = ChartPalette.colors(props.array("values").count, theme.chartPalette)
-    let maximum = max(data.map(\.value).max() ?? 1, 1)
-    HStack(spacing: theme.spacing) {
+    let all = sortedSlices(slices(props), theme.chartPalette)
+    let visible = all.filter { !hidden.contains(String($0.slice.id)) }
+    let maximum = max(visible.map(\.slice.value).max() ?? 1, 1)
+    VStack(spacing: 12) {
       ZStack {
-        ForEach(data) { slice in
-          let inset = CGFloat(slice.id) * 14
+        ForEach(Array(visible.enumerated()), id: \.element.slice.id) { ring, entry in
+          let inset = CGFloat(ring) * 14
           Circle()
             .stroke(.secondary.opacity(0.15), lineWidth: 10)
             .padding(inset)
           Circle()
-            .trim(from: 0, to: slice.value / maximum * 0.75)
-            .stroke(colors[slice.id], style: StrokeStyle(lineWidth: 10, lineCap: .round))
+            .trim(from: 0, to: entry.slice.value / maximum * 0.75)
+            .stroke(entry.color, style: StrokeStyle(lineWidth: 10, lineCap: .round))
             .rotationEffect(.degrees(-90))
             .padding(inset)
+            .accessibilityElement()
+            .accessibilityLabel(entry.slice.label)
+            .accessibilityValue(jsNumberToString(entry.slice.value))
         }
       }
       .frame(width: theme.chartHeight * 0.8, height: theme.chartHeight * 0.8)
-      VStack(alignment: .leading, spacing: 4) {
-        ForEach(data) { slice in
-          HStack(spacing: 6) {
-            Circle().fill(colors[slice.id]).frame(width: 8, height: 8)
-            Text(slice.label).font(.caption)
-            Text(jsNumberToString(slice.value)).font(.caption.monospacedDigit())
-              .foregroundStyle(.secondary)
-          }
-        }
-      }
+      .frame(maxWidth: .infinity)
+      ChartLegend(
+        entries: all.map {
+          LegendEntry(id: String($0.slice.id), label: $0.slice.label, color: $0.color)
+        },
+        hidden: $hidden)
     }
-    .openUIAnimation(Motion.dataMorph, value: data)
+    .openUIAnimation(Motion.dataMorph, value: visible.map(\.slice))
     .fadeAppear()
   }
 }
 
+/// react-ui's SingleStackedBar (its SegmentedBar): one rounded track split by
+/// share, colored down the ramp in the given order, with each segment's share
+/// in the legend. Hovering or tapping a segment (or its key) dims the rest
+/// and shows its value and share.
 struct SingleStackedBarChartView: View {
   let props: ComponentProps
+  @State private var selection: ChartSelection?
+  @State private var legendHover: String?
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let data = slices(props)
-    Chart(data) { slice in
-      BarMark(x: .value("Value", slice.value), y: .value("Total", ""))
-        .foregroundStyle(by: .value("Label", slice.label))
+    let ramp = theme.chartPalette.flatMap { $0.isEmpty ? nil : $0 } ?? ChartPalette.ocean
+    let total = data.reduce(0) { $0 + $1.value }
+    let share = { (slice: Slice) in total > 0 ? slice.value / total : 0 }
+    let color = { (slice: Slice) in ramp[slice.id % ramp.count] }
+    let active = selection?.key ?? legendHover
+    VStack(spacing: 12) {
+      SegmentRow(shares: data.map(share)) {
+        ForEach(data) { slice in
+          Rectangle()
+            .fill(color(slice))
+            .opacity(active == nil || active == String(slice.id) ? 1 : 0.4)
+            .accessibilityElement()
+            .accessibilityLabel(slice.label)
+            .accessibilityValue(ChartFormat.toFixed(share(slice) * 100, 1) + "%")
+        }
+      }
+      .frame(height: 20)
+      .clipShape(RoundedRectangle(cornerRadius: 6))
+      .overlay {
+        GeometryReader { geometry in
+          ZStack(alignment: .topLeading) {
+            PickSurface(selection: $selection) { point in
+              SegmentRow.index(at: point.x, width: geometry.size.width, shares: data.map(share))
+                .map { String(data[$0].id) }
+            }
+            if let key = selection?.key, let anchor = selection?.location,
+              let slice = data.first(where: { String($0.id) == key })
+            {
+              TooltipPlacement(anchor: anchor, placement: .above) {
+                ChartTooltip(
+                  content: ChartTooltipContent(
+                    label: slice.label,
+                    items: [
+                      .init(
+                        name: "Value", value: ChartFormat.tick(slice.value), color: color(slice)),
+                      .init(
+                        name: "Percentage", value: ChartFormat.toFixed(share(slice) * 100, 1) + "%",
+                        color: color(slice)),
+                    ]))
+              }
+              .allowsHitTesting(false)
+            }
+          }
+        }
+      }
+      .openUIAnimation(Motion.dataMorph, value: data)
+      .chartEntrance(.growSideways)
+      ChartLegend(
+        entries: data.map {
+          LegendEntry(
+            id: String($0.id), label: $0.label, color: color($0), percentage: share($0) * 100)
+        },
+        highlighted: $legendHover)
     }
-    .chartForegroundStyleScale(
-      domain: data.map(\.label), range: ChartPalette.colors(data.count, theme.chartPalette)
-    )
-    .chartYAxis(.hidden)
-    .chartLegend(position: .bottom, alignment: .leading)
-    .frame(height: 80)
-    .openUIAnimation(Motion.dataMorph, value: data)
-    .chartEntrance(.growSideways)
+  }
+}
+
+/// Lays segments out side by side, each as wide as its share of the row,
+/// with react-ui's 2pt gaps.
+struct SegmentRow: Layout {
+  let shares: [Double]
+  static let gap: CGFloat = 2
+
+  func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+    proposal.replacingUnspecifiedDimensions()
+  }
+
+  func placeSubviews(
+    in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+  ) {
+    var x = bounds.minX
+    for (subview, width) in zip(subviews, Self.widths(bounds.width, shares)) {
+      subview.place(
+        at: CGPoint(x: x, y: bounds.minY),
+        proposal: ProposedViewSize(width: width, height: bounds.height))
+      x += width + Self.gap
+    }
+  }
+
+  static func widths(_ width: CGFloat, _ shares: [Double]) -> [CGFloat] {
+    let room = max(width - gap * CGFloat(max(shares.count - 1, 0)), 0)
+    return shares.map { room * CGFloat($0) }
+  }
+
+  /// The segment at `x`, counting each gap with the segment before it.
+  static func index(at x: CGFloat, width: CGFloat, shares: [Double]) -> Int? {
+    var end: CGFloat = 0
+    for (index, segment) in widths(width, shares).enumerated() {
+      end += segment + gap
+      if x < end, segment > 0 { return index }
+    }
+    return nil
   }
 }
 
 struct ScatterChartView: View {
   let props: ComponentProps
+  @State private var hidden: Set<String> = []
   @Environment(\.openUITheme) private var theme
 
-  private struct Dot: Identifiable {
+  private struct Dot: Identifiable, Equatable {
     let id: Int
     let series: String
     let x: Double
@@ -400,22 +686,29 @@ struct ScatterChartView: View {
           Dot(id: dots.count, series: dataset.text("name"), x: x, y: y, z: point.number("z")))
       }
     }
-    let names = props.children("datasets").map { $0.text("name") }
-    return Chart(dots) { dot in
+    let series = SeriesColors(
+      props.children("datasets").map { $0.text("name") }, theme.chartPalette)
+    let visible = dots.filter { !hidden.contains($0.series) }
+    return VStack(spacing: 12) {
+      AxisTitles(props) {
+        scatter(visible, all: dots, series: series)
+      }
+      ChartLegend(entries: series.legend, hidden: $hidden)
+    }
+  }
+
+  private func scatter(_ visible: [Dot], all dots: [Dot], series: SeriesColors) -> some View {
+    Chart(visible) { dot in
       PointMark(x: .value(props.text("xLabel"), dot.x), y: .value(props.text("yLabel"), dot.y))
         .foregroundStyle(by: .value("Series", dot.series))
         .symbolSize(dot.z.map { max(20, min($0, 400)) } ?? 40)
     }
     .chartXScale(domain: Self.domain(dots.map(\.x)))
     .chartYScale(domain: Self.domain(dots.map(\.y)))
-    .chartForegroundStyleScale(
-      domain: names, range: ChartPalette.colors(names.count, theme.chartPalette)
-    )
-    .chartXAxisLabel(props.text("xLabel"))
-    .chartYAxisLabel(props.text("yLabel"))
-    .chartLegend(position: .bottom, alignment: .leading)
+    .chartForegroundStyleScale(domain: series.names, range: series.colors)
+    .chartLegend(.hidden)
     .frame(height: theme.chartHeight)
-    .openUIAnimation(Motion.dataMorph, value: dots.map(\.x) + dots.map(\.y))
+    .openUIAnimation(Motion.dataMorph, value: visible)
     .fadeAppear()
   }
 
@@ -434,15 +727,18 @@ struct ScatterChartView: View {
 /// Charts has no radar mark, so it is drawn directly.
 struct RadarChartView: View {
   let props: ComponentProps
+  @State private var hidden: Set<String> = []
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let labels = props.array("labels").map(displayText)
-    let series = props.children("series").map { series in
+    let all = props.children("series").map { series in
       (name: series.text("category"), values: series.array("values").map { $0.numberValue ?? 0 })
     }
+    let colors = SeriesColors(all.map(\.name), theme.chartPalette)
+    let series = all.filter { !hidden.contains($0.name) }
     let maximum = max(series.flatMap(\.values).max() ?? 1, 1)
-    VStack(alignment: .leading, spacing: 8) {
+    VStack(spacing: 12) {
       Canvas { context, size in
         guard labels.count >= 3 else { return }
         let center = CGPoint(x: size.width / 2, y: size.height / 2)
@@ -475,27 +771,19 @@ struct RadarChartView: View {
           context.draw(
             Text(labels[index]).font(.caption2).foregroundStyle(.secondary), at: point(index, 1.16))
         }
-        for (index, entry) in series.enumerated() {
+        for entry in series {
           let fractions = labels.indices.map {
             $0 < entry.values.count ? entry.values[$0] / maximum : 0
           }
           let shape = polygon(fractions)
-          let color = ChartPalette.colors(series.count, theme.chartPalette)[index]
+          let color = colors.color(entry.name)
           context.fill(shape, with: .color(color.opacity(0.18)))
           context.stroke(shape, with: .color(color), lineWidth: 2)
         }
       }
       .frame(height: theme.chartHeight + 40)
       .fadeAppear()
-      FlowLayout(spacing: 12) {
-        ForEach(Array(series.enumerated()), id: \.offset) { index, entry in
-          HStack(spacing: 6) {
-            Circle().fill(ChartPalette.colors(series.count, theme.chartPalette)[index]).frame(
-              width: 8, height: 8)
-            Text(entry.name).font(.caption).foregroundStyle(.secondary)
-          }
-        }
-      }
+      ChartLegend(entries: colors.legend, hidden: $hidden)
     }
   }
 }

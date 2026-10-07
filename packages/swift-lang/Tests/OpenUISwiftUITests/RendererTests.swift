@@ -489,3 +489,104 @@ let globalTestLibrary = SwiftUILibrary(
     #expect(GalleryMosaic.height(width: 1200, count: 5) == GalleryMosaic.maxHeight)
   }
 }
+
+/// Chart interactions against react-ui: its number formats (fixtures from its
+/// formatters), legend folding and toggling, and where pie slices, stacked
+/// bar segments and tooltips land. Main actor, because the legend's helpers
+/// are members of a view.
+@MainActor
+@Suite struct ChartInteractionTests {
+  private struct FormatCase: Decodable {
+    let value: Double
+    let tick: String
+    let tooltip: String
+  }
+
+  @Test func formatsNumbersLikeReactUI() throws {
+    let url = Bundle.module.url(
+      forResource: "chart-formats", withExtension: "json", subdirectory: "Fixtures")!
+    let cases = try JSONDecoder().decode([FormatCase].self, from: Data(contentsOf: url))
+    #expect(cases.count > 20)
+    for item in cases {
+      #expect(ChartFormat.tick(item.value) == item.tick, "tick \(item.value)")
+      #expect(
+        ChartFormat.tooltip(item.value, locale: Locale(identifier: "en_US")) == item.tooltip,
+        "tooltip \(item.value)")
+    }
+  }
+
+  @Test func keepsOneSeriesVisible() {
+    let keys = ["a", "b", "c"]
+    var hidden = ChartLegend.toggling("a", in: [], keys: keys)
+    hidden = ChartLegend.toggling("b", in: hidden, keys: keys)
+    #expect(hidden == ["a", "b"])
+    #expect(ChartLegend.toggling("c", in: hidden, keys: keys) == ["a", "b"])
+    #expect(ChartLegend.toggling("a", in: hidden, keys: keys) == ["b"])
+    // Keys from older data don't count against the current series.
+    #expect(ChartLegend.toggling("a", in: ["gone"], keys: ["a", "b"]) == ["gone", "a"])
+  }
+
+  @Test func foldsTheLegendLikeUseDefaultLegend() {
+    // Each key's width already includes a gap; keys after the first add another.
+    #expect(ChartLegend.fittingCount([50, 50, 50], available: 174, button: 60) == 3)
+    #expect(ChartLegend.fittingCount([50, 50, 50], available: 173, button: 60) == 2)
+    #expect(ChartLegend.fittingCount([50, 50, 50, 50], available: 200, button: 40) == 2)
+    #expect(ChartLegend.fittingCount([300, 50], available: 200, button: 40) == 1)
+    #expect(ChartLegend.fittingCount([50, 50], available: 0, button: 40) == 2)
+  }
+
+  @Test func sortsSlicesLargestFirst() {
+    let slices = [
+      Slice(id: 0, label: "a", value: 1), Slice(id: 1, label: "b", value: 5),
+      Slice(id: 2, label: "c", value: 5), Slice(id: 3, label: "d", value: 3),
+    ]
+    let sorted = sortedSlices(slices, nil)
+    #expect(sorted.map(\.slice.label) == ["b", "c", "d", "a"])
+    #expect(sorted.map(\.color) == ChartPalette.colors(4))
+  }
+
+  @Test func findsPieSlicesClockwiseFromTwelve() {
+    let size = CGSize(width: 200, height: 200)
+    let values: [Double] = [1, 1, 2]
+    func slice(_ x: CGFloat, _ y: CGFloat, inner: CGFloat = 0, semi: Bool = false) -> Int? {
+      PieGeometry.slice(
+        at: CGPoint(x: x, y: y), in: size, values: values, innerRatio: inner, semicircle: semi)
+    }
+    #expect(slice(150, 60) == 0)  // upper right
+    #expect(slice(150, 140) == 1)  // lower right
+    #expect(slice(50, 100) == 2)  // left
+    #expect(slice(100, 100, inner: 0.6) == nil)  // the donut's hole
+    #expect(slice(5, 5) == nil)  // outside the circle
+    // A semicircle is turned a quarter to the left: it starts at 9 o'clock.
+    #expect(slice(40, 90, semi: true) == 0)
+    #expect(slice(160, 90, semi: true) == 2)
+    #expect(slice(100, 160, semi: true) == nil)  // the empty lower half
+  }
+
+  @Test func splitsTheStackedBarByShare() {
+    let widths = SegmentRow.widths(204, [0.5, 0.25, 0.25])
+    #expect(widths == [100, 50, 50])
+    #expect(SegmentRow.index(at: 10, width: 204, shares: [0.5, 0.25, 0.25]) == 0)
+    #expect(SegmentRow.index(at: 120, width: 204, shares: [0.5, 0.25, 0.25]) == 1)
+    #expect(SegmentRow.index(at: 200, width: 204, shares: [0.5, 0.25, 0.25]) == 2)
+  }
+
+  @Test func placesTooltipsLikeFloatingUI() {
+    let bounds = CGRect(x: 0, y: 0, width: 400, height: 200)
+    let size = CGSize(width: 150, height: 80)
+    // Right of the pointer, flipped left near the trailing edge, kept inside.
+    #expect(
+      TooltipPlacement.origin(for: size, anchor: CGPoint(x: 50, y: 30), in: bounds)
+        == CGPoint(x: 70, y: 30))
+    #expect(
+      TooltipPlacement.origin(for: size, anchor: CGPoint(x: 300, y: 30), in: bounds)
+        == CGPoint(x: 130, y: 30))
+    #expect(
+      TooltipPlacement.origin(for: size, anchor: CGPoint(x: 300, y: 190), in: bounds)
+        == CGPoint(x: 130, y: 120))
+    #expect(
+      TooltipPlacement.origin(
+        for: size, anchor: CGPoint(x: 10, y: 10), placement: .above, in: bounds)
+        == CGPoint(x: 8, y: -90))
+  }
+}

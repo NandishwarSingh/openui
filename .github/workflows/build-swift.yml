@@ -8,6 +8,8 @@ on:
       - "packages/lang-core/src/**"
       - "packages/react-ui/src/genui-lib/**"
       - "packages/react-ui/src/utils/sentinelParser.ts"
+      - "packages/react-ui/src/components/Charts/utils/styleUtils.ts"
+      - "packages/react-ui/src/components/Charts/shared/core/PortalTooltip/utils/**"
       - ".github/workflows/build-swift.yml"
   pull_request:
     branches: [main]
@@ -16,6 +18,8 @@ on:
       - "packages/lang-core/src/**"
       - "packages/react-ui/src/genui-lib/**"
       - "packages/react-ui/src/utils/sentinelParser.ts"
+      - "packages/react-ui/src/components/Charts/utils/styleUtils.ts"
+      - "packages/react-ui/src/components/Charts/shared/core/PortalTooltip/utils/**"
       - ".github/workflows/build-swift.yml"
 
 permissions:
