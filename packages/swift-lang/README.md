@@ -212,7 +212,16 @@ let tools = FunctionToolProvider([
 OpenUIRenderer(response: text, library: library, toolProvider: tools)
 ```
 
-Conform your own type to `ToolProvider` for MCP or other backends; `extractToolResult(_:)` unwraps MCP `callTool` results.
+For an MCP server, `McpToolProvider` plays the part of passing an MCP client to react-lang's Renderer: give it a closure that calls the tool and returns the raw result (`{ content, structuredContent, isError }`) as an `OpenUIValue`, and it unwraps it with `extractToolResult(_:)`. Error results reach `onError` as `mcp-error`. It takes a closure so any MCP client works without this package depending on one:
+
+```swift
+let tools = McpToolProvider { name, arguments in
+  // e.g. a JSON-RPC tools/call to your MCP server, then JSON.parse(result)
+  try await mcp.callTool(name, arguments)
+}
+```
+
+Conform your own type to `ToolProvider` for other backends.
 
 ## JSON Schema Output
 

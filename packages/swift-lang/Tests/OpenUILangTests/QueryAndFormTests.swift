@@ -115,6 +115,25 @@ import Testing
       try extractToolResult(["isError": true, "content": [["type": "text", "text": "bad"]]])
     }
   }
+
+  /// An MCP client as the tool provider, as react-lang's Renderer takes one:
+  /// raw results are unwrapped, and error results become `mcp-error`.
+  @Test func mcpClientResultsAreUnwrapped() async throws {
+    let provider = McpToolProvider { name, arguments in
+      if name == "fail" {
+        return ["isError": true, "content": [["type": "text", "text": "quota exceeded"]]]
+      }
+      let echo = OpenUIValue.string("{\"echo\":\(JSON.stringify(arguments["q"] ?? .null))}")
+      return ["content": [["type": "text", "text": echo]]]
+    }
+    #expect(try await provider.callTool("search", arguments: ["q": "ada"]) == ["echo": "ada"])
+
+    let manager = QueryManager(toolProvider: provider)
+    manager.registerMutations([MutationNode(statementId: "boom", toolName: "fail")])
+    #expect(await manager.fireMutation("boom", args: [:]) == false)
+    #expect(manager.snapshot.errors.first?.code == "mcp-error")
+    #expect(manager.snapshot.errors.first?.message.contains("quota exceeded") == true)
+  }
 }
 
 @Suite struct FormRulesTests {

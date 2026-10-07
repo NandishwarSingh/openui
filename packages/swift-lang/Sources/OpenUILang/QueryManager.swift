@@ -70,6 +70,30 @@ public struct FunctionToolProvider: ToolProvider {
   }
 }
 
+/// A tool provider for an MCP client, like passing one to react-lang's
+/// Renderer as its `toolProvider`. `callTool` returns the client's raw result
+/// (`{ content, structuredContent, isError }`); the provider unwraps it with
+/// `extractToolResult`, so error results become `McpToolError`s, which
+/// `onError` reports as `mcp-error`.
+///
+/// It takes a closure rather than a client type, so any MCP client works
+/// without this package depending on one: convert the client's result to an
+/// `OpenUIValue` (for a JSON-RPC result, `JSON.parse` its text).
+public struct McpToolProvider: ToolProvider {
+  public typealias CallTool =
+    @Sendable (_ name: String, _ arguments: OpenUIObject) async throws -> OpenUIValue
+
+  private let call: CallTool
+
+  public init(callTool: @escaping CallTool) {
+    call = callTool
+  }
+
+  public func callTool(_ name: String, arguments: OpenUIObject) async throws -> OpenUIValue {
+    try extractToolResult(await call(name, arguments))
+  }
+}
+
 /// A Query statement evaluated against the current state.
 public struct QueryNode: Sendable {
   public var statementId: String
