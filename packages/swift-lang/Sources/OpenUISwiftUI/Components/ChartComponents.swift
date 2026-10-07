@@ -148,23 +148,27 @@ private struct ChartFrame<Content: View>: View {
   let isEmpty: Bool
   let legend: [LegendEntry]
   let hidden: Binding<Set<String>>?
+  /// The least height the chart needs, e.g. a row per bar.
+  let minHeight: CGFloat
   let content: Content
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUITheme) private var theme
 
   init(
     _ props: ComponentProps, isEmpty: Bool, legend: [LegendEntry],
-    hidden: Binding<Set<String>>? = nil, @ViewBuilder content: () -> Content
+    hidden: Binding<Set<String>>? = nil, minHeight: CGFloat = 0,
+    @ViewBuilder content: () -> Content
   ) {
     self.props = props
     self.isEmpty = isEmpty
     self.legend = legend
     self.hidden = hidden
+    self.minHeight = minHeight
     self.content = content()
   }
 
   var body: some View {
-    let height = props.number("height").map { CGFloat($0) } ?? theme.chartHeight
+    let height = max(props.number("height").map { CGFloat($0) } ?? theme.chartHeight, minHeight)
     if isEmpty && (context.isStreaming || context.isQueryLoading) {
       SkeletonBlock(height: height, cornerRadius: 8)
     } else {
@@ -261,7 +265,12 @@ struct HorizontalBarChartView: View {
     let series = SeriesColors(seriesNames(props), theme.chartRamp(theme.horizontalBarChartPalette))
     let stacked = props.string("variant") == "stacked"
     let labels = labelOrder(props)
-    ChartFrame(props, isEmpty: all.isEmpty, legend: series.legend, hidden: $hidden) {
+    // A row per bar, at least 28pt each: past that the frame grows instead of
+    // the bars spilling over the axis titles.
+    ChartFrame(
+      props, isEmpty: all.isEmpty, legend: series.legend, hidden: $hidden,
+      minHeight: CGFloat(labels.count) * 28
+    ) {
       Chart(points) { point in
         if stacked {
           BarMark(
@@ -285,7 +294,6 @@ struct HorizontalBarChartView: View {
         }
       }
       .valueAxis(.horizontal)
-      .frame(minHeight: CGFloat(labels.count) * 28)
       .categoryPicker(
         $selection, axis: .vertical, crosshairBehind: true,
         tooltip: { seriesTooltip($0, points, series) }
