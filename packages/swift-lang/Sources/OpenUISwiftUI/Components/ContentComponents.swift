@@ -737,7 +737,9 @@ struct TagBlockView: View {
     FlowLayout(spacing: theme.compactSpacing) {
       ForEach(Array(props.array("tags").enumerated()), id: \.offset) { _, tag in
         let size = props.string("size")
+        // Tags, like react-ui's: one line, cut short when wider than the block.
         Text(displayText(tag))
+          .lineLimit(1)
           .font(font)
           .padding(tagPadding(size))
           .background(theme.sunkSurface, in: RoundedRectangle(cornerRadius: tagRadius(size)))

@@ -408,7 +408,8 @@ struct TagLabel: View {
     let color = neutral ? Color.secondary : theme.status(variant)
     HStack(spacing: 4) {
       if let symbol { Image(systemName: symbol) }
-      Text(text)
+      // One line, cut short when the tag would be wider than its container.
+      Text(text).lineLimit(1)
     }
     .font(font)
     .foregroundStyle(onImage ? Color.white : neutral ? Color.primary : color)
