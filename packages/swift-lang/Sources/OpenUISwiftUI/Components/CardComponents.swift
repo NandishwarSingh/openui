@@ -676,8 +676,8 @@ private struct IconBadge: View {
       let color = statusColor(variant)
       return (color, color.opacity(0.14))
     case "inverted": return (Color(white: 0.98), Color.primary)
-    case "filled": return (.white, .accentColor)
-    case "soft": return (.accentColor, Color.accentColor.opacity(0.14))
+    case "filled": return (theme.onAccent, theme.accent)
+    case "soft": return (theme.accent, theme.accent.opacity(0.14))
     default: return (.primary, theme.sunkSurface)
     }
   }

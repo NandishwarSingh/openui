@@ -374,7 +374,7 @@ private struct IconButtonStyle: ViewModifier {
       switch variant {
       case "secondary": content.buttonStyle(.bordered)
       case "tertiary": content.buttonStyle(.borderless)
-      default: content.buttonStyle(.borderedProminent)
+      default: content.modifier(ProminentButton())
       }
     }
     if circle {

@@ -11,7 +11,12 @@ public struct OpenUITheme: Sendable {
   public var cornerRadius: CGFloat = 10
   public var smallCornerRadius: CGFloat = 6
   public var cardPadding: CGFloat = 18
+  /// Primary buttons, selected options, steps and other emphasis. The
+  /// renderer also tints its controls with it.
   public var accent: Color = .accentColor
+  /// Text and icons on accent backgrounds, like primary buttons (react-ui's
+  /// `textAccentPrimary`). Use a dark color with a light accent.
+  public var onAccent: Color = .white
   /// Raised surfaces such as clickable cards (react-ui's `foreground`).
   public var surface: Color = .platformElevatedBackground
   /// Recessed fills such as inputs (react-ui's `sunk`).
@@ -22,6 +27,10 @@ public struct OpenUITheme: Sendable {
   /// Borders of clickable cards (react-ui's `border-interactive`).
   public var interactiveBorder: Color = .primary.opacity(0.12)
   public var chartHeight: CGFloat = 220
+  /// Colors for chart series, like react-ui's `defaultChartPalette`: a ramp
+  /// that charts pick from the middle outwards. `nil` uses react-ui's default
+  /// blue ramp.
+  public var chartPalette: [Color]?
 
   public init() {}
 

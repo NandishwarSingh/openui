@@ -81,6 +81,7 @@ public struct OpenUIRenderer<QueryLoader: View>: View {
       }
     }
     .environment(context)
+    .tint(theme.accent)
     .onChange(of: response, initial: true) {
       context.update(response: response, isStreaming: isStreaming)
     }

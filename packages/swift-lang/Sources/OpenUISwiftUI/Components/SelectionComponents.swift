@@ -256,7 +256,7 @@ struct EditableTableView: View {
             context.triggerAction("Save Changes", form: name)
             edits = [:]
           }
-          .buttonStyle(.borderedProminent)
+          .modifier(ProminentButton())
         }
       }
     }

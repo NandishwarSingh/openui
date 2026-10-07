@@ -177,7 +177,7 @@ private struct ListRow: View {
       Spacer(minLength: 0)
       if onTap != nil {
         if let actionLabel = item.string("actionLabel"), !actionLabel.isEmpty {
-          Text(actionLabel).font(.caption.weight(.medium)).foregroundStyle(Color.accentColor)
+          Text(actionLabel).font(.caption.weight(.medium)).foregroundStyle(theme.accent)
         } else {
           Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
         }
@@ -245,6 +245,7 @@ private struct FollowUpButton: View {
 
 struct StepsView: View {
   let props: ComponentProps
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let items = props.children("items")
@@ -254,9 +255,9 @@ struct StepsView: View {
           VStack(spacing: 0) {
             Text("\(index + 1)")
               .font(.caption.weight(.bold).monospacedDigit())
-              .foregroundStyle(.white)
+              .foregroundStyle(theme.onAccent)
               .frame(width: 22, height: 22)
-              .background(Color.accentColor, in: Circle())
+              .background(theme.accent, in: Circle())
             if index < items.count - 1 {
               Rectangle().fill(.secondary.opacity(0.3)).frame(width: 2).frame(maxHeight: .infinity)
             }

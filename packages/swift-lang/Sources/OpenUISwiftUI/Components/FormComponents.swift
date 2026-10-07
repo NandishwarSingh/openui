@@ -337,10 +337,11 @@ private struct OptionRow: View {
   let symbol: String
   let label: String
   let description: String
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     HStack(alignment: .firstTextBaseline, spacing: 8) {
-      Image(systemName: symbol).foregroundStyle(Color.accentColor)
+      Image(systemName: symbol).foregroundStyle(theme.accent)
       VStack(alignment: .leading, spacing: 2) {
         Text(label)
         if !description.isEmpty {
@@ -556,8 +557,17 @@ private struct ButtonVariant: ViewModifier {
     switch variant {
     case "secondary": content.buttonStyle(.bordered)
     case "tertiary", "ghost": content.buttonStyle(.borderless)
-    default: content.buttonStyle(.borderedProminent)
+    default: content.modifier(ProminentButton())
     }
+  }
+}
+
+/// A filled button in the theme's accent, with its `onAccent` label.
+struct ProminentButton: ViewModifier {
+  @Environment(\.openUITheme) private var theme
+
+  func body(content: Content) -> some View {
+    content.buttonStyle(.borderedProminent).foregroundStyle(theme.onAccent)
   }
 }
 

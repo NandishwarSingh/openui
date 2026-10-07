@@ -324,3 +324,31 @@ let globalTestLibrary = SwiftUILibrary(
     #expect(ScatterChartView.domain([]) == 0...100)
   }
 }
+
+/// Mirrors react-ui's paletteUtils tests.
+@Suite struct ChartPaletteTests {
+  let ramp = ChartPalette.ocean
+
+  @Test func picksFromTheMiddleOutwards() {
+    #expect(ChartPalette.colors(1) == [ramp[5]])
+    #expect(ChartPalette.colors(2) == [ramp[4], ramp[6]])
+    #expect(ChartPalette.colors(3) == [ramp[4], ramp[5], ramp[6]])
+    #expect(ChartPalette.colors(5) == Array(ramp[3...7]))
+  }
+
+  @Test func usesTheThemePaletteAndFallsBackWhenEmpty() {
+    let pastel: [Color] = [.pink, .mint, .yellow]
+    #expect(ChartPalette.colors(3, pastel) == pastel)
+    #expect(ChartPalette.colors(2, [.pink, .mint]) == [.pink, .mint])
+    #expect(ChartPalette.colors(1, []) == [ramp[5]])
+  }
+
+  @Test func neverIndexesOutOfBounds() {
+    for size in 1...12 {
+      let palette = (0..<size).map { Color(white: Double($0) / 12) }
+      for count in 1...40 {
+        #expect(ChartPalette.colors(count, palette).count == count)
+      }
+    }
+  }
+}
