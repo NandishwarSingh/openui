@@ -201,6 +201,7 @@ private struct OptionCardTile: View {
 struct EditableTableView: View {
   let props: ComponentProps
   @State private var edits = TableEdits()
+  @FocusState private var focus: Cell?
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUITheme) private var theme
 
@@ -219,13 +220,13 @@ struct EditableTableView: View {
             }
           }
           Divider()
-          ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+          ForEach(Array(rows.enumerated()), id: \.offset) { rowIndex, row in
             let id = displayText(row["id"])
             GridRow {
               ForEach(Array(columns.enumerated()), id: \.offset) { index, column in
                 cell(
-                  rowId: id, index: index, column: column,
-                  value: row["values"].arrayValue?[safe: index])
+                  Cell(row: rowIndex, column: index), rowId: id, column: column,
+                  value: row["values"].arrayValue?[safe: index], rowCount: rows.count)
               }
             }
           }
@@ -263,9 +264,24 @@ struct EditableTableView: View {
     .disabled(context.isStreaming)
   }
 
-  private func cell(rowId: String, index: Int, column: OpenUIValue, value: OpenUIValue?)
-    -> some View
-  {
+  /// A cell's place in the table, for keyboard focus.
+  private struct Cell: Hashable {
+    let row: Int
+    let column: Int
+  }
+
+  /// Moves focus `rows` rows from `cell`, staying in its column.
+  private func move(_ rows: Int, from cell: Cell, rowCount: Int) -> KeyPress.Result {
+    let row = cell.row + rows
+    guard (0..<rowCount).contains(row) else { return .ignored }
+    focus = Cell(row: row, column: cell.column)
+    return .handled
+  }
+
+  private func cell(
+    _ position: Cell, rowId: String, column: OpenUIValue, value: OpenUIValue?, rowCount: Int
+  ) -> some View {
+    let index = position.column
     let width = column["width"].numberValue.map { CGFloat($0) } ?? 120
     let original = displayText(value ?? .null)
     let binding = Binding<String>(
@@ -280,7 +296,16 @@ struct EditableTableView: View {
         }
         .labelsHidden()
       } else {
-        TextField("", text: binding).textFieldStyle(.roundedBorder)
+        // react-ui's spreadsheet keys, for a hardware keyboard: Enter keeps
+        // the edit and moves down, Up and Down move between rows. Tab already
+        // moves across.
+        TextField("", text: binding)
+          .textFieldStyle(.roundedBorder)
+          .focused($focus, equals: position)
+          .onSubmit { _ = move(1, from: position, rowCount: rowCount) }
+          .onKeyPress(.upArrow) { move(-1, from: position, rowCount: rowCount) }
+          .onKeyPress(.downArrow) { move(1, from: position, rowCount: rowCount) }
+
       }
     }
     .frame(width: width)

@@ -259,6 +259,71 @@ import Testing
       #expect(box.state["$open"] == false)
     }
 
+    /// The editable table's keys with a keyboard: Down and Up move between
+    /// rows, and Enter keeps the edit and moves down.
+    @Test func editableTableKeys() {
+      let input = """
+        root = Card([t])
+        t = EditableTable("roster", [{type: "text", key: "name", header: "Name"}], [{id: "1", values: ["Alex"]}, {id: "2", values: ["Jamie"]}, {id: "3", values: ["Sam"]}])
+        """
+      let host = NSHostingView(
+        rootView: OpenUIRenderer(response: input, library: OpenUIChatLibrary.library)
+          .frame(width: 420, height: 300))
+      let window = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 420, height: 300), styleMask: [.titled],
+        backing: .buffered, defer: false)
+      window.isReleasedWhenClosed = false
+      window.contentView = host
+      window.makeKeyAndOrderFront(nil)
+      defer { window.close() }
+      func settle() { RunLoop.main.run(until: Date().addingTimeInterval(0.2)) }
+      func fields(_ view: NSView) -> [NSTextField] {
+        let own = (view as? NSTextField).map { [$0] } ?? []
+        return own + view.subviews.flatMap(fields)
+      }
+      func key(_ code: UInt16, _ characters: String) {
+        for type in [NSEvent.EventType.keyDown, .keyUp] {
+          window.sendEvent(
+            NSEvent.keyEvent(
+              with: type, location: .zero, modifierFlags: [], timestamp: 0,
+              windowNumber: window.windowNumber, context: nil, characters: characters,
+              charactersIgnoringModifiers: characters, isARepeat: false, keyCode: code)!)
+        }
+        settle()
+      }
+      /// The text of the field being edited.
+      func focused() -> String? { (window.firstResponder as? NSText)?.string }
+      /// Waits for focus to land on the field showing `text` (CI is slower).
+      func focuses(_ text: String) -> Bool {
+        for _ in 0..<30 where focused() != text { settle() }
+        return focused() == text
+      }
+      settle()
+      let cells = fields(host).filter(\.isEditable).sorted {
+        $0.convert(.zero, to: nil).y > $1.convert(.zero, to: nil).y
+      }
+      guard cells.count == 3 else {
+        Issue.record("expected 3 cells, found \(cells.count)")
+        return
+      }
+      window.makeFirstResponder(cells[0])
+      settle()
+      #expect(focuses("Alex"))
+      key(125, "\u{F701}")  // Down
+      #expect(focuses("Jamie"))
+      key(126, "\u{F700}")  // Up
+      #expect(focuses("Alex"))
+      (window.firstResponder as? NSTextView)?.insertText(
+        "x", replacementRange: NSRange(location: 4, length: 0))
+      key(36, "\r")  // Enter
+      #expect(focuses("Jamie"))
+      #expect(cells[0].stringValue == "Alexx")
+      key(125, "\u{F701}")  // Down
+      key(125, "\u{F701}")  // Down at the last row stays there
+      #expect(focuses("Sam"))
+      #expect(cells[0].stringValue == "Alexx")
+    }
+
     /// The bug vishxrad hit in the Angular port: an input recreated on every
     /// update loses focus mid-typing. The AppKit text field behind the SwiftUI
     /// input must be the same object across streamed updates and typing.
