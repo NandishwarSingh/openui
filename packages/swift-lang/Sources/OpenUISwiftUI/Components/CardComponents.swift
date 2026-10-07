@@ -84,10 +84,13 @@ struct ResponsiveCardGrid<Cell: View>: View {
   let maxPerRow: Int
   var responsive = true
   var spacing: CGFloat = 12
+  var minCellWidth: CGFloat = 0
   @ViewBuilder let cell: (Int) -> Cell
 
   var body: some View {
-    CardGridLayout(maxPerRow: maxPerRow, responsive: responsive, spacing: spacing) {
+    CardGridLayout(
+      maxPerRow: maxPerRow, responsive: responsive, spacing: spacing, minCellWidth: minCellWidth
+    ) {
       ForEach(0..<count, id: \.self) { index in
         cell(index).transition(.openUIInsertion)
       }
@@ -103,6 +106,10 @@ struct CardGridLayout: Layout {
   let maxPerRow: Int
   let responsive: Bool
   let spacing: CGFloat
+  /// The card's own minimum width in react-ui. Past it, the grid drops to
+  /// fewer columns: react-ui keeps the columns and lets the cards overflow
+  /// them, and without a minimum they'd squeeze down to a word per line.
+  var minCellWidth: CGFloat = 0
 
   func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
     guard let width = proposal.width, width.isFinite else {
@@ -145,16 +152,25 @@ struct CardGridLayout: Layout {
 
   private func rowCount(_ count: Int, _ width: CGFloat) -> Int { rows(count, width).count }
 
+  /// The most cards per row: react-ui's breakpoints, then as many as fit at
+  /// `minCellWidth`.
+  static func columns(
+    width: CGFloat, maxPerRow: Int, responsive: Bool, spacing: CGFloat, minCellWidth: CGFloat
+  ) -> Int {
+    let breakpoint = !responsive ? maxPerRow : width <= 480 ? 1 : width <= 768 ? 2 : maxPerRow
+    guard minCellWidth > 0 else { return breakpoint }
+    let fitting = Int((width + spacing) / (minCellWidth + spacing))
+    return max(1, min(breakpoint, fitting))
+  }
+
   /// Subview indices per row, using react-ui's breakpoints.
   private func rows(_ count: Int, _ width: CGFloat) -> [[Int]] {
-    let perRow: [Int]
-    if responsive && width <= 480 {
-      perRow = Array(repeating: 1, count: count)
-    } else if responsive && width <= 768 {
-      perRow = cardRowConfiguration(count, maxPerRow: 2)
-    } else {
-      perRow = cardRowConfiguration(count, maxPerRow: maxPerRow)
-    }
+    let columns = Self.columns(
+      width: width, maxPerRow: maxPerRow, responsive: responsive, spacing: spacing,
+      minCellWidth: minCellWidth)
+    let perRow =
+      columns == 1
+      ? Array(repeating: 1, count: count) : cardRowConfiguration(count, maxPerRow: columns)
     var start = 0
     return perRow.map { length in
       defer { start += length }
@@ -172,6 +188,8 @@ private struct CardBlockLayout<Item: View>: View {
   let props: ComponentProps
   let size: CardBlockSize
   let maxPerRow: Int
+  /// The card's minimum width in react-ui's styles, if it has one.
+  var minCardWidth: CGFloat = 0
   let click: (Int, ComponentProps) -> (label: String, context: OpenUIObject)
   @ViewBuilder let item: (ComponentProps) -> Item
   @Environment(OpenUIContext.self) private var context
@@ -195,7 +213,7 @@ private struct CardBlockLayout<Item: View>: View {
       } else {
         ResponsiveCardGrid(
           count: items.count, maxPerRow: maxPerRow, responsive: props.bool("responsive") != false,
-          spacing: gap
+          spacing: gap, minCellWidth: minCardWidth
         ) { index in
           card(index, items[index], clickable: clickable)
         }
@@ -312,7 +330,7 @@ private struct SnippetCard: View {
 struct OverviewCardBlockView: View {
   let props: ComponentProps
   var body: some View {
-    CardBlockLayout(props: props, size: .small, maxPerRow: 3) { index, item in
+    CardBlockLayout(props: props, size: .small, maxPerRow: 3, minCardWidth: 158) { index, item in
       let title = childString(item["top"], "title") ?? childString(item["top"], "value")
       let subtitle = childString(item["top"], "subtitle") ?? childString(item["top"], "subtext")
       return (
@@ -359,7 +377,7 @@ private struct OverviewCard: View {
 struct ContextCardBlockView: View {
   let props: ComponentProps
   var body: some View {
-    CardBlockLayout(props: props, size: .small, maxPerRow: 3) { index, item in
+    CardBlockLayout(props: props, size: .small, maxPerRow: 3, minCardWidth: 196) { index, item in
       let title = contextTitle(item)
       return (
         title.isEmpty ? (item.string("id") ?? "Context card \(index + 1)") : title,
@@ -441,7 +459,7 @@ private struct ContextCard: View {
 struct CompositeCardBlockView: View {
   let props: ComponentProps
   var body: some View {
-    CardBlockLayout(props: props, size: .medium, maxPerRow: 2) { index, item in
+    CardBlockLayout(props: props, size: .medium, maxPerRow: 2, minCardWidth: 240) { index, item in
       let header = item["header"].elementValue?.props ?? OpenUIObject()
       func pick(_ keys: String...) -> String? {
         keys.lazy.compactMap { header[$0]?.stringValue }.first

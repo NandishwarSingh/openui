@@ -844,3 +844,29 @@ let globalTestLibrary = SwiftUILibrary(
     #expect(edits["1", 0] == nil)
   }
 }
+
+/// Card grids keep react-ui's breakpoints but never squeeze a card below its
+/// react-ui minimum width.
+@Suite struct CardGridColumnsTests {
+  func columns(_ width: CGFloat, responsive: Bool, min: CGFloat = 0) -> Int {
+    CardGridLayout.columns(
+      width: width, maxPerRow: 3, responsive: responsive, spacing: 12, minCellWidth: min)
+  }
+
+  @Test func followsReactUIBreakpoints() {
+    #expect(columns(400, responsive: true) == 1)
+    #expect(columns(700, responsive: true) == 2)
+    #expect(columns(900, responsive: true) == 3)
+    #expect(columns(400, responsive: false) == 3)
+  }
+
+  /// A context card (196pt minimum) in a non-responsive block on a phone: one
+  /// per row instead of three a word wide.
+  @Test func dropsColumnsBelowTheCardsMinimum() {
+    #expect(columns(350, responsive: false, min: 196) == 1)
+    #expect(columns(404, responsive: false, min: 196) == 2)
+    #expect(columns(612, responsive: false, min: 196) == 3)
+    #expect(columns(900, responsive: true, min: 196) == 3)
+    #expect(columns(10, responsive: false, min: 196) == 1)
+  }
+}
