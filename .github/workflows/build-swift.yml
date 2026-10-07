@@ -7,6 +7,7 @@ on:
       - "packages/swift-lang/**"
       - "packages/lang-core/src/**"
       - "packages/react-ui/src/genui-lib/**"
+      - "packages/react-ui/src/utils/sentinelParser.ts"
       - ".github/workflows/build-swift.yml"
   pull_request:
     branches: [main]
@@ -14,6 +15,7 @@ on:
       - "packages/swift-lang/**"
       - "packages/lang-core/src/**"
       - "packages/react-ui/src/genui-lib/**"
+      - "packages/react-ui/src/utils/sentinelParser.ts"
       - ".github/workflows/build-swift.yml"
 
 permissions:
