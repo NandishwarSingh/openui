@@ -105,6 +105,8 @@ struct MessageView: View {
 
 Pass the full response text so far on every chunk; the renderer only re-parses what changed. OpenUI Cloud responses wrap the program in `]]>openui:content` and `]]>openui:end` markers; pass them through as they are, like the JavaScript renderers do.
 
+A finished response renders fully on its first frame, so a restored transcript doesn't flash empty rows. Lay a transcript out in a `VStack` inside the `ScrollView`, not a `LazyVStack`: a lazy stack re-measures rows as it goes, and when that happens inside an animation (an animated `scrollTo`, the keyboard closing) SwiftUI can block the main thread for seconds while response heights settle.
+
 ## The chat library
 
 `OpenUIChatLibrary.library` renders every `openuiChatLibrary` component natively: cards and text, Markdown, callouts, code, images and galleries, Swift Charts (bar, line, area, horizontal bar, pie, radial, single stacked bar, scatter) and a radar chart, tables and the editable table, forms (inputs, text areas, selects, date pickers, sliders, check boxes, radios, switches, chips, option cards) with validation, buttons and icon buttons, lists and follow-ups, steps, tabs, accordions, sections, carousels, tags, entity lists and the card blocks.
@@ -120,7 +122,7 @@ let prompt = OpenUIChatLibrary.library.prompt(ChatComponents.promptOptions)
 let systemMessage = try OpenUIChatLibrary.library.cloudConfig(ChatComponents.promptOptions)
 ```
 
-The views follow react-ui's layouts and behavior rather than restyling them: card blocks use the same responsive grid (one column on phones), tabs and sections follow the stream until the user picks one, charts use react-ui's palette and curves, and `[n]` citations resolve against the card's sources. Lucide icon names map to SF Symbols with the same category fallbacks. Spacing, fills and corner radii come from `OpenUITheme`, which follows react-ui's design tokens; override it with `.environment(\.openUITheme, theme)`.
+The views follow react-ui's layouts and behavior rather than restyling them: card blocks use the same responsive grid (one column on phones), tabs and sections follow the stream until the user picks one, charts use react-ui's palette and curves, and `[n]` citations resolve against the card's sources. Lucide icon names map to SF Symbols with the same category fallbacks. Spacing, fills and corner radii come from `OpenUITheme`, which follows react-ui's design tokens; override it with `.environment(\.openUITheme, theme)`. Its `accent` and `onAccent` color primary buttons, selections and steps (the renderer also tints controls with `accent`), and `chartPalette` replaces the default chart ramp, like react-ui's `defaultChartPalette`.
 
 The schemas in `ChatComponents` live in `OpenUILang`, without SwiftUI, so a Swift server can build the chat prompt too. They're generated from `openuiChatLibrary` (see [Testing Locally](#testing-locally)).
 
@@ -181,6 +183,9 @@ Components read the renderer state from the environment:
 | `generateCloudConfig(library:promptOptions:instructions:)`, `library.cloudConfig(_:instructions:)` | OpenUI Cloud's config block (`generateSystemPrompt({ cloud: true })`).                                                         |
 | `mergeStatements(_:_:rootId:)`                                                                     | Edit mode: applies a patch program to an existing one.                                                                         |
 | `evaluate(_:_:)`, `Store`, `QueryManager`                                                          | Lower-level runtime pieces.                                                                                                    |
+| `separateContentAndContext(_:)`, `wrapContent(_:)`, `wrapContext(_:)`, `hasLangSyntax(_:)`         | OpenUI Cloud's message format, from react-ui's `sentinelParser`: split a stored message into the program and its state.        |
+| `messageWithState(content:contentHeader:state:)`, `continueConversationMessage(_:)`                | Build the messages react-ui sends back: a response with its form state, and a follow-up from an action.                        |
+| `initialState(fromContext:)`, `parseArtifactSentinel(_:)`                                          | Restore form state from a stored message, and read an `]]>openui:artifact` header.                                             |
 
 ## Tool Provider Support (Queries & Mutations)
 
@@ -209,6 +214,7 @@ Conform your own type to `ToolProvider` for MCP or other backends; `extractToolR
 - Composite values (arrays, objects) have no identity in Swift, so `==` between two of them is always false. In JavaScript it's true only for the same instance.
 - Prop evaluation and SwiftUI views can't throw, so `onError` never reports `runtime-error` or `render-error`.
 - `$$` math in text content shows as source; there's no native TeX renderer.
+- Code is highlighted with Prism's `vscDarkPlus` and `oneLight` colors by a small built-in tokenizer covering common languages (C-family, JSON, markup, Python, Ruby, shell, YAML, SQL), not by Prism's grammars.
 - Not ported: `jsonToOpenUI`, the deprecated `enrichErrors` (its hints are in `onError`), and the server-side `artifactTool` from `@openuidev/lang-core/cloud`.
 
 ## Testing Locally
@@ -221,7 +227,7 @@ swift test
 swift format lint --strict -r Sources Tests Package.swift
 ```
 
-The conformance fixtures in `Tests/OpenUILangTests/Fixtures` are generated from the TypeScript packages, which are the source of truth. They cover batch and streaming parsing, prop evaluation, prompts, OpenUI Cloud config, edit-mode merging, error hints and the chat library schemas. After changing `lang-core` or the chat library, rebuild and regenerate them, and regenerate `ChatComponents.swift` when the chat library changed:
+The conformance fixtures in `Tests/OpenUILangTests/Fixtures` are generated from the TypeScript packages, which are the source of truth. They cover batch and streaming parsing, prop evaluation, prompts, OpenUI Cloud config, edit-mode merging, error hints, OpenUI Cloud's message format and the chat library schemas. After changing `lang-core`, the chat library or react-ui's `sentinelParser`, rebuild and regenerate them (the script imports react-ui's TypeScript source directly, so it needs Node 22.18 or newer), and regenerate `ChatComponents.swift` when the chat library changed:
 
 ```bash
 pnpm run build:packages
