@@ -715,7 +715,6 @@ private struct TitleStack: View {
 
 struct ImageTextView: View {
   let props: ComponentProps
-  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let size = CGFloat(min(max(props.number("imageSize").flatMap(\.finite) ?? 40, 0), 400))

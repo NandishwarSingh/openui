@@ -52,13 +52,11 @@ struct LabelView: View {
 private struct FieldContext {
   let field: StateField
   let rules: [ParsedRule]
-  let form: String?
 
   @MainActor
   init(_ props: ComponentProps, context: OpenUIContext, form: String?) {
     self.field = context.stateField(name: props.text("name"), binding: props["value"], form: form)
     self.rules = parseStructuredRules(props["rules"])
-    self.form = form
   }
 }
 

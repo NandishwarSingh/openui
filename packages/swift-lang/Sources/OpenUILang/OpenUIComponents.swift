@@ -8,9 +8,6 @@
 /// Components both libraries define the same way are `ChatComponents`'
 /// schemas.
 public enum OpenUIComponents {
-  /// The form `rules` object, for schemas that aren't shared.
-  static let formRules = ChatComponents.formRules
-
   public static let card = ComponentSchema(
     "Card",
     description:

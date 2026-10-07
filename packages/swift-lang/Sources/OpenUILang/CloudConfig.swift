@@ -32,7 +32,7 @@ public func generateCloudConfig(
     if !issues.isEmpty {
       throw CloudConfigError(
         description:
-          "[generateSystemPrompt] Invalid library: \(issues.map(\.message).joined(separator: " "))")
+          "[generateSystemPrompt] Invalid library: \(issues.joined(separator: " "))")
     }
     var chatLibrary = library.objectValue ?? OpenUIObject()
     chatLibrary["components"] = nil
@@ -78,80 +78,47 @@ private func cloudPromptOptions(_ options: PromptOptions) -> OpenUIObject? {
 
 // MARK: - Library validation
 
-struct ChatLibraryIssue: Equatable {
-  enum Code: String {
-    case invalidShape = "invalid-shape"
-    case rootNotFound = "root-not-found"
-    case unresolvedRef = "unresolved-ref"
-    case unknownGroupComponent = "unknown-group-component"
-    case invalidRequired = "invalid-required"
-  }
-
-  var code: Code
-  var message: String
-  /// e.g. "$defs/Card/properties/children/items"
-  var path: String?
-}
-
-/// Structural checks Cloud applies to a library, reporting every issue in one pass.
-func validateChatLibrary(_ library: OpenUIValue) -> [ChatLibraryIssue] {
+/// Structural checks Cloud applies to a library, reporting every issue in one
+/// pass. lang-core's issues also carry a code and a path, but only their
+/// messages are ever read, so these are the messages.
+func validateChatLibrary(_ library: OpenUIValue) -> [String] {
   guard let spec = library.objectValue else {
-    return [ChatLibraryIssue(code: .invalidShape, message: "chatLibrary must be an object.")]
+    return ["chatLibrary must be an object."]
   }
-  var issues: [ChatLibraryIssue] = []
+  var issues: [String] = []
 
   let root = spec["root"] ?? .undefined
   let rootName = root.stringValue.flatMap { $0.isEmpty ? nil : $0 }
   if root != .undefined, rootName == nil {
-    issues.append(
-      ChatLibraryIssue(
-        code: .invalidShape,
-        message: "chatLibrary.root, when present, must be a non-empty string.", path: "root"))
+    issues.append("chatLibrary.root, when present, must be a non-empty string.")
   }
 
   guard let schema = spec["schema"]?.objectValue else {
-    issues.append(
-      ChatLibraryIssue(
-        code: .invalidShape,
-        message: "chatLibrary.schema must be an object with a $defs map of component schemas.",
-        path: "schema"))
+    issues.append("chatLibrary.schema must be an object with a $defs map of component schemas.")
     return issues
   }
   guard let defs = schema["$defs"]?.objectValue, !defs.isEmpty else {
-    issues.append(
-      ChatLibraryIssue(
-        code: .invalidShape,
-        message: "chatLibrary.schema.$defs must be a non-empty object keyed by component name.",
-        path: "schema/$defs"))
+    issues.append("chatLibrary.schema.$defs must be a non-empty object keyed by component name.")
     return issues
   }
   let defNames = Set(defs.keys)
 
   if let rootName, !defNames.contains(rootName) {
     issues.append(
-      ChatLibraryIssue(
-        code: .rootNotFound,
-        message:
-          "Root component \"\(rootName)\" was not found in schema.$defs. Available components: \(defs.keys.joined(separator: ", ")).",
-        path: "root"))
+      "Root component \"\(rootName)\" was not found in schema.$defs. Available components: \(defs.keys.joined(separator: ", "))."
+    )
   }
 
   for (name, def) in defs.entries {
     let defPath = "$defs/\(name)"
     guard let component = def.objectValue else {
-      issues.append(
-        ChatLibraryIssue(
-          code: .invalidShape, message: "\(defPath) must be an object component schema.",
-          path: defPath))
+      issues.append("\(defPath) must be an object component schema.")
       continue
     }
 
     let properties = component["properties"] ?? .undefined
     if properties != .undefined, properties.objectValue == nil {
-      issues.append(
-        ChatLibraryIssue(
-          code: .invalidShape, message: "\(defPath)/properties must be an object.",
-          path: "\(defPath)/properties"))
+      issues.append("\(defPath)/properties must be an object.")
     }
 
     let required = component["required"] ?? .undefined
@@ -160,18 +127,10 @@ func validateChatLibrary(_ library: OpenUIValue) -> [ChatLibraryIssue] {
       if let names, names.allSatisfy({ $0 != nil }) {
         let propKeys = Set(properties.objectValue?.keys ?? [])
         for case let name? in names where !propKeys.contains(name) {
-          issues.append(
-            ChatLibraryIssue(
-              code: .invalidRequired,
-              message: "\(defPath) lists required property \"\(name)\" that is not in properties.",
-              path: "\(defPath)/required"))
+          issues.append("\(defPath) lists required property \"\(name)\" that is not in properties.")
         }
       } else {
-        issues.append(
-          ChatLibraryIssue(
-            code: .invalidRequired,
-            message: "\(defPath)/required must be an array of property names.",
-            path: "\(defPath)/required"))
+        issues.append("\(defPath)/required must be an array of property names.")
       }
     }
 
@@ -182,21 +141,14 @@ func validateChatLibrary(_ library: OpenUIValue) -> [ChatLibraryIssue] {
     guard let groupName = group["name"].stringValue, let components = group["components"].arrayValue
     else {
       issues.append(
-        ChatLibraryIssue(
-          code: .invalidShape,
-          message:
-            "Each componentGroups entry must be {name: string, components: string[], notes?: string[]}.",
-          path: "componentGroups"))
+        "Each componentGroups entry must be {name: string, components: string[], notes?: string[]}."
+      )
       continue
     }
     for component in components
     where !(component.stringValue.map { defNames.contains($0) } ?? false) {
       issues.append(
-        ChatLibraryIssue(
-          code: .unknownGroupComponent,
-          message:
-            "Component group \"\(groupName)\" references unknown component \"\(component.jsString)\".",
-          path: "componentGroups"))
+        "Component group \"\(groupName)\" references unknown component \"\(component.jsString)\".")
     }
   }
 
@@ -205,7 +157,7 @@ func validateChatLibrary(_ library: OpenUIValue) -> [ChatLibraryIssue] {
 
 /// Checks every `$ref` below `node` resolves to a component in `$defs`.
 private func collectRefIssues(
-  _ node: OpenUIValue, _ path: String, _ defNames: Set<String>, _ issues: inout [ChatLibraryIssue]
+  _ node: OpenUIValue, _ path: String, _ defNames: Set<String>, _ issues: inout [String]
 ) {
   if let items = node.arrayValue {
     for (i, item) in items.enumerated() {
@@ -217,11 +169,8 @@ private func collectRefIssues(
 
   if let ref = object["$ref"]?.stringValue, !refResolves(ref, defNames) {
     issues.append(
-      ChatLibraryIssue(
-        code: .unresolvedRef,
-        message:
-          "Unresolvable $ref \"\(ref)\" at \(path) — refs must be \"#/$defs/<name>\" pointing at a component in $defs.",
-        path: path))
+      "Unresolvable $ref \"\(ref)\" at \(path) — refs must be \"#/$defs/<name>\" pointing at a component in $defs."
+    )
   }
   for (key, value) in object.entries where key != "$ref" {
     collectRefIssues(value, "\(path)/\(key)", defNames, &issues)

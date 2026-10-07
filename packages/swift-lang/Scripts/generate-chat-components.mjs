@@ -151,11 +151,15 @@ function generate({ lib, promptOptions, enumName, docs, shared }) {
   const all = names.map(
     (name) => `    ${reused(name) ? `${shared.enumName}.` : ""}${lowerFirst(name)},`,
   );
+  // A library reusing another's schemas aliases its rules object only when one
+  // of its own schemas has form rules.
   const formRules = shared
-    ? `  /// The form \`rules\` object, for schemas that aren't shared.
+    ? schemas.some((schema) => /\bformRules\b/.test(schema))
+      ? `  /// The form \`rules\` object, for schemas that aren't shared.
   static let formRules = ${shared.enumName}.formRules
 
 `
+      : ""
     : `  /// The structured \`rules\` object shared by form fields.
   public static let formRules: PropType = .object(
     ["required", "email", "url", "numeric"].map { Prop($0, .boolean, .optional) }
