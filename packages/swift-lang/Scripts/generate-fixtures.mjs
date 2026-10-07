@@ -25,6 +25,8 @@ const ui = await import(join(packages, "react-ui", "dist", "genui-lib", "index.m
 // ── Schemas ───────────────────────────────────────────────────────────────
 
 const chatSchema = ui.openuiChatLibrary.toJSONSchema();
+// react-ui's general library: the chat components plus Stack (its root) and Modal.
+const openuiSchema = ui.openuiLibrary.toJSONSchema();
 
 // Small hand-written schema that exercises validation paths the chat library
 // doesn't: defaults, const, integer, nested required keys, enum defaults.
@@ -135,16 +137,23 @@ const hoistedSchema = {
 
 const schemas = {
   chat: { schema: chatSchema, root: "Card", reactive: reactiveProps(ui.openuiChatLibrary) },
+  openui: { schema: openuiSchema, root: "Stack", reactive: reactiveProps(ui.openuiLibrary) },
   test: { schema: testSchema, root: "Card", reactive: testReactive },
   hoisted: { schema: hoistedSchema, root: "Tree", reactive: {} },
 };
-const libraries = { chat: ui.openuiChatLibrary, test: testLibrary };
+const libraries = { chat: ui.openuiChatLibrary, openui: ui.openuiLibrary, test: testLibrary };
 
 // ── Corpus ────────────────────────────────────────────────────────────────
 
 const chatExamples = ui.openuiChatPromptOptions.examples.map((text, i) => ({
   name: `chat-example-${i + 1}`,
   schema: "chat",
+  input: text,
+}));
+
+const openuiExamples = ui.openuiPromptOptions.examples.map((text, i) => ({
+  name: `openui-example-${i + 1}`,
+  schema: "openui",
   input: text,
 }));
 
@@ -290,12 +299,12 @@ function streamCheckpoints(schemaName, input) {
   });
 }
 
-const parserCases = [...chatExamples, ...edgeCases].map((c) => ({
+const parserCases = [...chatExamples, ...openuiExamples, ...edgeCases].map((c) => ({
   ...c,
   expected: parseWith(c.schema, c.input),
 }));
 
-const streamingCases = [...chatExamples, ...edgeCases]
+const streamingCases = [...chatExamples, ...openuiExamples, ...edgeCases]
   .filter((c) => c.input.length > 0)
   .map((c) => ({ ...c, checkpoints: streamCheckpoints(c.schema, c.input) }));
 
@@ -337,6 +346,7 @@ const e = (name, input, extra = {}) => ({ name, schema: "test", input, ...extra 
 
 const evalCases = [
   ...chatExamples,
+  ...openuiExamples,
   e("operators", edgeCases.find((c) => c.name === "operators").input),
   e("member-index", edgeCases.find((c) => c.name === "member-index").input),
   e("actions", edgeCases.find((c) => c.name === "actions").input),
@@ -379,6 +389,7 @@ const evalFixtures = evalCases.map((c) => ({ ...c, expected: evaluateCase(c) }))
 // ── Prompts ───────────────────────────────────────────────────────────────
 
 const chatSpec = ui.openuiChatLibrary.toSpec();
+const openuiSpec = ui.openuiLibrary.toSpec();
 delete chatSpec.schema; // already in schemas.json
 
 const tools = [
@@ -443,6 +454,8 @@ const sliceSpec = {
 const promptCases = [
   { name: "chat-default", spec: chatSpec },
   { name: "chat-options", spec: { ...chatSpec, ...ui.openuiChatPromptOptions } },
+  { name: "openui-default", spec: openuiSpec },
+  { name: "openui-options", spec: { ...openuiSpec, ...ui.openuiPromptOptions } },
   { name: "slice-bindings", spec: { ...sliceSpec, bindings: true } },
   {
     name: "slice-tools",
@@ -780,6 +793,15 @@ writeFileSync(
   ) + "\n",
 );
 write("chat-spec.json", chatComponentSpecs);
+write("openui-spec.json", openuiSpec);
+writeFileSync(
+  join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures", "openui-examples.json"),
+  JSON.stringify(
+    openuiExamples.map(({ name, input }) => ({ name, input })),
+    null,
+    1,
+  ) + "\n",
+);
 writeFileSync(
   join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures", "chart-formats.json"),
   JSON.stringify(chartFormatCases, null, 1) + "\n",

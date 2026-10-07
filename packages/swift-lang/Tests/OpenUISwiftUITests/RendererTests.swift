@@ -164,6 +164,101 @@ import Testing
       #expect(host.fittingSize.height > 120, "\(name) rendered \(host.fittingSize)")
     }
 
+    nonisolated static let openUIExamples: [(name: String, input: String)] = {
+      let url = Bundle.module.url(
+        forResource: "openui-examples", withExtension: "json", subdirectory: "Fixtures")!
+      let json = try! JSON.parse(String(contentsOf: url, encoding: .utf8))
+      return (json.arrayValue ?? []).map { ($0["name"].stringValue!, $0["input"].stringValue!) }
+    }()
+
+    /// The same for react-ui's general library, `openuiLibrary`, whose
+    /// examples start from a Stack.
+    @Test(arguments: openUIExamples.map(\.name))
+    func rendersOpenUIExample(_ name: String) {
+      let input = Self.openUIExamples.first { $0.name == name }!.input
+      var errors: [OpenUIError] = []
+      let host = NSHostingView(
+        rootView: OpenUIRenderer(
+          response: input, library: OpenUILibrary.library, onError: { errors = $0 }
+        )
+        .frame(width: 420))
+      let window = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 420, height: 600), styleMask: [.borderless],
+        backing: .buffered, defer: false)
+      window.contentView = host
+      RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+      #expect(host.fittingSize.height > 100, "\(name) rendered \(host.fittingSize)")
+      // Only the example's prose heading may fail to parse.
+      #expect(errors.allSatisfy { $0.jsonRepresentation["source"] == "parser" }, "\(errors)")
+    }
+
+    /// A closed Modal takes no room in a Stack, gap included, as in react-ui
+    /// where it renders nothing.
+    @Test func closedModalTakesNoRoom() {
+      func height(_ input: String) -> CGFloat {
+        let host = NSHostingView(
+          rootView: OpenUIRenderer(response: input, library: OpenUILibrary.library)
+            .frame(width: 420))
+        RunLoop.main.run(until: Date().addingTimeInterval(0.2))
+        return host.fittingSize.height
+      }
+      let alone = height(#"root = Stack([TextContent("Profile"), TextContent("Name")])"#)
+      let withModal = height(
+        """
+        $open = false
+        root = Stack([TextContent("Profile"), modal, TextContent("Name")])
+        modal = Modal("Edit", $open, [TextContent("Hi")])
+        """)
+      #expect(alone > 0)
+      #expect(withModal == alone)
+    }
+
+    /// openuiLibrary's Modal opens from its `open` binding, and closing the
+    /// sheet (its X, Escape, a swipe) writes false back.
+    @Test func modalFollowsItsOpenBinding() {
+      final class Box { var state = OpenUIObject() }
+      let box = Box()
+      let input = """
+        $open = true
+        root = Stack([title, modal])
+        title = TextContent("Profile")
+        modal = Modal("Edit profile", $open, [TextContent("Change your name")])
+        """
+      let host = NSHostingView(
+        rootView: OpenUIRenderer(
+          response: input, library: OpenUILibrary.library, onStateUpdate: { box.state = $0 }
+        )
+        .frame(width: 420, height: 300))
+      let window = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 420, height: 300), styleMask: [.titled],
+        backing: .buffered, defer: false)
+      window.isReleasedWhenClosed = false
+      window.contentView = host
+      window.orderFrontRegardless()
+      defer { window.close() }
+      // Poll rather than wait a fixed time: CI machines are slower.
+      func wait(until done: () -> Bool) {
+        for _ in 0..<50 where !done() { RunLoop.main.run(until: Date().addingTimeInterval(0.1)) }
+      }
+      wait { window.attachedSheet != nil }
+      guard let sheet = window.attachedSheet else {
+        Issue.record("no sheet for $open = true")
+        return
+      }
+      // Escape, which the sheet's close button answers to.
+      sheet.makeKey()
+      for type in [NSEvent.EventType.keyDown, .keyUp] {
+        let escape = NSEvent.keyEvent(
+          with: type, location: .zero, modifierFlags: [], timestamp: 0,
+          windowNumber: sheet.windowNumber, context: nil, characters: "\u{1b}",
+          charactersIgnoringModifiers: "\u{1b}", isARepeat: false, keyCode: 53)!
+        sheet.sendEvent(escape)
+      }
+      wait { window.attachedSheet == nil && box.state["$open"] == false }
+      #expect(window.attachedSheet == nil)
+      #expect(box.state["$open"] == false)
+    }
+
     /// The bug vishxrad hit in the Angular port: an input recreated on every
     /// update loses focus mid-typing. The AppKit text field behind the SwiftUI
     /// input must be the same object across streamed updates and typing.
@@ -589,4 +684,55 @@ let globalTestLibrary = SwiftUILibrary(
         for: size, anchor: CGPoint(x: 10, y: 10), placement: .above, in: bounds)
         == CGPoint(x: 8, y: -90))
   }
+}
+
+/// The flex layout behind openuiLibrary's Stack and Card, against what CSS
+/// flexbox does with react-ui's styles.
+@Suite struct FlexLayoutTests {
+  typealias Item = FlexLayout.Item
+
+  @Test func growingItemsShareTheFreeSpace() {
+    // Two cards (flex: 1, basis 0) and a 100pt button in 400pt with 12pt gaps.
+    let items = [
+      Item(basis: 0, flexible: true), Item(basis: 100, flexible: false),
+      Item(basis: 0, flexible: true),
+    ]
+    let (widths, offsets) = FlexLayout.distribute(items, width: 400, gap: 12, justify: nil)
+    #expect(widths == [138, 100, 138])
+    #expect(offsets == [0, 150, 262])
+  }
+
+  @Test func justifySpreadsSpaceWhenNothingGrows() {
+    let items = [Item(basis: 100, flexible: false), Item(basis: 100, flexible: false)]
+    func offsets(_ justify: String?) -> [CGFloat] {
+      FlexLayout.distribute(items, width: 300, gap: 0, justify: justify).offsets
+    }
+    #expect(offsets(nil) == [0, 100])
+    #expect(offsets("center") == [50, 150])
+    #expect(offsets("end") == [100, 200])
+    #expect(offsets("between") == [0, 200])
+    #expect(offsets("around") == [25, 175])
+    let third: CGFloat = 100 / 3
+    #expect(offsets("evenly") == [third, 100 + 2 * third])
+  }
+
+  @Test func fixedItemsShrinkInProportion() {
+    let items = [Item(basis: 300, flexible: false), Item(basis: 100, flexible: false)]
+    #expect(FlexLayout.distribute(items, width: 200, gap: 0, justify: nil).widths == [150, 50])
+  }
+
+  @Test func wrapsByBasisButGrowingItemsNeverWrap() {
+    let fixed = Array(repeating: Item(basis: 100, flexible: false), count: 5)
+    #expect(FlexLayout.lines(fixed, width: 330, gap: 10, wrap: true) == [0..<3, 3..<5])
+    #expect(FlexLayout.lines(fixed, width: 330, gap: 10, wrap: false) == [0..<5])
+    let cards = Array(repeating: Item(basis: 0, flexible: true), count: 5)
+    #expect(FlexLayout.lines(cards, width: 100, gap: 10, wrap: true) == [0..<5])
+  }
+
+  @Test func gapsFollowReactUISpacing() {
+    let names: [String?] = ["none", "xs", "s", nil, "m", "l", "xl", "2xl"]
+    let gaps: [CGFloat] = [0, 6, 8, 12, 12, 18, 24, 36]
+    #expect(names.map(FlexLayout.gap) == gaps)
+  }
+
 }

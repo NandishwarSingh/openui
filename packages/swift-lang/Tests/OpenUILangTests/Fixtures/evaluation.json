@@ -2916,6 +2916,1184 @@
   }
  },
  {
+  "name": "openui-example-1",
+  "schema": "openui",
+  "input": "Example 1 — Table (column-oriented):\n\nroot = Stack([title, tbl])\ntitle = TextContent(\"Top Languages\", \"large-heavy\")\ntbl = Table([Col(\"Language\", langs), Col(\"Users (M)\", users), Col(\"Year\", years)])\nlangs = [\"Python\", \"JavaScript\", \"Java\", \"TypeScript\", \"Go\"]\nusers = [15.7, 14.2, 12.1, 8.5, 5.2]\nyears = [1991, 1995, 1995, 2012, 2009]",
+  "expected": {
+   "root": {
+    "type": "element",
+    "typeName": "Stack",
+    "props": {
+     "children": [
+      {
+       "type": "element",
+       "typeName": "TextContent",
+       "props": {
+        "text": "Top Languages",
+        "size": "large-heavy"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "title"
+      },
+      {
+       "type": "element",
+       "typeName": "Table",
+       "props": {
+        "columns": [
+         {
+          "type": "element",
+          "typeName": "Col",
+          "props": {
+           "label": "Language",
+           "data": [
+            "Python",
+            "JavaScript",
+            "Java",
+            "TypeScript",
+            "Go"
+           ]
+          },
+          "partial": false,
+          "hasDynamicProps": false
+         },
+         {
+          "type": "element",
+          "typeName": "Col",
+          "props": {
+           "label": "Users (M)",
+           "data": [
+            15.7,
+            14.2,
+            12.1,
+            8.5,
+            5.2
+           ]
+          },
+          "partial": false,
+          "hasDynamicProps": false
+         },
+         {
+          "type": "element",
+          "typeName": "Col",
+          "props": {
+           "label": "Year",
+           "data": [
+            1991,
+            1995,
+            1995,
+            2012,
+            2009
+           ]
+          },
+          "partial": false,
+          "hasDynamicProps": false
+         }
+        ]
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "tbl"
+      }
+     ]
+    },
+    "partial": false,
+    "hasDynamicProps": false,
+    "statementId": "root"
+   },
+   "errors": []
+  }
+ },
+ {
+  "name": "openui-example-2",
+  "schema": "openui",
+  "input": "Example 2 — Bar chart:\n\nroot = Stack([title, chart])\ntitle = TextContent(\"Q4 Revenue\", \"large-heavy\")\nchart = BarChart(labels, [s1, s2], \"grouped\")\nlabels = [\"Oct\", \"Nov\", \"Dec\"]\ns1 = Series(\"Product A\", [120, 150, 180])\ns2 = Series(\"Product B\", [90, 110, 140])",
+  "expected": {
+   "root": {
+    "type": "element",
+    "typeName": "Stack",
+    "props": {
+     "children": [
+      {
+       "type": "element",
+       "typeName": "TextContent",
+       "props": {
+        "text": "Q4 Revenue",
+        "size": "large-heavy"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "title"
+      },
+      {
+       "type": "element",
+       "typeName": "BarChart",
+       "props": {
+        "labels": [
+         "Oct",
+         "Nov",
+         "Dec"
+        ],
+        "series": [
+         {
+          "type": "element",
+          "typeName": "Series",
+          "props": {
+           "category": "Product A",
+           "values": [
+            120,
+            150,
+            180
+           ]
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "s1"
+         },
+         {
+          "type": "element",
+          "typeName": "Series",
+          "props": {
+           "category": "Product B",
+           "values": [
+            90,
+            110,
+            140
+           ]
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "s2"
+         }
+        ],
+        "variant": "grouped"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "chart"
+      }
+     ]
+    },
+    "partial": false,
+    "hasDynamicProps": false,
+    "statementId": "root"
+   },
+   "errors": []
+  }
+ },
+ {
+  "name": "openui-example-3",
+  "schema": "openui",
+  "input": "Example 3 — Form with validation:\n\nroot = Stack([title, form])\ntitle = TextContent(\"Contact Us\", \"large-heavy\")\nform = Form(\"contact\", btns, [nameField, emailField, countryField, msgField])\nnameField = FormControl(\"Name\", Input(\"name\", \"Your name\", \"text\", { required: true, minLength: 2 }))\nemailField = FormControl(\"Email\", Input(\"email\", \"you@example.com\", \"email\", { required: true, email: true }))\ncountryField = FormControl(\"Country\", Select(\"country\", countryOpts, \"Select...\", { required: true }))\nmsgField = FormControl(\"Message\", TextArea(\"message\", \"Tell us more...\", 4, { required: true, minLength: 10 }))\ncountryOpts = [SelectItem(\"us\", \"United States\"), SelectItem(\"uk\", \"United Kingdom\"), SelectItem(\"de\", \"Germany\")]\nbtns = Buttons([Button(\"Submit\", Action([@ToAssistant(\"Submit\")]), \"primary\"), Button(\"Cancel\", Action([@ToAssistant(\"Cancel\")]), \"secondary\")])",
+  "expected": {
+   "root": {
+    "type": "element",
+    "typeName": "Stack",
+    "props": {
+     "children": [
+      {
+       "type": "element",
+       "typeName": "TextContent",
+       "props": {
+        "text": "Contact Us",
+        "size": "large-heavy"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "title"
+      },
+      {
+       "type": "element",
+       "typeName": "Form",
+       "props": {
+        "name": "contact",
+        "buttons": {
+         "type": "element",
+         "typeName": "Buttons",
+         "props": {
+          "buttons": [
+           {
+            "type": "element",
+            "typeName": "Button",
+            "props": {
+             "label": "Submit",
+             "action": {
+              "steps": [
+               {
+                "type": "continue_conversation",
+                "message": "Submit"
+               }
+              ]
+             },
+             "variant": "primary"
+            },
+            "partial": false,
+            "hasDynamicProps": true
+           },
+           {
+            "type": "element",
+            "typeName": "Button",
+            "props": {
+             "label": "Cancel",
+             "action": {
+              "steps": [
+               {
+                "type": "continue_conversation",
+                "message": "Cancel"
+               }
+              ]
+             },
+             "variant": "secondary"
+            },
+            "partial": false,
+            "hasDynamicProps": true
+           }
+          ]
+         },
+         "partial": false,
+         "hasDynamicProps": true,
+         "statementId": "btns"
+        },
+        "fields": [
+         {
+          "type": "element",
+          "typeName": "FormControl",
+          "props": {
+           "label": "Name",
+           "input": {
+            "type": "element",
+            "typeName": "Input",
+            "props": {
+             "name": "name",
+             "placeholder": "Your name",
+             "type": "text",
+             "rules": {
+              "required": true,
+              "minLength": 2
+             }
+            },
+            "partial": false,
+            "hasDynamicProps": false
+           }
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "nameField"
+         },
+         {
+          "type": "element",
+          "typeName": "FormControl",
+          "props": {
+           "label": "Email",
+           "input": {
+            "type": "element",
+            "typeName": "Input",
+            "props": {
+             "name": "email",
+             "placeholder": "you@example.com",
+             "type": "email",
+             "rules": {
+              "required": true,
+              "email": true
+             }
+            },
+            "partial": false,
+            "hasDynamicProps": false
+           }
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "emailField"
+         },
+         {
+          "type": "element",
+          "typeName": "FormControl",
+          "props": {
+           "label": "Country",
+           "input": {
+            "type": "element",
+            "typeName": "Select",
+            "props": {
+             "name": "country",
+             "items": [
+              {
+               "type": "element",
+               "typeName": "SelectItem",
+               "props": {
+                "value": "us",
+                "label": "United States"
+               },
+               "partial": false,
+               "hasDynamicProps": false
+              },
+              {
+               "type": "element",
+               "typeName": "SelectItem",
+               "props": {
+                "value": "uk",
+                "label": "United Kingdom"
+               },
+               "partial": false,
+               "hasDynamicProps": false
+              },
+              {
+               "type": "element",
+               "typeName": "SelectItem",
+               "props": {
+                "value": "de",
+                "label": "Germany"
+               },
+               "partial": false,
+               "hasDynamicProps": false
+              }
+             ],
+             "placeholder": "Select...",
+             "rules": {
+              "required": true
+             }
+            },
+            "partial": false,
+            "hasDynamicProps": false
+           }
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "countryField"
+         },
+         {
+          "type": "element",
+          "typeName": "FormControl",
+          "props": {
+           "label": "Message",
+           "input": {
+            "type": "element",
+            "typeName": "TextArea",
+            "props": {
+             "name": "message",
+             "placeholder": "Tell us more...",
+             "rows": 4,
+             "rules": {
+              "required": true,
+              "minLength": 10
+             }
+            },
+            "partial": false,
+            "hasDynamicProps": false
+           }
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "msgField"
+         }
+        ]
+       },
+       "partial": false,
+       "hasDynamicProps": true,
+       "statementId": "form"
+      }
+     ]
+    },
+    "partial": false,
+    "hasDynamicProps": true,
+    "statementId": "root"
+   },
+   "errors": []
+  }
+ },
+ {
+  "name": "openui-example-4",
+  "schema": "openui",
+  "input": "Example 4 — Tabs with mixed content:\n\nroot = Stack([title, tabs])\ntitle = TextContent(\"React vs Vue\", \"large-heavy\")\ntabs = Tabs([tabReact, tabVue])\ntabReact = TabItem(\"react\", \"React\", reactContent)\ntabVue = TabItem(\"vue\", \"Vue\", vueContent)\nreactContent = [TextContent(\"React is a library by Meta for building UIs.\"), Callout(\"info\", \"Note\", \"React uses JSX syntax.\")]\nvueContent = [TextContent(\"Vue is a progressive framework by Evan You.\"), Callout(\"success\", \"Tip\", \"Vue has a gentle learning curve.\")]",
+  "expected": {
+   "root": {
+    "type": "element",
+    "typeName": "Stack",
+    "props": {
+     "children": [
+      {
+       "type": "element",
+       "typeName": "TextContent",
+       "props": {
+        "text": "React vs Vue",
+        "size": "large-heavy"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "title"
+      },
+      {
+       "type": "element",
+       "typeName": "Tabs",
+       "props": {
+        "items": [
+         {
+          "type": "element",
+          "typeName": "TabItem",
+          "props": {
+           "value": "react",
+           "trigger": "React",
+           "content": [
+            {
+             "type": "element",
+             "typeName": "TextContent",
+             "props": {
+              "text": "React is a library by Meta for building UIs."
+             },
+             "partial": false,
+             "hasDynamicProps": false
+            },
+            {
+             "type": "element",
+             "typeName": "Callout",
+             "props": {
+              "variant": "info",
+              "title": "Note",
+              "description": "React uses JSX syntax."
+             },
+             "partial": false,
+             "hasDynamicProps": false
+            }
+           ]
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "tabReact"
+         },
+         {
+          "type": "element",
+          "typeName": "TabItem",
+          "props": {
+           "value": "vue",
+           "trigger": "Vue",
+           "content": [
+            {
+             "type": "element",
+             "typeName": "TextContent",
+             "props": {
+              "text": "Vue is a progressive framework by Evan You."
+             },
+             "partial": false,
+             "hasDynamicProps": false
+            },
+            {
+             "type": "element",
+             "typeName": "Callout",
+             "props": {
+              "variant": "success",
+              "title": "Tip",
+              "description": "Vue has a gentle learning curve."
+             },
+             "partial": false,
+             "hasDynamicProps": false
+            }
+           ]
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "tabVue"
+         }
+        ]
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "tabs"
+      }
+     ]
+    },
+    "partial": false,
+    "hasDynamicProps": false,
+    "statementId": "root"
+   },
+   "errors": []
+  }
+ },
+ {
+  "name": "openui-example-5",
+  "schema": "openui",
+  "input": "Example 5 — KPI and product cards:\n\nroot = Stack([kpiHeader, kpiBlock, productsHeader, productCards])\nkpiHeader = InlineHeader(\"This Month\", \"Key account metrics\")\nkpiBlock = SnippetCardBlock([kpi1, kpi2, kpi3])\nkpi1 = SnippetCardItem(\"revenue\", kpi1lhs, kpi1rhs)\nkpi1lhs = IconText(kpi1icon, \"neutral\", \"m\", \"Revenue\", \"Month to date\", false, \"horizontal\")\nkpi1icon = Icon(\"circle-dollar-sign\", \"finance\")\nkpi1rhs = BoldText(\"number\", \"$48,200\", \"+8.1%\", \"metric\")\nkpi2 = SnippetCardItem(\"active-users\", kpi2lhs, kpi2rhs)\nkpi2lhs = IconText(kpi2icon, \"neutral\", \"m\", \"Active Users\", \"This month\", false, \"horizontal\")\nkpi2icon = Icon(\"users\", \"people\")\nkpi2rhs = BoldText(\"number\", \"1,204\", \"+3.4%\", \"metric\")\nkpi3 = SnippetCardItem(\"churn\", kpi3lhs, kpi3rhs)\nkpi3lhs = IconText(kpi3icon, \"neutral\", \"m\", \"Churn\", \"This month\", false, \"horizontal\")\nkpi3icon = Icon(\"user-minus\", \"people\")\nkpi3rhs = BoldText(\"number\", \"1.8%\", \"-0.3%\", \"metric\")\nproductsHeader = InlineHeader(\"Top Products\", \"By units sold\")\nproductCards = CompositeCardBlock([p1, p2])\np1 = CompositeCardItem(\"widget-pro\", p1header, [p1body], p1footer)\np1header = IconText(p1icon, \"neutral\", \"m\", \"Widget Pro\", \"Best seller\", true, \"horizontal\")\np1icon = Icon(\"package\", \"shopping\")\np1body = MetricIndicatorInline(\"2,410 units\", \"Sold this month\", { direction: \"up\", value: 12 })\np1footer = { price: BoldText(\"text\", \"$29.00\"), button: p1btn }\np1btn = Button(\"View Details\", Action([@ToAssistant(\"Show details for Widget Pro\")]), \"secondary\")\np2 = CompositeCardItem(\"widget-mini\", p2header, [p2body], p2footer)\np2header = IconText(p2icon, \"neutral\", \"m\", \"Widget Mini\", \"New arrival\", true, \"horizontal\")\np2icon = Icon(\"box\", \"shopping\")\np2body = MetricIndicatorInline(\"980 units\", \"Sold this month\", { direction: \"up\", value: 4 })\np2footer = { price: BoldText(\"text\", \"$14.00\"), button: p2btn }\np2btn = Button(\"View Details\", Action([@ToAssistant(\"Show details for Widget Mini\")]), \"secondary\")",
+  "expected": {
+   "root": {
+    "type": "element",
+    "typeName": "Stack",
+    "props": {
+     "children": [
+      {
+       "type": "element",
+       "typeName": "InlineHeader",
+       "props": {
+        "heading": "This Month",
+        "description": "Key account metrics"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "kpiHeader"
+      },
+      {
+       "type": "element",
+       "typeName": "SnippetCardBlock",
+       "props": {
+        "items": [
+         {
+          "type": "element",
+          "typeName": "SnippetCardItem",
+          "props": {
+           "id": "revenue",
+           "lhs": {
+            "type": "element",
+            "typeName": "IconText",
+            "props": {
+             "icon": {
+              "type": "element",
+              "typeName": "Icon",
+              "props": {
+               "name": "circle-dollar-sign",
+               "category": "finance"
+              },
+              "partial": false,
+              "hasDynamicProps": false,
+              "statementId": "kpi1icon"
+             },
+             "iconVariant": "neutral",
+             "iconSize": "m",
+             "title": "Revenue",
+             "subtitle": "Month to date",
+             "bold": false,
+             "layout": "horizontal"
+            },
+            "partial": false,
+            "hasDynamicProps": false,
+            "statementId": "kpi1lhs"
+           },
+           "rhs": {
+            "type": "element",
+            "typeName": "BoldText",
+            "props": {
+             "variant": "number",
+             "value": "$48,200",
+             "subtext": "+8.1%",
+             "subtextVariant": "metric",
+             "size": "sm"
+            },
+            "partial": false,
+            "hasDynamicProps": false,
+            "statementId": "kpi1rhs"
+           }
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "kpi1"
+         },
+         {
+          "type": "element",
+          "typeName": "SnippetCardItem",
+          "props": {
+           "id": "active-users",
+           "lhs": {
+            "type": "element",
+            "typeName": "IconText",
+            "props": {
+             "icon": {
+              "type": "element",
+              "typeName": "Icon",
+              "props": {
+               "name": "users",
+               "category": "people"
+              },
+              "partial": false,
+              "hasDynamicProps": false,
+              "statementId": "kpi2icon"
+             },
+             "iconVariant": "neutral",
+             "iconSize": "m",
+             "title": "Active Users",
+             "subtitle": "This month",
+             "bold": false,
+             "layout": "horizontal"
+            },
+            "partial": false,
+            "hasDynamicProps": false,
+            "statementId": "kpi2lhs"
+           },
+           "rhs": {
+            "type": "element",
+            "typeName": "BoldText",
+            "props": {
+             "variant": "number",
+             "value": "1,204",
+             "subtext": "+3.4%",
+             "subtextVariant": "metric",
+             "size": "sm"
+            },
+            "partial": false,
+            "hasDynamicProps": false,
+            "statementId": "kpi2rhs"
+           }
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "kpi2"
+         },
+         {
+          "type": "element",
+          "typeName": "SnippetCardItem",
+          "props": {
+           "id": "churn",
+           "lhs": {
+            "type": "element",
+            "typeName": "IconText",
+            "props": {
+             "icon": {
+              "type": "element",
+              "typeName": "Icon",
+              "props": {
+               "name": "user-minus",
+               "category": "people"
+              },
+              "partial": false,
+              "hasDynamicProps": false,
+              "statementId": "kpi3icon"
+             },
+             "iconVariant": "neutral",
+             "iconSize": "m",
+             "title": "Churn",
+             "subtitle": "This month",
+             "bold": false,
+             "layout": "horizontal"
+            },
+            "partial": false,
+            "hasDynamicProps": false,
+            "statementId": "kpi3lhs"
+           },
+           "rhs": {
+            "type": "element",
+            "typeName": "BoldText",
+            "props": {
+             "variant": "number",
+             "value": "1.8%",
+             "subtext": "-0.3%",
+             "subtextVariant": "metric",
+             "size": "sm"
+            },
+            "partial": false,
+            "hasDynamicProps": false,
+            "statementId": "kpi3rhs"
+           }
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "kpi3"
+         }
+        ],
+        "layout": "grid",
+        "responsive": true
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "kpiBlock"
+      },
+      {
+       "type": "element",
+       "typeName": "InlineHeader",
+       "props": {
+        "heading": "Top Products",
+        "description": "By units sold"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "productsHeader"
+      },
+      {
+       "type": "element",
+       "typeName": "CompositeCardBlock",
+       "props": {
+        "items": [
+         {
+          "type": "element",
+          "typeName": "CompositeCardItem",
+          "props": {
+           "id": "widget-pro",
+           "header": {
+            "type": "element",
+            "typeName": "IconText",
+            "props": {
+             "icon": {
+              "type": "element",
+              "typeName": "Icon",
+              "props": {
+               "name": "package",
+               "category": "shopping"
+              },
+              "partial": false,
+              "hasDynamicProps": false,
+              "statementId": "p1icon"
+             },
+             "iconVariant": "neutral",
+             "iconSize": "m",
+             "title": "Widget Pro",
+             "subtitle": "Best seller",
+             "bold": true,
+             "layout": "horizontal"
+            },
+            "partial": false,
+            "hasDynamicProps": false,
+            "statementId": "p1header"
+           },
+           "body": [
+            {
+             "type": "element",
+             "typeName": "MetricIndicatorInline",
+             "props": {
+              "value": "2,410 units",
+              "subtext": "Sold this month",
+              "trend": {
+               "direction": "up",
+               "value": 12
+              }
+             },
+             "partial": false,
+             "hasDynamicProps": false,
+             "statementId": "p1body"
+            }
+           ],
+           "footer": {
+            "price": {
+             "type": "element",
+             "typeName": "BoldText",
+             "props": {
+              "variant": "text",
+              "value": "$29.00",
+              "subtextVariant": "text",
+              "size": "sm"
+             },
+             "partial": false,
+             "hasDynamicProps": false
+            },
+            "button": {
+             "type": "element",
+             "typeName": "Button",
+             "props": {
+              "label": "View Details",
+              "action": {
+               "steps": [
+                {
+                 "type": "continue_conversation",
+                 "message": "Show details for Widget Pro"
+                }
+               ]
+              },
+              "variant": "secondary"
+             },
+             "partial": false,
+             "hasDynamicProps": true,
+             "statementId": "p1btn"
+            }
+           }
+          },
+          "partial": false,
+          "hasDynamicProps": true,
+          "statementId": "p1"
+         },
+         {
+          "type": "element",
+          "typeName": "CompositeCardItem",
+          "props": {
+           "id": "widget-mini",
+           "header": {
+            "type": "element",
+            "typeName": "IconText",
+            "props": {
+             "icon": {
+              "type": "element",
+              "typeName": "Icon",
+              "props": {
+               "name": "box",
+               "category": "shopping"
+              },
+              "partial": false,
+              "hasDynamicProps": false,
+              "statementId": "p2icon"
+             },
+             "iconVariant": "neutral",
+             "iconSize": "m",
+             "title": "Widget Mini",
+             "subtitle": "New arrival",
+             "bold": true,
+             "layout": "horizontal"
+            },
+            "partial": false,
+            "hasDynamicProps": false,
+            "statementId": "p2header"
+           },
+           "body": [
+            {
+             "type": "element",
+             "typeName": "MetricIndicatorInline",
+             "props": {
+              "value": "980 units",
+              "subtext": "Sold this month",
+              "trend": {
+               "direction": "up",
+               "value": 4
+              }
+             },
+             "partial": false,
+             "hasDynamicProps": false,
+             "statementId": "p2body"
+            }
+           ],
+           "footer": {
+            "price": {
+             "type": "element",
+             "typeName": "BoldText",
+             "props": {
+              "variant": "text",
+              "value": "$14.00",
+              "subtextVariant": "text",
+              "size": "sm"
+             },
+             "partial": false,
+             "hasDynamicProps": false
+            },
+            "button": {
+             "type": "element",
+             "typeName": "Button",
+             "props": {
+              "label": "View Details",
+              "action": {
+               "steps": [
+                {
+                 "type": "continue_conversation",
+                 "message": "Show details for Widget Mini"
+                }
+               ]
+              },
+              "variant": "secondary"
+             },
+             "partial": false,
+             "hasDynamicProps": true,
+             "statementId": "p2btn"
+            }
+           }
+          },
+          "partial": false,
+          "hasDynamicProps": true,
+          "statementId": "p2"
+         }
+        ],
+        "layout": "grid",
+        "responsive": true
+       },
+       "partial": false,
+       "hasDynamicProps": true,
+       "statementId": "productCards"
+      }
+     ]
+    },
+    "partial": false,
+    "hasDynamicProps": true,
+    "statementId": "root"
+   },
+   "errors": []
+  }
+ },
+ {
+  "name": "openui-example-6",
+  "schema": "openui",
+  "input": "Example 6 — Editable table and a selection form:\n\nroot = Stack([tableHeader, editTable, formHeader, prefsForm])\ntableHeader = InlineHeader(\"Team Roster\", \"Click a cell to edit\")\neditTable = EditableTable(\"roster\", [colName, colRole, colStart], [row1, row2])\ncolName = { type: \"text\", key: \"name\", header: \"Name\" }\ncolRole = { type: \"select\", key: \"role\", header: \"Role\", options: [roleEng, roleDesign] }\nroleEng = { value: \"eng\", label: \"Engineering\" }\nroleDesign = { value: \"design\", label: \"Design\" }\ncolStart = { type: \"date-single\", key: \"start\", header: \"Start Date\" }\nrow1 = { id: \"1\", values: [\"Alex Kim\", \"eng\", \"2024-01-15\"] }\nrow2 = { id: \"2\", values: [\"Jamie Lee\", \"design\", \"2024-03-02\"] }\nformHeader = InlineHeader(\"Preferences\", \"Tell us how you like to work\")\nprefsForm = Form(\"prefs\", formButtons, [fc1, fc2])\nfc1 = FormControl(\"Working Style\", styleCards, \"Pick the one that fits best\")\nstyleCards = OptionCards(\"style\", \"single\", [style1, style2])\nstyle1 = OptionCard(\"focused\", \"Deep Focus\", \"Long uninterrupted blocks\", style1icon)\nstyle1icon = Icon(\"target\", \"tools\")\nstyle2 = OptionCard(\"collab\", \"Collaborative\", \"Frequent pairing and syncs\", style2icon)\nstyle2icon = Icon(\"users\", \"people\")\nfc2 = FormControl(\"Tools\", toolChips, \"Select all that apply\")\ntoolChips = Chips(\"tools\", \"multiple\", [tool1, tool2, tool3])\ntool1 = ChipItem(\"figma\", \"Figma\", tool1icon)\ntool1icon = Icon(\"figma\", \"design\")\ntool2 = ChipItem(\"slack\", \"Slack\", tool2icon)\ntool2icon = Icon(\"message-square\", \"communication\")\ntool3 = ChipItem(\"notion\", \"Notion\", tool3icon)\ntool3icon = Icon(\"notebook\", \"text\")\nformButtons = Buttons([Button(\"Save\", Action([@ToAssistant(\"Save preferences\")]), \"primary\")])",
+  "expected": {
+   "root": {
+    "type": "element",
+    "typeName": "Stack",
+    "props": {
+     "children": [
+      {
+       "type": "element",
+       "typeName": "InlineHeader",
+       "props": {
+        "heading": "Team Roster",
+        "description": "Click a cell to edit"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "tableHeader"
+      },
+      {
+       "type": "element",
+       "typeName": "EditableTable",
+       "props": {
+        "name": "roster",
+        "columns": [
+         {
+          "type": "text",
+          "key": "name",
+          "header": "Name"
+         },
+         {
+          "type": "select",
+          "key": "role",
+          "header": "Role",
+          "options": [
+           {
+            "value": "eng",
+            "label": "Engineering"
+           },
+           {
+            "value": "design",
+            "label": "Design"
+           }
+          ]
+         },
+         {
+          "type": "date-single",
+          "key": "start",
+          "header": "Start Date"
+         }
+        ],
+        "data": [
+         {
+          "id": "1",
+          "values": [
+           "Alex Kim",
+           "eng",
+           "2024-01-15"
+          ]
+         },
+         {
+          "id": "2",
+          "values": [
+           "Jamie Lee",
+           "design",
+           "2024-03-02"
+          ]
+         }
+        ]
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "editTable"
+      },
+      {
+       "type": "element",
+       "typeName": "InlineHeader",
+       "props": {
+        "heading": "Preferences",
+        "description": "Tell us how you like to work"
+       },
+       "partial": false,
+       "hasDynamicProps": false,
+       "statementId": "formHeader"
+      },
+      {
+       "type": "element",
+       "typeName": "Form",
+       "props": {
+        "name": "prefs",
+        "buttons": {
+         "type": "element",
+         "typeName": "Buttons",
+         "props": {
+          "buttons": [
+           {
+            "type": "element",
+            "typeName": "Button",
+            "props": {
+             "label": "Save",
+             "action": {
+              "steps": [
+               {
+                "type": "continue_conversation",
+                "message": "Save preferences"
+               }
+              ]
+             },
+             "variant": "primary"
+            },
+            "partial": false,
+            "hasDynamicProps": true
+           }
+          ]
+         },
+         "partial": false,
+         "hasDynamicProps": true,
+         "statementId": "formButtons"
+        },
+        "fields": [
+         {
+          "type": "element",
+          "typeName": "FormControl",
+          "props": {
+           "label": "Working Style",
+           "input": {
+            "type": "element",
+            "typeName": "OptionCards",
+            "props": {
+             "name": "style",
+             "type": "single",
+             "items": [
+              {
+               "type": "element",
+               "typeName": "OptionCard",
+               "props": {
+                "value": "focused",
+                "title": "Deep Focus",
+                "subtitle": "Long uninterrupted blocks",
+                "topContent": {
+                 "type": "element",
+                 "typeName": "Icon",
+                 "props": {
+                  "name": "target",
+                  "category": "tools"
+                 },
+                 "partial": false,
+                 "hasDynamicProps": false,
+                 "statementId": "style1icon"
+                }
+               },
+               "partial": false,
+               "hasDynamicProps": false,
+               "statementId": "style1"
+              },
+              {
+               "type": "element",
+               "typeName": "OptionCard",
+               "props": {
+                "value": "collab",
+                "title": "Collaborative",
+                "subtitle": "Frequent pairing and syncs",
+                "topContent": {
+                 "type": "element",
+                 "typeName": "Icon",
+                 "props": {
+                  "name": "users",
+                  "category": "people"
+                 },
+                 "partial": false,
+                 "hasDynamicProps": false,
+                 "statementId": "style2icon"
+                }
+               },
+               "partial": false,
+               "hasDynamicProps": false,
+               "statementId": "style2"
+              }
+             ]
+            },
+            "partial": false,
+            "hasDynamicProps": false,
+            "statementId": "styleCards"
+           },
+           "hint": "Pick the one that fits best"
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "fc1"
+         },
+         {
+          "type": "element",
+          "typeName": "FormControl",
+          "props": {
+           "label": "Tools",
+           "input": {
+            "type": "element",
+            "typeName": "Chips",
+            "props": {
+             "name": "tools",
+             "type": "multiple",
+             "items": [
+              {
+               "type": "element",
+               "typeName": "ChipItem",
+               "props": {
+                "value": "figma",
+                "label": "Figma",
+                "icon": {
+                 "type": "element",
+                 "typeName": "Icon",
+                 "props": {
+                  "name": "figma",
+                  "category": "design"
+                 },
+                 "partial": false,
+                 "hasDynamicProps": false,
+                 "statementId": "tool1icon"
+                }
+               },
+               "partial": false,
+               "hasDynamicProps": false,
+               "statementId": "tool1"
+              },
+              {
+               "type": "element",
+               "typeName": "ChipItem",
+               "props": {
+                "value": "slack",
+                "label": "Slack",
+                "icon": {
+                 "type": "element",
+                 "typeName": "Icon",
+                 "props": {
+                  "name": "message-square",
+                  "category": "communication"
+                 },
+                 "partial": false,
+                 "hasDynamicProps": false,
+                 "statementId": "tool2icon"
+                }
+               },
+               "partial": false,
+               "hasDynamicProps": false,
+               "statementId": "tool2"
+              },
+              {
+               "type": "element",
+               "typeName": "ChipItem",
+               "props": {
+                "value": "notion",
+                "label": "Notion",
+                "icon": {
+                 "type": "element",
+                 "typeName": "Icon",
+                 "props": {
+                  "name": "notebook",
+                  "category": "text"
+                 },
+                 "partial": false,
+                 "hasDynamicProps": false,
+                 "statementId": "tool3icon"
+                }
+               },
+               "partial": false,
+               "hasDynamicProps": false,
+               "statementId": "tool3"
+              }
+             ]
+            },
+            "partial": false,
+            "hasDynamicProps": false,
+            "statementId": "toolChips"
+           },
+           "hint": "Select all that apply"
+          },
+          "partial": false,
+          "hasDynamicProps": false,
+          "statementId": "fc2"
+         }
+        ]
+       },
+       "partial": false,
+       "hasDynamicProps": true,
+       "statementId": "prefsForm"
+      }
+     ]
+    },
+    "partial": false,
+    "hasDynamicProps": true,
+    "statementId": "root"
+   },
+   "errors": []
+  }
+ },
+ {
   "name": "operators",
   "schema": "test",
   "input": "$a = 1\n$b = \"2\"\nroot = Card([Text($a + $b * 2 - -1 > 3 && !$c || $a == \"1\" ? \"yes\" : \"no\")])",

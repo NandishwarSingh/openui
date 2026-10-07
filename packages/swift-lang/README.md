@@ -126,6 +126,16 @@ The views follow react-ui's layouts and behavior rather than restyling them: car
 
 The schemas in `ChatComponents` live in `OpenUILang`, without SwiftUI, so a Swift server can build the chat prompt too. They're generated from `openuiChatLibrary` (see [Testing Locally](#testing-locally)).
 
+### The general library
+
+`OpenUILibrary.library` is react-ui's general `openuiLibrary`, for apps that aren't a chat: the same views without the chat-only follow-ups and sections, plus `Stack` (the root, a flex row or column), `Modal` (a sheet its `$boolean` binding opens; closing it writes `false` back) and a `Card` that takes Stack's layout props. Its schemas and prompt options are `OpenUIComponents`.
+
+```swift
+OpenUIRenderer(response: text, isStreaming: isStreaming, library: OpenUILibrary.library)
+
+let prompt = OpenUILibrary.library.prompt(OpenUIComponents.promptOptions)
+```
+
 ## API Reference
 
 ### Component Definition
@@ -227,7 +237,7 @@ swift test
 swift format lint --strict -r Sources Tests Package.swift
 ```
 
-The conformance fixtures in `Tests/OpenUILangTests/Fixtures` are generated from the TypeScript packages, which are the source of truth. They cover batch and streaming parsing, prop evaluation, prompts, OpenUI Cloud config, edit-mode merging, error hints, OpenUI Cloud's message format, the chart number formats and the chat library schemas. After changing `lang-core`, the chat library, react-ui's `sentinelParser` or its chart formatters, rebuild and regenerate them (the script imports react-ui's TypeScript source directly, so it needs Node 22.18 or newer), and regenerate `ChatComponents.swift` when the chat library changed:
+The conformance fixtures in `Tests/OpenUILangTests/Fixtures` are generated from the TypeScript packages, which are the source of truth. They cover batch and streaming parsing, prop evaluation, prompts, OpenUI Cloud config, edit-mode merging, error hints, OpenUI Cloud's message format, the chart number formats, and the schemas, prompts and examples of both libraries. After changing `lang-core`, react-ui's libraries, its `sentinelParser` or its chart formatters, rebuild and regenerate them (the script imports react-ui's TypeScript source directly, so it needs Node 22.18 or newer), and regenerate `ChatComponents.swift` and `OpenUIComponents.swift` when either library changed:
 
 ```bash
 pnpm run build:packages
