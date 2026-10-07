@@ -30,6 +30,31 @@ struct FixtureLibrary: ComponentLibrary {
         .props["text"] == "n 3")
   }
 
+  /// `preload` renders a response before the host is told about it; the first
+  /// `update` with the same text reports it once, as if nothing came before.
+  @Test func preloadDefersCallbacksToTheFirstUpdate() {
+    let runtime = makeRuntime()
+    var reported = 0
+    var stateUpdates = 0
+    runtime.onParseResult = { _ in reported += 1 }
+    runtime.onStateUpdate = { _ in stateUpdates += 1 }
+    let response = "$count = 3\nroot = Card([Text(\"n \" + $count)])"
+
+    runtime.preload(response: response, isStreaming: false)
+    #expect(reported == 0)
+    #expect(stateUpdates == 0)
+    #expect(runtime.store.get("$count") == 3)
+    #expect(
+      runtime.evaluatedRoot()?.props["children"]?.arrayValue?.first?.elementValue?
+        .props["text"] == "n 3")
+
+    runtime.update(response: response, isStreaming: false)
+    #expect(reported == 1)
+    runtime.update(response: response, isStreaming: false)
+    #expect(reported == 1)
+    #expect(stateUpdates == 0)
+  }
+
   @Test func keepsUserChangesWhenDeclarationsChange() {
     let runtime = makeRuntime()
     runtime.update(response: "$name = \"\"\nroot = Card([Text($name)])", isStreaming: true)

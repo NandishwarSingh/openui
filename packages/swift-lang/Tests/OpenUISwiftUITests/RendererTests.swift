@@ -235,6 +235,19 @@ import Testing
       #expect(host.fittingSize.height > 400, "rendered \(host.fittingSize)")
     }
 
+    /// The response shows on the very first layout, before any onChange runs.
+    /// A renderer in a lazy stack is rebuilt each time it scrolls back into
+    /// view; if it came back empty and then grew, the stack would keep
+    /// re-placing rows.
+    @Test func rendersOnTheFirstFrame() {
+      let host = NSHostingView(
+        rootView: OpenUIRenderer(
+          response: Self.examples[1].input, library: OpenUIChatLibrary.library
+        )
+        .frame(width: 420))
+      #expect(host.fittingSize.height > 400, "first frame was \(host.fittingSize)")
+    }
+
     @Test func passesParseResultsAndErrorsToTheHost() {
       final class Received {
         var parseResults = 0

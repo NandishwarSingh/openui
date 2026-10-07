@@ -18,7 +18,12 @@ public struct OpenUIRenderer<QueryLoader: View>: View {
   let onParseResult: ((ParseResult?) -> Void)?
   let onError: (([OpenUIError]) -> Void)?
 
-  @State private var context: OpenUIContext
+  // A StateObject because its initializer is an autoclosure: the context (and
+  // the runtime behind it) is created once per view, not each time a parent
+  // redraws and builds this struct again.
+  @StateObject private var holder: ContextHolder
+  private var context: OpenUIContext { holder.context }
+  @Environment(\.openUITheme) private var theme
 
   /// - Parameters:
   ///   - response: The response text so far.
@@ -49,9 +54,14 @@ public struct OpenUIRenderer<QueryLoader: View>: View {
     self.onStateUpdate = onStateUpdate
     self.onParseResult = onParseResult
     self.onError = onError
-    _context = State(
-      initialValue: OpenUIContext(
-        library: library, initialState: initialState, toolProvider: toolProvider))
+    // The context parses the response up front, so the first frame shows it.
+    // Without that, a renderer in a lazy stack is rebuilt empty each time it
+    // scrolls back into view, then grows, and the stack keeps re-placing rows.
+    _holder = StateObject(
+      wrappedValue: ContextHolder(
+        OpenUIContext(
+          library: library, initialState: initialState, toolProvider: toolProvider,
+          response: response, isStreaming: isStreaming)))
   }
 
   public var body: some View {
@@ -114,4 +124,11 @@ public struct DefaultQueryLoader: View {
   public var body: some View {
     ProgressView().controlSize(.small)
   }
+}
+
+/// Keeps a renderer's context for the life of the view.
+@MainActor
+private final class ContextHolder: ObservableObject {
+  let context: OpenUIContext
+  init(_ context: OpenUIContext) { self.context = context }
 }

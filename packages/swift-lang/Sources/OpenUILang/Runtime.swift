@@ -74,6 +74,18 @@ public final class OpenUIRuntime {
 
   // MARK: Parsing
 
+  /// Parses `response` so it can be rendered right away, without telling the
+  /// host or starting queries. The next `update` reports it and starts them,
+  /// as if it were the first.
+  public func preload(response: String?, isStreaming: Bool) {
+    guard !hasParsed else { return }
+    self.isStreaming = isStreaming
+    self.response = response
+    guard let response, !response.isEmpty else { return }
+    parseResult = streamParser.set(response)
+    initializeStoreIfNeeded()
+  }
+
   /// Feeds the latest full response text. Appended text parses incrementally.
   public func update(response: String?, isStreaming: Bool) {
     self.isStreaming = isStreaming

@@ -38,9 +38,11 @@ public final class OpenUIContext {
   @ObservationIgnored var onError: (([OpenUIError]) -> Void)?
   @ObservationIgnored private var unsubscribers: [() -> Void] = []
 
+  /// - Parameter response: The response to show on the first render, before
+  ///   ``update(response:isStreaming:)`` is called.
   public init(
     library: SwiftUILibrary, initialState: OpenUIObject? = nil,
-    toolProvider: (any ToolProvider)? = nil
+    toolProvider: (any ToolProvider)? = nil, response: String? = nil, isStreaming: Bool = false
   ) {
     self.library = library
     self.runtime = OpenUIRuntime(
@@ -51,6 +53,7 @@ public final class OpenUIContext {
     runtime.onError = { [weak self] errors in self?.onError?(errors) }
     unsubscribers.append(runtime.store.subscribe { [weak self] in self?.revision += 1 })
     unsubscribers.append(runtime.queries.subscribe { [weak self] in self?.revision += 1 })
+    runtime.preload(response: response, isStreaming: isStreaming)
   }
 
   /// Feeds the latest response text.
