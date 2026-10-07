@@ -290,12 +290,9 @@ struct MarkdownBlocks: View {
       }
       if line.isEmpty {
         flushParagraph()
-      } else if let hashes = line.prefix(while: { $0 == "#" }).count as Int?, hashes > 0,
-        hashes <= 6,
-        line.dropFirst(hashes).first == " "
-      {
+      } else if let level = headingLevel(line) {
         flushParagraph()
-        blocks.append(.heading(level: hashes, text: String(line.dropFirst(hashes + 1))))
+        blocks.append(.heading(level: level, text: String(line.dropFirst(level + 1))))
       } else if line == "---" || line == "***" {
         flushParagraph()
         blocks.append(.rule)
@@ -323,6 +320,12 @@ struct MarkdownBlocks: View {
     if let lines = code { blocks.append(.code(language: codeLanguage, codeBlockText(lines))) }
     flushParagraph()
     return blocks
+  }
+
+  /// The level of a `#`–`######` heading line.
+  private static func headingLevel(_ line: String) -> Int? {
+    let hashes = line.prefix { $0 == "#" }.count
+    return (1...6).contains(hashes) && line.dropFirst(hashes).first == " " ? hashes : nil
   }
 
   /// A fenced block's text, trimmed like react-ui's (`String(children).trim()`).
