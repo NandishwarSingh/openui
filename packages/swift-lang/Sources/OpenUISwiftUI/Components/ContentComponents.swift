@@ -324,27 +324,324 @@ struct ImageBlockView: View {
   }
 }
 
+/// react-ui's ImageGallery: the first five images in a mosaic, a "Show All"
+/// button when there are more, and a viewer with every image. Tapping an image
+/// opens the viewer on it.
 struct ImageGalleryView: View {
   let props: ComponentProps
+  @State private var selected = 0
+  @State private var showsViewer = false
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    ScrollView(.horizontal, showsIndicators: false) {
-      HStack(alignment: .top, spacing: theme.spacing) {
-        ForEach(Array(props.array("images").enumerated()), id: \.offset) { _, image in
-          VStack(alignment: .leading, spacing: 4) {
-            RemoteImage(src: image["src"].stringValue, alt: displayText(image["alt"]))
-              .frame(width: 220, height: 150)
-              .clipped()
-            let details = displayText(image["details"])
-            if !details.isEmpty {
-              Text(details).font(.caption).foregroundStyle(.secondary).frame(
-                width: 220, alignment: .leading)
-            }
+    let images = props.array("images")
+    if !images.isEmpty {
+      GalleryMosaic {
+        ForEach(Array(images.prefix(GalleryMosaic.maxImages).enumerated()), id: \.offset) {
+          index, image in
+          Button {
+            selected = index
+            showsViewer = true
+          } label: {
+            GalleryTile(src: image["src"].stringValue)
           }
+          .buttonStyle(.plain)
+          .accessibilityLabel(galleryImageLabel(image, index))
         }
       }
+      .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadius))
+      .overlay(alignment: .bottomTrailing) {
+        if images.count > GalleryMosaic.maxImages {
+          // Filled by hand: over a photo, a bordered button that loses its
+          // fill in an inactive Mac window can't be read.
+          Button {
+            showsViewer = true
+          } label: {
+            Text("Show All")
+              .font(.footnote.weight(.medium))
+              .foregroundStyle(theme.onAccent)
+              .padding(.horizontal, 10)
+              .padding(.vertical, 5)
+              .background(theme.accent, in: RoundedRectangle(cornerRadius: theme.smallCornerRadius))
+          }
+          .buttonStyle(.plain)
+          .padding(5)
+        }
+      }
+      .sheet(isPresented: $showsViewer) {
+        GalleryViewer(images: images, selected: $selected)
+          .environment(\.openUITheme, theme)
+      }
     }
+  }
+}
+
+private func galleryImageLabel(_ image: OpenUIValue, _ index: Int) -> String {
+  let alt = displayText(image["alt"])
+  return alt.isEmpty ? "Gallery image \(index + 1)" : alt
+}
+
+/// A mosaic image that zooms in a little under the pointer, as react-ui's do.
+private struct GalleryTile: View {
+  let src: String?
+  @State private var hovering = false
+
+  var body: some View {
+    RemoteImage(src: src, alt: "", rounded: false)
+      .scaleEffect(hovering ? 1.05 : 1)
+      .clipped()
+      .contentShape(Rectangle())
+      .onHover { hovering in
+        withOpenUIAnimation(.easeOut(duration: 0.3)) { self.hovering = hovering }
+      }
+  }
+}
+
+/// Lays out up to five gallery images like react-ui's grid templates: one or
+/// two side by side, otherwise the first image large and the rest in two rows
+/// beside it (or, when narrow, in rows under it).
+struct GalleryMosaic: Layout {
+  static let maxImages = 5
+  /// react-ui caps the grid at 376px.
+  static let maxHeight: CGFloat = 376
+  /// react-ui's `space-s`.
+  static let gap: CGFloat = 8
+  /// react-ui switches to its narrow templates under a 768px viewport. A chat
+  /// column is much narrower than the window it is in, so this goes by the
+  /// gallery's own width.
+  static let narrowWidth: CGFloat = 520
+
+  /// A CSS grid template: column weights (`fr`), a row count, and each image's
+  /// column, row and spans.
+  struct Template: Equatable {
+    var columns: [CGFloat]
+    var rows: Int
+    var cells: [Cell]
+
+    struct Cell: Equatable {
+      var column: Int
+      var row: Int
+      var columnSpan = 1
+      var rowSpan = 1
+    }
+  }
+
+  static func template(count: Int, narrow: Bool) -> Template {
+    typealias Cell = Template.Cell
+    switch min(count, maxImages) {
+    case 0: return Template(columns: [1], rows: 1, cells: [])
+    case 1: return Template(columns: [1], rows: 1, cells: [Cell(column: 0, row: 0)])
+    case 2:
+      return Template(
+        columns: [1, 1], rows: 1, cells: [Cell(column: 0, row: 0), Cell(column: 1, row: 0)])
+    case 3 where narrow:
+      return Template(
+        columns: [1, 1], rows: 2,
+        cells: [
+          Cell(column: 0, row: 0, columnSpan: 2), Cell(column: 0, row: 1), Cell(column: 1, row: 1),
+        ])
+    case 3:
+      return Template(
+        columns: [1, 1], rows: 2,
+        cells: [
+          Cell(column: 0, row: 0, rowSpan: 2), Cell(column: 1, row: 0), Cell(column: 1, row: 1),
+        ])
+    case 4:
+      return Template(
+        columns: [1, 1, 1, 1], rows: 2,
+        cells: [
+          Cell(column: 0, row: 0, columnSpan: 2, rowSpan: 2),
+          Cell(column: 2, row: 0, columnSpan: 2),
+          Cell(column: 2, row: 1), Cell(column: 3, row: 1),
+        ])
+    case _ where narrow:
+      return Template(
+        columns: Array(repeating: 1, count: 6), rows: 2,
+        cells: [
+          Cell(column: 0, row: 0, columnSpan: 3), Cell(column: 3, row: 0, columnSpan: 3),
+          Cell(column: 0, row: 1, columnSpan: 2), Cell(column: 2, row: 1, columnSpan: 2),
+          Cell(column: 4, row: 1, columnSpan: 2),
+        ])
+    default:
+      return Template(
+        columns: [2, 1, 1], rows: 2,
+        cells: [
+          Cell(column: 0, row: 0, rowSpan: 2), Cell(column: 1, row: 0), Cell(column: 2, row: 0),
+          Cell(column: 1, row: 1), Cell(column: 2, row: 1),
+        ])
+    }
+  }
+
+  /// react-ui's grid takes its height from the images, up to 376px. That
+  /// isn't known until they load, so this uses a fixed shape instead: no jump
+  /// when they arrive.
+  static func height(width: CGFloat, count: Int) -> CGFloat {
+    let ratio: CGFloat =
+      switch count {
+      case 1: 0.6
+      case 2: 0.45
+      default: width < narrowWidth ? 0.8 : 0.55
+      }
+    return min(maxHeight, (width * ratio).rounded())
+  }
+
+  /// Each image's frame, in order.
+  static func frames(count: Int, in bounds: CGRect) -> [CGRect] {
+    let template = template(count: count, narrow: bounds.width < narrowWidth)
+    let unit =
+      (bounds.width - gap * CGFloat(template.columns.count - 1)) / template.columns.reduce(0, +)
+    let rowHeight = (bounds.height - gap * CGFloat(template.rows - 1)) / CGFloat(template.rows)
+    func x(_ column: Int) -> CGFloat {
+      bounds.minX + template.columns.prefix(column).reduce(0, +) * unit + gap * CGFloat(column)
+    }
+    return template.cells.map { cell in
+      let columns = template.columns[cell.column..<cell.column + cell.columnSpan]
+      return CGRect(
+        x: x(cell.column),
+        y: bounds.minY + (rowHeight + gap) * CGFloat(cell.row),
+        width: columns.reduce(0, +) * unit + gap * CGFloat(cell.columnSpan - 1),
+        height: rowHeight * CGFloat(cell.rowSpan) + gap * CGFloat(cell.rowSpan - 1))
+    }
+  }
+
+  func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+    // Without a usable width (an unbounded stack), fall back to a phone's.
+    let width = proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? 360
+    return CGSize(width: width, height: Self.height(width: width, count: subviews.count))
+  }
+
+  func placeSubviews(
+    in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+  ) {
+    for (subview, frame) in zip(subviews, Self.frames(count: subviews.count, in: bounds)) {
+      subview.place(at: frame.origin, proposal: ProposedViewSize(frame.size))
+    }
+  }
+}
+
+/// react-ui's gallery modal: every image, one at a time, over a strip of
+/// thumbnails. Swipe or use the arrow keys to move between them.
+struct GalleryViewer: View {
+  let images: [OpenUIValue]
+  @Binding var selected: Int
+  @State private var page: Int?
+  @FocusState private var focused: Bool
+  @Environment(\.dismiss) private var dismiss
+  @Environment(\.openUITheme) private var theme
+
+  init(images: [OpenUIValue], selected: Binding<Int>) {
+    self.images = images
+    _selected = selected
+    _page = State(initialValue: selected.wrappedValue)
+  }
+
+  var body: some View {
+    VStack(spacing: 24) {
+      HStack {
+        Text("All Photos").font(.headline)
+        Spacer()
+        Button {
+          dismiss()
+        } label: {
+          Image(systemName: "xmark")
+            .font(.footnote.weight(.semibold))
+            .frame(width: 28, height: 28)
+            .background(
+              theme.sunkSurface, in: RoundedRectangle(cornerRadius: theme.smallCornerRadius))
+        }
+        .buttonStyle(.plain)
+        .keyboardShortcut(.cancelAction)
+        .accessibilityLabel("Close gallery")
+      }
+      .padding(.horizontal, 24)
+      pages
+      thumbnails
+    }
+    .padding(.vertical, 24)
+    #if os(macOS)
+      .frame(minWidth: 560, idealWidth: 720, minHeight: 520, idealHeight: 640)
+    #endif
+    .focusable()
+    .focusEffectDisabled()
+    .focused($focused)
+    .onAppear { focused = true }
+    .onKeyPress(.leftArrow) { show(selected - 1) }
+    .onKeyPress(.rightArrow) { show(selected + 1) }
+    .onChange(of: page) { _, page in
+      if let page { selected = page }
+    }
+  }
+
+  /// The images full size, one page each. Pages have a fixed size, so the
+  /// lazy stack never has to re-measure anything while it scrolls.
+  private var pages: some View {
+    ScrollView(.horizontal) {
+      LazyHStack(spacing: 0) {
+        ForEach(images.indices, id: \.self) { index in
+          let details = displayText(images[index]["details"])
+          VStack(spacing: 8) {
+            RemoteImage(
+              src: images[index]["src"].stringValue, alt: galleryImageLabel(images[index], index),
+              fit: true
+            )
+            .frame(maxHeight: .infinity)
+            if !details.isEmpty {
+              Text(details).font(.footnote).foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            }
+          }
+          .padding(.horizontal, 24)
+          .containerRelativeFrame([.horizontal, .vertical])
+          .id(index)
+        }
+      }
+      .scrollTargetLayout()
+    }
+    .scrollTargetBehavior(.paging)
+    .scrollPosition(id: $page)
+    .scrollIndicators(.never)
+  }
+
+  private var thumbnails: some View {
+    ScrollViewReader { proxy in
+      ScrollView(.horizontal, showsIndicators: false) {
+        HStack(spacing: GalleryMosaic.gap) {
+          ForEach(images.indices, id: \.self) { index in
+            let isSelected = index == selected
+            Button {
+              page = index
+            } label: {
+              RemoteImage(src: images[index]["src"].stringValue, alt: "")
+                .frame(height: 116)
+                .containerRelativeFrame(.horizontal) { width, _ in
+                  // Thumbnails share the row, but are at least 174 wide.
+                  let count = CGFloat(images.count)
+                  return max(174, (width - 48 - GalleryMosaic.gap * (count - 1)) / count)
+                }
+                .opacity(isSelected ? 1 : 0.6)
+                .overlay(
+                  RoundedRectangle(cornerRadius: theme.smallCornerRadius)
+                    .strokeBorder(isSelected ? theme.accent : .clear))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(galleryImageLabel(images[index], index))
+            .accessibilityAddTraits(isSelected ? .isSelected : [])
+            .id(index)
+          }
+        }
+        .padding(.horizontal, 24)
+      }
+      .onAppear { proxy.scrollTo(selected, anchor: .center) }
+      .onChange(of: selected) { _, selected in
+        withOpenUIAnimation(Motion.reveal) { proxy.scrollTo(selected, anchor: .center) }
+      }
+    }
+  }
+
+  private func show(_ index: Int) -> KeyPress.Result {
+    guard images.indices.contains(index) else { return .ignored }
+    page = index
+    return .handled
   }
 }
 
@@ -358,6 +655,8 @@ struct RemoteImage: View {
   let src: String?
   let alt: String
   var fit = false
+  /// Off for images inside something that clips them, like the gallery mosaic.
+  var rounded = true
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
@@ -385,7 +684,7 @@ struct RemoteImage: View {
           .clipped()
       }
     }
-    .clipShape(RoundedRectangle(cornerRadius: theme.smallCornerRadius))
+    .clipShape(RoundedRectangle(cornerRadius: rounded ? theme.smallCornerRadius : 0))
     .accessibilityLabel(alt)
   }
 

@@ -453,3 +453,39 @@ let globalTestLibrary = SwiftUILibrary(
         == [.paragraph("See ![a](https://x.test/a.png) here")])
   }
 }
+
+@Suite struct GalleryMosaicTests {
+  /// The frames tile the gallery like react-ui's grid templates: inside the
+  /// bounds, no overlaps, and the first image the largest.
+  @Test(arguments: [false, true], 1...5)
+  func tilesLikeReactUI(narrow: Bool, count: Int) {
+    let width: CGFloat = narrow ? 360 : 700
+    let bounds = CGRect(
+      x: 0, y: 0, width: width, height: GalleryMosaic.height(width: width, count: count))
+    let frames = GalleryMosaic.frames(count: count, in: bounds)
+    #expect(frames.count == count)
+    for (index, frame) in frames.enumerated() {
+      #expect(bounds.insetBy(dx: -0.5, dy: -0.5).contains(frame))
+      for other in frames[(index + 1)...] {
+        #expect(frame.intersection(other).width < 0.5 || frame.intersection(other).height < 0.5)
+      }
+      #expect(frame.width * frame.height <= frames[0].width * frames[0].height + 0.5)
+    }
+    // Nothing left uncovered but the gaps.
+    let area = frames.reduce(0) { $0 + $1.width * $1.height }
+    #expect(area > bounds.width * bounds.height * 0.9)
+  }
+
+  @Test func usesReactUITemplates() {
+    // Five or more, wide: 2fr 1fr 1fr with the first image down both rows.
+    let wide = GalleryMosaic.frames(count: 5, in: CGRect(x: 0, y: 0, width: 708, height: 376))
+    #expect(wide[0] == CGRect(x: 0, y: 0, width: 346, height: 376))
+    #expect(wide[1] == CGRect(x: 354, y: 0, width: 173, height: 184))
+    #expect(wide[4] == CGRect(x: 535, y: 192, width: 173, height: 184))
+    // Narrow: two on top, three below.
+    let narrow = GalleryMosaic.frames(count: 5, in: CGRect(x: 0, y: 0, width: 368, height: 288))
+    #expect(narrow[0].width == narrow[1].width)
+    #expect(narrow[2].minY == narrow[3].minY && narrow[3].minY == narrow[4].minY)
+    #expect(GalleryMosaic.height(width: 1200, count: 5) == GalleryMosaic.maxHeight)
+  }
+}
