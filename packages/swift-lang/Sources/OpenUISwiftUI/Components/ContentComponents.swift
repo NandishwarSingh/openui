@@ -222,26 +222,88 @@ private struct Banner: View {
 
 // MARK: - Code
 
+/// A code block like react-ui's: Prism's `vscDarkPlus` colors (in light mode
+/// too), and a copy button in the corner (on hover on the Mac, as on the web).
 struct CodeBlockView: View {
   let props: ComponentProps
-  @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 6) {
-      if let language = props.string("language"), !language.isEmpty {
-        Text(language).font(.caption.weight(.medium)).foregroundStyle(.secondary)
-      }
-      ScrollView(.horizontal, showsIndicators: false) {
-        Text(props.text("codeString"))
-          .font(.system(.callout, design: .monospaced))
-          .textSelection(.enabled)
-          .fixedSize(horizontal: true, vertical: false)
-      }
-    }
-    .padding(12)
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .background(theme.sunkSurface, in: RoundedRectangle(cornerRadius: theme.smallCornerRadius))
+    CodeBlockContent(
+      code: props.text("codeString"), language: props.string("language"),
+      theme: .darkPlus)
   }
+}
+
+/// Highlighted code with a copy button, shared with code in markdown.
+struct CodeBlockContent: View {
+  let code: String
+  let language: String?
+  let theme: SyntaxHighlighter.Theme
+  @State private var copied = false
+  @State private var hovering = false
+
+  var body: some View {
+    ScrollView(.horizontal, showsIndicators: false) {
+      Text(SyntaxHighlighter.highlight(code, language: language, theme: theme))
+        .font(.system(size: 13, design: .monospaced))
+        .lineSpacing(4)
+        .textSelection(.enabled)
+        .fixedSize(horizontal: true, vertical: false)
+        .padding(13)
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .background(theme.background, in: RoundedRectangle(cornerRadius: 8))
+    .overlay(alignment: .topTrailing) {
+      copyButton
+        .padding(8)
+        .opacity(showsCopyButton ? 1 : 0)
+        .animation(.easeInOut(duration: 0.2), value: showsCopyButton)
+    }
+    .onHover { hovering = $0 }
+  }
+
+  private var showsCopyButton: Bool {
+    #if os(macOS)
+      hovering || copied
+    #else
+      true
+    #endif
+  }
+
+  private var copyButton: some View {
+    Button {
+      copyToPasteboard(code)
+      copied = true
+      Task {
+        try? await Task.sleep(for: .seconds(1))
+        copied = false
+      }
+    } label: {
+      Image(systemName: copied ? "checkmark" : "doc.on.doc")
+        .font(.caption.weight(.semibold))
+        .contentTransition(.symbolEffect(.replace))
+        .foregroundStyle(copied ? Color.green : Color.primary)
+        .frame(width: 26, height: 26)
+        .background(
+          copied ? Color.green.opacity(0.15) : Color.platformElevatedBackground,
+          in: RoundedRectangle(cornerRadius: 6)
+        )
+        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.primary.opacity(0.12)))
+    }
+    .buttonStyle(.plain)
+    .accessibilityLabel(copied ? "Copied to clipboard" : "Copy code")
+  }
+}
+
+/// Puts `text` on the system pasteboard.
+@MainActor
+func copyToPasteboard(_ text: String) {
+  #if os(macOS)
+    NSPasteboard.general.clearContents()
+    NSPasteboard.general.setString(text, forType: .string)
+  #else
+    UIPasteboard.general.string = text
+  #endif
 }
 
 // MARK: - Images

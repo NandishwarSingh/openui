@@ -119,7 +119,9 @@ struct MarkdownBlocks: View {
     case bullet(String)
     case numbered(String, String)
     case quote(String)
-    case code(String)
+    case code(language: String?, String)
+    /// A line that is only `![alt](url)`.
+    case image(alt: String, url: String)
     /// `$$ … $$` math. There's no native TeX renderer, so it shows as source.
     case math(String)
     case table(header: [String], rows: [[String]])
@@ -130,6 +132,7 @@ struct MarkdownBlocks: View {
   let blocks: [Block]
   /// Renders `[n]` markers as citations (TextContent does, MarkDownRenderer doesn't).
   let citations: Bool
+  @Environment(\.colorScheme) private var colorScheme
 
   init(_ source: String, citations: Bool = false) {
     blocks = Self.parse(source)
@@ -170,8 +173,12 @@ struct MarkdownBlocks: View {
         .foregroundStyle(.secondary)
         .padding(.leading, 10)
         .overlay(alignment: .leading) { Rectangle().fill(.secondary.opacity(0.4)).frame(width: 3) }
-    case .code(let text):
-      Text(text).font(.system(.callout, design: .monospaced))
+    case .code(let language, let text):
+      // react-ui's markdown uses the CodeBlock, with oneLight in light mode.
+      CodeBlockContent(
+        code: text, language: language, theme: colorScheme == .dark ? .darkPlus : .oneLight)
+    case .image(let alt, let url):
+      RemoteImage(src: url, alt: alt, fit: true)
     case .math(let tex):
       Text(tex)
         .font(.system(.callout, design: .monospaced))
@@ -203,6 +210,7 @@ struct MarkdownBlocks: View {
     var blocks: [Block] = []
     var paragraph: [String] = []
     var code: [String]? = nil
+    var codeLanguage: String?
     var math: [String]? = nil
     var table: [[String]] = []
 
@@ -266,11 +274,13 @@ struct MarkdownBlocks: View {
       }
       if line.hasPrefix("```") {
         if let lines = code {
-          blocks.append(.code(lines.joined(separator: "\n")))
+          blocks.append(.code(language: codeLanguage, codeBlockText(lines)))
           code = nil
         } else {
           flushParagraph()
           code = []
+          let info = line.dropFirst(3).split(separator: " ").first.map(String.init)
+          codeLanguage = info?.isEmpty == false ? info : nil
         }
         continue
       }
@@ -298,6 +308,9 @@ struct MarkdownBlocks: View {
         flushParagraph()
         blocks.append(
           .numbered(String(line[...dot]), String(line[line.index(dot, offsetBy: 2)...])))
+      } else if let image = Self.image(line) {
+        flushParagraph()
+        blocks.append(image)
       } else if line.hasPrefix(">") {
         flushParagraph()
         blocks.append(.quote(String(line.dropFirst()).trimmingCharacters(in: .whitespaces)))
@@ -307,9 +320,22 @@ struct MarkdownBlocks: View {
     }
     if !table.isEmpty { flushTable() }
     if let lines = math { blocks.append(.math(lines.joined(separator: "\n"))) }
-    if let lines = code { blocks.append(.code(lines.joined(separator: "\n"))) }
+    if let lines = code { blocks.append(.code(language: codeLanguage, codeBlockText(lines))) }
     flushParagraph()
     return blocks
+  }
+
+  /// A fenced block's text, trimmed like react-ui's (`String(children).trim()`).
+  private static func codeBlockText(_ lines: [String]) -> String {
+    lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+
+  /// `![alt](url)` (optionally with a title) alone on a line.
+  static func image(_ line: String) -> Block? {
+    guard
+      let match = line.wholeMatch(of: /!\[([^\]]*)\]\((\S+?)(?:\s+"[^"]*")?\)/)
+    else { return nil }
+    return .image(alt: String(match.1), url: String(match.2))
   }
 }
 

@@ -372,3 +372,84 @@ let globalTestLibrary = SwiftUILibrary(
     #expect(SliderView.errors([.nan], minimum: 0, maximum: 100) == ["Invalid number"])
   }
 }
+
+/// The highlighter's token kinds, standing in for Prism's.
+@Suite struct SyntaxHighlighterTests {
+  func kinds(_ code: String, _ language: String) -> [String: SyntaxHighlighter.Token] {
+    var kinds: [String: SyntaxHighlighter.Token] = [:]
+    for (text, token) in SyntaxHighlighter.tokenize(code, language: language)
+    where !text.trimmingCharacters(in: .whitespaces).isEmpty {
+      kinds[text] = token
+    }
+    return kinds
+  }
+
+  @Test func keepsTheSourceIntact() {
+    for (code, language) in [
+      ("const total = items.map(x => x * 2) // twice\n", "ts"),
+      ("def f(x):\n    \"\"\"doc\"\"\"\n    return x  # done", "python"),
+      ("{\"a\": [1, true, null]}", "json"), ("<a href=\"/x\">Hi</a>", "html"),
+      ("SELECT name FROM users WHERE id = 3", "sql"), ("let s = \"unfinished", "swift"),
+    ] {
+      let joined = SyntaxHighlighter.tokenize(code, language: language).map(\.0).joined()
+      #expect(joined == code)
+    }
+  }
+
+  @Test func classifiesTokensLikePrism() {
+    let ts = kinds("import { x } from \"y\"\nconst total = sum(3.5) // note", "ts")
+    #expect(ts["import"] == .control)
+    #expect(ts["const"] == .keyword)
+    #expect(ts["\"y\""] == .string)
+    #expect(ts["sum"] == .function)
+    #expect(ts["3.5"] == .number)
+    #expect(ts["// note"] == .comment)
+    #expect(ts["total"] == .plain)
+
+    let python = kinds("def greet(name):\n    return None  # nothing", "python")
+    #expect(python["def"] == .keyword)
+    #expect(python["greet"] == .function)
+    #expect(python["return"] == .control)
+    #expect(python["None"] == .constant)
+    #expect(python["# nothing"] == .comment)
+
+    let json = kinds("{\"name\": \"Ada\", \"age\": 36, \"ok\": true}", "json")
+    #expect(json["\"name\""] == .property)
+    #expect(json["\"Ada\""] == .string)
+    #expect(json["36"] == .number)
+    #expect(json["true"] == .constant)
+
+    let html = kinds("<a href=\"/x\">Hi</a>", "html")
+    #expect(html["<a"] == .tag)
+    #expect(html["href"] == .attribute)
+    #expect(html["\"/x\""] == .string)
+
+    #expect(kinds("SELECT id FROM t", "sql")["SELECT"] == .keyword)
+  }
+
+  @Test func colorsPlainWordsPerLanguage() {
+    let dark = SyntaxHighlighter.Theme.darkPlus
+    #expect(dark.color(.plain, language: "ts") != dark.color(.plain, language: "python"))
+    #expect(dark.color(.punctuation, language: "ts") == dark.plain)
+  }
+}
+
+@MainActor
+@Suite struct MarkdownCodeAndImageTests {
+  @Test func keepsTheFenceLanguageAndTrims() {
+    #expect(
+      MarkdownBlocks.parse("```swift\nlet x = 1\n\n```")
+        == [.code(language: "swift", "let x = 1")])
+    #expect(MarkdownBlocks.parse("```\nplain\n```") == [.code(language: nil, "plain")])
+  }
+
+  @Test func readsImageLines() {
+    #expect(
+      MarkdownBlocks.parse("Intro\n![A lake](https://x.test/l.jpg \"Lake\")")
+        == [.paragraph("Intro"), .image(alt: "A lake", url: "https://x.test/l.jpg")])
+    // Inline in a sentence it stays part of the paragraph.
+    #expect(
+      MarkdownBlocks.parse("See ![a](https://x.test/a.png) here")
+        == [.paragraph("See ![a](https://x.test/a.png) here")])
+  }
+}
