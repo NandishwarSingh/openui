@@ -352,3 +352,23 @@ let globalTestLibrary = SwiftUILibrary(
     }
   }
 }
+
+/// The slider's range logic, against react-ui's SliderBlock.
+@MainActor
+@Suite struct SliderTests {
+  @Test func snapsToStepsWithinBounds() {
+    #expect(RangeSlider.snap(23, bounds: 0...100, step: 5) == 25)
+    #expect(RangeSlider.snap(-7, bounds: 0...100, step: 5) == 0)
+    #expect(RangeSlider.snap(140, bounds: 0...100, step: 5) == 100)
+    #expect(RangeSlider.snap(12.4, bounds: 10...20, step: 0.5) == 12.5)
+  }
+
+  @Test func reportsReactUIErrors() {
+    #expect(SliderView.errors([20, 80], minimum: 0, maximum: 100) == ["", ""])
+    #expect(
+      SliderView.errors([120], minimum: 0, maximum: 100) == ["Value must be between 0 and 100"])
+    #expect(
+      SliderView.errors([90, 10], minimum: 0, maximum: 100) == ["Min must be less than max", ""])
+    #expect(SliderView.errors([.nan], minimum: 0, maximum: 100) == ["Invalid number"])
+  }
+}

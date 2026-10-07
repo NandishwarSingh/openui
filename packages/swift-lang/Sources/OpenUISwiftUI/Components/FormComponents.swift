@@ -436,6 +436,9 @@ struct DatePickerView: View {
   }
 }
 
+/// A slider like react-ui's SliderBlock: the label with editable values (a
+/// menu of steps when discrete), then the track. Two values make it a range
+/// with a thumb at each end.
 struct SliderView: View {
   let props: ComponentProps
   @Environment(OpenUIContext.self) private var context
@@ -446,34 +449,45 @@ struct SliderView: View {
     let state = FieldContext(props, context: context, form: form)
     let minimum = props.number("min") ?? 0
     let maximum = max(props.number("max") ?? 100, minimum)
-    let step = props.string("variant") == "discrete" ? max(props.number("step") ?? 1, 0.0001) : nil
+    let discrete = props.string("variant") == "discrete"
+    // react-ui steps a continuous slider by at least 1.
+    let step = discrete ? max(props.number("step") ?? 1, 0.0001) : max(1, props.number("step") ?? 1)
     let stored = state.field.value.isNullish ? props["defaultValue"] : state.field.value
     let values = (stored.arrayValue ?? []).compactMap(\.numberValue)
-    let current = values.isEmpty ? [minimum] : values
-    VStack(alignment: .leading, spacing: 4) {
-      HStack {
-        Text(props.string("label") ?? state.field.name).font(.subheadline)
-        Spacer()
-        Text(current.map(jsNumberToString).joined(separator: " – "))
-          .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
+    let current = values.isEmpty ? [minimum] : Array(values.prefix(2))
+    let errors = discrete ? [] : Self.errors(current, minimum: minimum, maximum: maximum)
+    let set: @MainActor ([Double]) -> Void = { next in
+      state.field.setValue(.array(next.map { .number($0) }))
+      if !state.rules.isEmpty {
+        validation?.validateField(state.field.name, value: .number(next[0]), rules: state.rules)
       }
-      ForEach(current.indices, id: \.self) { index in
-        let binding = Binding<Double>(
-          get: { min(max(current[index], minimum), maximum) },
-          set: { newValue in
-            var next = current
-            next[index] = newValue
-            state.field.setValue(.array(next.map { .number($0) }))
-            if !state.rules.isEmpty {
-              validation?.validateField(
-                state.field.name, value: .number(next[0]), rules: state.rules)
-            }
-          })
-        if let step {
-          Slider(value: binding, in: minimum...maximum, step: step)
-        } else {
-          Slider(value: binding, in: minimum...maximum)
+    }
+    VStack(alignment: .leading, spacing: 6) {
+      HStack(spacing: 8) {
+        Text(props.string("label") ?? state.field.name).font(.subheadline)
+        Spacer(minLength: 8)
+        // Step-derived controls wait until the props stop streaming.
+        if !context.isStreaming {
+          SliderValueControls(
+            values: current, minimum: minimum, maximum: maximum, step: step, discrete: discrete,
+            errors: errors, onChange: set)
         }
+      }
+      if !context.isStreaming, let error = errors.first(where: { !$0.isEmpty }) {
+        Label(error, systemImage: "exclamationmark.circle")
+          .font(.caption).foregroundStyle(.red)
+      }
+      if current.count > 1 {
+        RangeSlider(
+          lower: min(current[0], current[1]), upper: max(current[0], current[1]),
+          bounds: minimum...maximum, step: step
+        ) { set([$0, $1]) }
+      } else {
+        Slider(
+          value: Binding(
+            get: { min(max(current[0], minimum), maximum) },
+            set: { set([$0]) }),
+          in: minimum...maximum, step: step)
       }
       HStack {
         Text(compactNumber(minimum))
@@ -485,6 +499,212 @@ struct SliderView: View {
     }
     .disabled(context.isStreaming)
     .formField(state.field.name, rules: state.rules, value: state.field.value)
+  }
+
+  /// react-ui's messages for typed values: one per value, empty when fine.
+  static func errors(_ values: [Double], minimum: Double, maximum: Double) -> [String] {
+    var errors = values.map { value -> String in
+      if value.isNaN { return "Invalid number" }
+      if value < minimum || value > maximum {
+        return "Value must be between \(jsNumberToString(minimum)) and \(jsNumberToString(maximum))"
+      }
+      return ""
+    }
+    if values.count > 1, values[0] > values[1] { errors[0] = "Min must be less than max" }
+    return errors
+  }
+}
+
+/// The values beside a slider's label: number fields, or menus of the steps
+/// when the slider is discrete.
+private struct SliderValueControls: View {
+  let values: [Double]
+  let minimum: Double
+  let maximum: Double
+  let step: Double
+  let discrete: Bool
+  let errors: [String]
+  let onChange: @MainActor ([Double]) -> Void
+
+  /// Above this many steps a menu is unwieldy, so discrete sliders get a
+  /// number field instead.
+  private static let maximumMenuOptions = 200
+
+  var body: some View {
+    let options = discrete ? Self.options(minimum, maximum, step) : []
+    let useMenus = discrete && options.count <= Self.maximumMenuOptions
+    HStack(spacing: 6) {
+      if values.count > 1 {
+        let lower = values[0]
+        let upper = values[1]
+        if useMenus {
+          menu(lower, options.filter { $0 < upper }) { onChange([$0, upper].sorted()) }
+          separator
+          menu(upper, options.filter { $0 > lower }) { onChange([lower, $0].sorted()) }
+        } else {
+          SliderValueField(value: lower, hasError: !errors[0].isEmpty) { onChange([$0, upper]) }
+          separator
+          SliderValueField(value: upper, hasError: !(errors.last ?? "").isEmpty) {
+            onChange([lower, $0])
+          }
+        }
+      } else if useMenus {
+        menu(values[0], options) { onChange([$0]) }
+      } else {
+        SliderValueField(value: values[0], hasError: !(errors.first ?? "").isEmpty) {
+          onChange([$0])
+        }
+      }
+    }
+  }
+
+  private var separator: some View {
+    Rectangle().fill(Color.secondary.opacity(0.5)).frame(width: 8, height: 1)
+  }
+
+  private func menu(
+    _ value: Double, _ options: [Double], _ select: @escaping @MainActor (Double) -> Void
+  )
+    -> some View
+  {
+    Picker(
+      "Value",
+      selection: Binding(get: { value }, set: { select($0) })
+    ) {
+      ForEach(options, id: \.self) { Text(jsNumberToString($0)).tag($0) }
+    }
+    .labelsHidden()
+    .pickerStyle(.menu)
+    .fixedSize()
+  }
+
+  /// Every step from `minimum` to `maximum`, like react-ui's option list.
+  static func options(_ minimum: Double, _ maximum: Double, _ step: Double) -> [Double] {
+    let count = Int(((maximum - minimum) / step).rounded(.down)) + 1
+    guard count > 0 else { return [] }
+    return (0..<count).map { minimum + Double($0) * step }
+  }
+}
+
+/// A small number field that applies valid numbers as they're typed and shows
+/// the slider's value again when it loses focus.
+private struct SliderValueField: View {
+  let value: Double
+  let hasError: Bool
+  let onChange: @MainActor (Double) -> Void
+  @State private var text = ""
+  @FocusState private var focused: Bool
+
+  var body: some View {
+    TextField("Value", text: $text)
+      .labelsHidden()
+      .multilineTextAlignment(.center)
+      .font(.subheadline.monospacedDigit())
+      .frame(width: 64)
+      .padding(.vertical, 4)
+      .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
+      .overlay(
+        RoundedRectangle(cornerRadius: 6)
+          .strokeBorder(hasError ? Color.red : Color.primary.opacity(0.1))
+      )
+      .focused($focused)
+      #if os(iOS)
+        .keyboardType(.numbersAndPunctuation)
+      #endif
+      .onAppear { text = jsNumberToString(value) }
+      .onChange(of: value) { if !focused { text = jsNumberToString(value) } }
+      .onChange(of: focused) { if !focused { text = jsNumberToString(value) } }
+      .onChange(of: text) {
+        let number = jsStringToNumber(text)
+        if !number.isNaN, focused { onChange(number) }
+      }
+  }
+}
+
+/// One track with a thumb at each end of a range, like react-ui's range
+/// slider. A thumb stops at the other one rather than crossing it.
+struct RangeSlider: View {
+  let lower: Double
+  let upper: Double
+  let bounds: ClosedRange<Double>
+  let step: Double
+  let onChange: @MainActor (Double, Double) -> Void
+  @Environment(\.isEnabled) private var isEnabled
+  private let thumbSize: CGFloat = 24
+
+  var body: some View {
+    GeometryReader { geometry in
+      let track = max(geometry.size.width - thumbSize, 1)
+      ZStack(alignment: .leading) {
+        Capsule()
+          .fill(Color.primary.opacity(0.12))
+          .frame(height: 4)
+          .padding(.horizontal, thumbSize / 2)
+        Capsule()
+          .fill(.tint)
+          .frame(width: max(0, offset(upper, track) - offset(lower, track)), height: 4)
+          .offset(x: offset(lower, track) + thumbSize / 2)
+        thumb(isLower: true, value: lower, track: track)
+        thumb(isLower: false, value: upper, track: track)
+      }
+      .frame(maxHeight: .infinity)
+    }
+    .frame(height: thumbSize + 4)
+    .opacity(isEnabled ? 1 : 0.5)
+  }
+
+  private func offset(_ value: Double, _ track: CGFloat) -> CGFloat {
+    let span = bounds.upperBound - bounds.lowerBound
+    return span > 0 ? CGFloat((value - bounds.lowerBound) / span) * track : 0
+  }
+
+  private func thumb(isLower: Bool, value: Double, track: CGFloat) -> some View {
+    Circle()
+      .fill(.white)
+      .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+      .overlay(Circle().strokeBorder(Color.black.opacity(0.06)))
+      .frame(width: thumbSize, height: thumbSize)
+      .offset(x: offset(value, track))
+      .gesture(
+        DragGesture(minimumDistance: 0)
+          .onChanged { drag in
+            let span = bounds.upperBound - bounds.lowerBound
+            let position = offset(value, track) + drag.translation.width
+            move(isLower: isLower, to: bounds.lowerBound + Double(position / track) * span)
+          }
+      )
+      .accessibilityElement()
+      .accessibilityLabel(isLower ? "Minimum" : "Maximum")
+      .accessibilityValue(jsNumberToString(value))
+      .accessibilityAdjustableAction { direction in
+        let delta = direction == .increment ? step : -step
+        move(isLower: isLower, to: value + delta)
+      }
+      .focusable()
+      .onKeyPress(.leftArrow) {
+        move(isLower: isLower, to: value - step)
+        return .handled
+      }
+      .onKeyPress(.rightArrow) {
+        move(isLower: isLower, to: value + step)
+        return .handled
+      }
+  }
+
+  private func move(isLower: Bool, to value: Double) {
+    let snapped = Self.snap(value, bounds: bounds, step: step)
+    if isLower {
+      onChange(min(snapped, upper), upper)
+    } else {
+      onChange(lower, max(snapped, lower))
+    }
+  }
+
+  /// The nearest step to `value`, within `bounds`.
+  static func snap(_ value: Double, bounds: ClosedRange<Double>, step: Double) -> Double {
+    guard step > 0 else { return min(max(value, bounds.lowerBound), bounds.upperBound) }
+    let steps = ((value - bounds.lowerBound) / step).rounded()
+    return min(max(bounds.lowerBound + steps * step, bounds.lowerBound), bounds.upperBound)
   }
 }
 
