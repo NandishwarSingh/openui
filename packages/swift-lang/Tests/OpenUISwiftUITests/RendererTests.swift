@@ -736,3 +736,21 @@ let globalTestLibrary = SwiftUILibrary(
   }
 
 }
+
+/// The editable table's edit bookkeeping.
+@Suite struct TableEditsTests {
+  @Test func onlyChangedTextIsAnEdit() {
+    var edits = TableEdits()
+    // A focused field writes its text back unchanged: not an edit.
+    edits.set("Alex", row: "1", column: 0, original: "Alex")
+    #expect(edits.count == 0)
+    edits.set("Alexx", row: "1", column: 0, original: "Alex")
+    edits.set("Ops", row: "2", column: 1, original: "Eng")
+    #expect(edits.count == 2)
+    #expect(edits["1", 0] == "Alexx")
+    // Typing the original back undoes the edit.
+    edits.set("Alex", row: "1", column: 0, original: "Alex")
+    #expect(edits.count == 1)
+    #expect(edits["1", 0] == nil)
+  }
+}

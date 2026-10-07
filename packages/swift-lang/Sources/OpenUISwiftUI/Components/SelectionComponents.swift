@@ -200,7 +200,7 @@ private struct OptionCardTile: View {
 /// react-ui.
 struct EditableTableView: View {
   let props: ComponentProps
-  @State private var edits: [String: [Int: String]] = [:]
+  @State private var edits = TableEdits()
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUITheme) private var theme
 
@@ -208,7 +208,7 @@ struct EditableTableView: View {
     let columns = props.array("columns")
     let rows = props.array("data")
     let name = props.string("name") ?? "editable-table"
-    let changed = edits.values.reduce(0) { $0 + $1.count }
+    let changed = edits.count
     VStack(alignment: .leading, spacing: theme.compactSpacing) {
       ScrollView(.horizontal, showsIndicators: false) {
         Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 6) {
@@ -236,13 +236,13 @@ struct EditableTableView: View {
           Text("\(changed) unsaved change\(changed == 1 ? "" : "s")").font(.caption)
             .foregroundStyle(.secondary)
           Spacer()
-          Button("Reset") { edits = [:] }.buttonStyle(.borderless)
+          Button("Reset") { edits = TableEdits() }.buttonStyle(.borderless)
           Button("Save Changes") {
             let saved = OpenUIValue.array(
               rows.map { row in
                 let id = displayText(row["id"])
                 let values = (0..<columns.count).map { index -> OpenUIValue in
-                  if let edit = edits[id]?[index] {
+                  if let edit = edits[id, index] {
                     let number = jsStringToNumber(edit)
                     let numeric = columns[index]["type"].stringValue == "number" && !number.isNaN
                     return numeric ? .number(number) : .string(edit)
@@ -254,7 +254,7 @@ struct EditableTableView: View {
             context.runtime.setFieldValue(
               form: name, componentType: "EditableTable", name: name, value: saved)
             context.triggerAction("Save Changes", form: name)
-            edits = [:]
+            edits = TableEdits()
           }
           .modifier(ProminentButton())
         }
@@ -267,9 +267,10 @@ struct EditableTableView: View {
     -> some View
   {
     let width = column["width"].numberValue.map { CGFloat($0) } ?? 120
+    let original = displayText(value ?? .null)
     let binding = Binding<String>(
-      get: { edits[rowId]?[index] ?? displayText(value ?? .null) },
-      set: { edits[rowId, default: [:]][index] = $0 })
+      get: { edits[rowId, index] ?? original },
+      set: { edits.set($0, row: rowId, column: index, original: original) })
     return Group {
       if column["type"].stringValue == "select", let options = column["options"].arrayValue {
         Picker("", selection: binding) {
@@ -283,6 +284,23 @@ struct EditableTableView: View {
       }
     }
     .frame(width: width)
+  }
+}
+
+/// An editable table's unsaved edits, by row id and column. Only text that
+/// differs from the data is an edit: a focused field writes its text back
+/// unchanged, which must not count as a change.
+struct TableEdits: Equatable {
+  private var rows: [String: [Int: String]] = [:]
+
+  /// How many cells have unsaved edits.
+  var count: Int { rows.values.reduce(0) { $0 + $1.count } }
+
+  subscript(row: String, column: Int) -> String? { rows[row]?[column] }
+
+  mutating func set(_ text: String, row: String, column: Int, original: String) {
+    rows[row, default: [:]][column] = text == original ? nil : text
+    if rows[row]?.isEmpty == true { rows[row] = nil }
   }
 }
 
