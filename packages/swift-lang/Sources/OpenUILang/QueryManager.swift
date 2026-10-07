@@ -1,3 +1,5 @@
+import Foundation
+
 /// Calls the tools behind `Query(...)` and `Mutation(...)` statements: MCP,
 /// REST, GraphQL or anything else.
 public protocol ToolProvider: Sendable {
@@ -50,6 +52,16 @@ public func extractToolResult(_ result: OpenUIValue) throws -> OpenUIValue {
     return (try? JSON.parse(text)) ?? .string(text)
   }
   return .null
+}
+
+/// A thrown error's message, as lang-core reads `err.message`: a
+/// `LocalizedError`'s description, a Cocoa error's localized description
+/// (its debug form reads `Error Domain=… Code=0 "(null)"`), or the error as
+/// text, which for this package's errors is their description.
+func errorMessage(_ error: Error) -> String {
+  if let description = (error as? LocalizedError)?.errorDescription { return description }
+  if type(of: error) is NSError.Type { return (error as NSError).localizedDescription }
+  return "\(error)"
 }
 
 /// A tool provider backed by a map of async handlers.
@@ -308,7 +320,8 @@ public final class QueryManager {
         statementId: statementId, component: "Query", toolName: toolName)
     }
     return OpenUIError(
-      source: .query, code: "tool-error", message: "Query \"\(toolName)\" failed: \(error)",
+      source: .query, code: "tool-error",
+      message: "Query \"\(toolName)\" failed: \(errorMessage(error))",
       statementId: statementId, component: "Query", toolName: toolName)
   }
 
@@ -445,7 +458,7 @@ public final class QueryManager {
       success = true
     } catch {
       if disposed || currentGeneration != generation { return false }
-      mutations[statementId]?.result = ["status": "error", "error": .string("\(error)")]
+      mutations[statementId]?.result = ["status": "error", "error": .string(errorMessage(error))]
       mutations[statementId]?.error = mutationError(
         error, toolName: mutation.toolName, statementId: statementId)
     }
@@ -471,7 +484,8 @@ public final class QueryManager {
         statementId: statementId, component: "Mutation", toolName: toolName)
     }
     return OpenUIError(
-      source: .mutation, code: "tool-error", message: "Mutation \"\(toolName)\" failed: \(error)",
+      source: .mutation, code: "tool-error",
+      message: "Mutation \"\(toolName)\" failed: \(errorMessage(error))",
       statementId: statementId, component: "Mutation", toolName: toolName)
   }
 

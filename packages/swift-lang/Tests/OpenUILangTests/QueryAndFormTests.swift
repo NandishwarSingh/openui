@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 
 @testable import OpenUILang
@@ -87,6 +88,32 @@ import Testing
     #expect(await manager.fireMutation("boom", args: [:]) == false)
     #expect(manager.mutationResult("boom")?["status"] == "error")
     #expect(manager.snapshot.errors.first?.code == "mcp-error")
+  }
+
+  /// Errors read like lang-core's `err.message`: a Cocoa error's localized
+  /// description rather than its `Error Domain=… Code=0 "(null)"` debug form,
+  /// and a `LocalizedError`'s own description.
+  @Test func toolErrorsUseTheErrorsMessage() async {
+    struct Offline: LocalizedError {
+      var errorDescription: String? { "You're offline." }
+    }
+    let cocoa = NSError(domain: "kCLErrorDomain", code: 0)
+    let provider = FunctionToolProvider([
+      "locate": { _ in throw cocoa },
+      "sync": { _ in throw Offline() },
+    ])
+    let manager = QueryManager(toolProvider: provider)
+    manager.registerMutations([
+      MutationNode(statementId: "locate", toolName: "locate"),
+      MutationNode(statementId: "sync", toolName: "sync"),
+    ])
+    _ = await manager.fireMutation("locate", args: [:])
+    _ = await manager.fireMutation("sync", args: [:])
+    let messages = manager.snapshot.errors.map(\.message)
+    #expect(messages.contains("Mutation \"locate\" failed: \(cocoa.localizedDescription)"))
+    #expect(messages.contains("Mutation \"sync\" failed: You're offline."))
+    #expect(!messages.joined().contains("Error Domain"))
+    #expect(manager.mutationResult("sync")?["error"] == "You're offline.")
   }
 
   @Test func failedMutationHaltsTheActionPlan() async {
