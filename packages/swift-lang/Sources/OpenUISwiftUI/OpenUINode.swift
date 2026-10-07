@@ -44,7 +44,13 @@ public struct OpenUINodes: View {
   public var body: some View {
     VStack(alignment: alignment, spacing: spacing) {
       ForEach(items) { item in
-        OpenUINode(item.value).transition(.openUIInsertion)
+        OpenUINode(item.value)
+          // Each node is as tall as it needs to be at this width. Offered
+          // exactly the stack's ideal height (a fixed frame, a self-sizing
+          // cell), a VStack splits it by flexibility instead, so wrapping text
+          // next to a row with a Spacer is cut short and space is left over.
+          .fixedSize(horizontal: false, vertical: true)
+          .transition(.openUIInsertion)
       }
     }
     // Nodes keep their identity, so only newly streamed ones animate in.

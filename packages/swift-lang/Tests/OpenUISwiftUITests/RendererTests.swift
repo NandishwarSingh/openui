@@ -192,6 +192,40 @@ import Testing
       #expect(errors.allSatisfy { $0.jsonRepresentation["source"] == "parser" }, "\(errors)")
     }
 
+    /// Offered exactly its ideal height (a fixed frame, a self-sizing cell),
+    /// a response lays out at that height. A VStack split the height by
+    /// flexibility instead, cutting wrapping text short next to a row with a
+    /// Spacer and leaving the rest of the height empty.
+    @Test func fillsExactlyItsIdealHeight() {
+      final class Box { var height: CGFloat = 0 }
+      let response = """
+        root = Card([intro, tip])
+        intro = TextContent("That is **Bangalore Palace** in Bengaluru, Karnataka! Built in 1878, its Tudor-style architecture was inspired by Windsor Castle, with fortified towers, battlements and lush gardens.")
+        tip = Callout("info", "Good to know", "Sprawling gardens used for cultural exhibitions, concerts, flower shows and public events across the year.")
+        """
+      let measured = NSHostingView(
+        rootView: OpenUIRenderer(response: response, library: OpenUIChatLibrary.library)
+          .frame(width: 340))
+      RunLoop.main.run(until: Date().addingTimeInterval(0.2))
+      let ideal = measured.fittingSize.height
+      let box = Box()
+      let host = NSHostingView(
+        rootView: OpenUIRenderer(response: response, library: OpenUIChatLibrary.library)
+          .onGeometryChange(for: CGFloat.self) {
+            $0.size.height
+          } action: {
+            box.height = $0
+          }
+          .frame(width: 340, height: ideal))
+      let window = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 340, height: ideal), styleMask: [.borderless],
+        backing: .buffered, defer: false)
+      window.contentView = host
+      RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+      #expect(ideal > 100)
+      #expect(abs(box.height - ideal) < 1, "laid out \(box.height) of \(ideal)")
+    }
+
     /// A closed Modal takes no room in a Stack, gap included, as in react-ui
     /// where it renders nothing.
     @Test func closedModalTakesNoRoom() {
