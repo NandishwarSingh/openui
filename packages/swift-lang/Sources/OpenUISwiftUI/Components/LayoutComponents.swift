@@ -158,15 +158,27 @@ private struct ListRow: View {
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    let row = HStack(alignment: .top, spacing: 10) {
+    if let onTap {
+      Button(action: onTap) { Hovering(content: row) }.buttonStyle(.openUIHover)
+    } else {
+      row(hovered: false)
+    }
+  }
+
+  /// react-ui grows a clickable row's marker and deepens its fill under the
+  /// pointer.
+  private func row(hovered: Bool) -> some View {
+    HStack(alignment: .top, spacing: 10) {
       if let marker {
         Text(marker)
           .font(.caption.weight(.semibold).monospacedDigit())
           .frame(width: 22, height: 22)
-          .background(theme.sunkSurface, in: Circle())
+          .background(hovered ? Color.primary.opacity(0.1) : theme.sunkSurface, in: Circle())
+          .scaleEffect(hovered ? 1.1 : 1)
       } else if let src = item["image"]["src"].stringValue {
         RemoteImage(src: src, alt: displayText(item["image"]["alt"]))
           .frame(width: 44, height: 44)
+          .scaleEffect(hovered ? 1.1 : 1)
       }
       VStack(alignment: .leading, spacing: 2) {
         Text(item.text("title")).font(small ? .subheadline : .body)
@@ -184,11 +196,6 @@ private struct ListRow: View {
       }
     }
     .contentShape(Rectangle())
-    if let onTap {
-      Button(action: onTap) { row }.buttonStyle(.plain)
-    } else {
-      row
-    }
   }
 }
 
@@ -332,15 +339,17 @@ struct TabsView: View {
       userChose = true
       withOpenUIAnimation(Motion.reveal) { active = value }
     } label: {
-      Text(item.text("trigger"))
-        .font(.subheadline.weight(isActive ? .semibold : .regular))
-        .foregroundStyle(isActive ? .primary : .secondary)
-        .padding(.vertical, 6)
-        .overlay(alignment: .bottom) {
-          if isActive { Rectangle().fill(.primary).frame(height: 2) }
-        }
+      Hovering { hovered in
+        Text(item.text("trigger"))
+          .font(.subheadline.weight(isActive ? .semibold : .regular))
+          .foregroundStyle(isActive || hovered ? .primary : .secondary)
+          .padding(.vertical, 6)
+          .overlay(alignment: .bottom) {
+            if isActive { Rectangle().fill(.primary).frame(height: 2) }
+          }
+      }
     }
-    .buttonStyle(.plain)
+    .buttonStyle(.openUIHover)
   }
 
   private func followStream(_ sizes: [(value: String, size: Int)]) {

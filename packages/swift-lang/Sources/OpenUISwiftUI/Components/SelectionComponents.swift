@@ -119,22 +119,26 @@ private struct Chip: View {
 
   var body: some View {
     Button(action: action) {
-      HStack(spacing: 4) {
-        if let symbol = iconSymbol(item["icon"]) { Image(systemName: symbol) }
-        Text(item.text("label"))
+      Hovering { hovered in
+        HStack(spacing: 4) {
+          if let symbol = iconSymbol(item["icon"]) { Image(systemName: symbol) }
+          Text(item.text("label"))
+        }
+        .font(.subheadline)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(
+          isOn ? Color.primary.opacity(0.08) : hovered ? theme.subtleSurface : .clear,
+          in: RoundedRectangle(cornerRadius: 8)
+        )
+        .overlay(
+          RoundedRectangle(cornerRadius: 8).strokeBorder(
+            isOn ? .primary : hovered ? theme.border : theme.interactiveBorder)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 8))
       }
-      .font(.subheadline)
-      .padding(.horizontal, 8)
-      .padding(.vertical, 6)
-      .background(
-        isOn ? Color.primary.opacity(0.08) : .clear, in: RoundedRectangle(cornerRadius: 8)
-      )
-      .overlay(
-        RoundedRectangle(cornerRadius: 8).strokeBorder(isOn ? .primary : theme.interactiveBorder)
-      )
-      .contentShape(RoundedRectangle(cornerRadius: 8))
     }
-    .buttonStyle(.plain)
+    .buttonStyle(.openUIHover)
     .accessibilityAddTraits(isOn ? .isSelected : [])
   }
 }
@@ -163,32 +167,36 @@ private struct OptionCardTile: View {
 
   var body: some View {
     Button(action: action) {
-      VStack(alignment: .leading, spacing: 6) {
-        switch item["topContent"] {
-        case .element(let element) where element.typeName == "Icon":
-          Image(systemName: iconSymbol(item["topContent"]) ?? "circle")
-            .font(.system(size: 14))
-            .frame(width: 32, height: 32)
-            .background(theme.sunkSurface, in: RoundedRectangle(cornerRadius: 8))
-        case .element:
-          OpenUINode(item["topContent"]).frame(height: 90).clipped()
-        default:
-          EmptyView()
+      Hovering { hovered in
+        VStack(alignment: .leading, spacing: 6) {
+          switch item["topContent"] {
+          case .element(let element) where element.typeName == "Icon":
+            Image(systemName: iconSymbol(item["topContent"]) ?? "circle")
+              .font(.system(size: 14))
+              .frame(width: 32, height: 32)
+              .background(theme.sunkSurface, in: RoundedRectangle(cornerRadius: 8))
+          case .element:
+            OpenUINode(item["topContent"]).frame(height: 90).clipped()
+          default:
+            EmptyView()
+          }
+          Text(item.text("title")).font(.subheadline.weight(.semibold))
+          if let subtitle = item.string("subtitle"), !subtitle.isEmpty {
+            Text(subtitle).font(.caption).foregroundStyle(.secondary)
+          }
         }
-        Text(item.text("title")).font(.subheadline.weight(.semibold))
-        if let subtitle = item.string("subtitle"), !subtitle.isEmpty {
-          Text(subtitle).font(.caption).foregroundStyle(.secondary)
-        }
+        .padding(10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(isOn ? theme.sunkSurface : .clear, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(
+          RoundedRectangle(cornerRadius: 14).strokeBorder(
+            // react-ui darkens an unselected card's border under the pointer.
+            isOn ? .primary : hovered ? Color.primary.opacity(0.3) : theme.interactiveBorder)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 14))
       }
-      .padding(10)
-      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-      .background(isOn ? theme.sunkSurface : .clear, in: RoundedRectangle(cornerRadius: 14))
-      .overlay(
-        RoundedRectangle(cornerRadius: 14).strokeBorder(isOn ? .primary : theme.interactiveBorder)
-      )
-      .contentShape(RoundedRectangle(cornerRadius: 14))
     }
-    .buttonStyle(.plain)
+    .buttonStyle(.openUIHover)
     .accessibilityAddTraits(isOn ? .isSelected : [])
   }
 }

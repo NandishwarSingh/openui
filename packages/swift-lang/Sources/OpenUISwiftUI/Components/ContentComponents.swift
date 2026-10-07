@@ -47,22 +47,29 @@ private struct SourceCard: View {
 
   var body: some View {
     let url = source["url"].stringValue.flatMap(URL.init(string:))
-    let card = VStack(alignment: .leading, spacing: 4) {
-      HStack(spacing: 8) {
-        Favicon(host: url?.host())
-        Text(displayText(source["sourceName"])).font(.caption.weight(.medium)).lineLimit(1)
+    let card = Hovering { hovered in
+      VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: 8) {
+          Favicon(host: url?.host())
+          Text(displayText(source["sourceName"])).font(.caption.weight(.medium)).lineLimit(1)
+        }
+        Text(displayText(source["title"]))
+          .font(.caption)
+          .foregroundStyle(.secondary)
+          .lineLimit(2)
+          .multilineTextAlignment(.leading)
       }
-      Text(displayText(source["title"]))
-        .font(.caption)
-        .foregroundStyle(.secondary)
-        .lineLimit(2)
-        .multilineTextAlignment(.leading)
+      .padding(8)
+      .frame(width: 180, alignment: .topLeading)
+      .background(
+        Color.primary.opacity(hovered ? 0.03 : 0), in: RoundedRectangle(cornerRadius: 10)
+      )
+      .overlay(
+        RoundedRectangle(cornerRadius: 10).strokeBorder(
+          hovered ? theme.interactiveBorder : theme.border))
     }
-    .padding(8)
-    .frame(width: 180, alignment: .topLeading)
-    .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(theme.border))
     if let url {
-      Link(destination: url) { card }.buttonStyle(.plain)
+      Link(destination: url) { card }.buttonStyle(.openUIHover)
     } else {
       card
     }

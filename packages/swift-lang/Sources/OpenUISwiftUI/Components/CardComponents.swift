@@ -215,7 +215,7 @@ private struct CardBlockLayout<Item: View>: View {
       } label: {
         content.contentShape(Rectangle())
       }
-      .buttonStyle(.plain)
+      .buttonStyle(.openUICard)
     } else {
       content
     }
@@ -535,6 +535,7 @@ struct VisualCardItemView: View {
 private struct VisualCard: View {
   let item: ComponentProps
   @Environment(\.openUICardClickable) private var clickable
+  @Environment(\.openUIHovered) private var hovered
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
@@ -567,6 +568,9 @@ private struct VisualCard: View {
       ZStack {
         theme.subtleSurface
         RemoteImage(src: item.string("bgImageSrc"), alt: item.text("bgImageAlt"))
+          // react-ui zooms a clickable card's photo under the pointer.
+          .scaleEffect(hovered ? 1.04 : 1)
+          .animation(.easeOut(duration: 0.3), value: hovered)
       }
     }
     .clipShape(RoundedRectangle(cornerRadius: 16))

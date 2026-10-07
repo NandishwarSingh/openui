@@ -225,7 +225,7 @@ struct RadioGroupView: View {
             symbol: value == selected ? "largecircle.fill.circle" : "circle",
             label: item.text("label"), description: item.text("description"))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.openUIHover)
       }
     }
     .disabled(context.isStreaming)
@@ -281,7 +281,7 @@ private struct BooleanGroup: View {
               symbol: isOn ? "checkmark.square.fill" : "square", label: item.text("label"),
               description: item.text("description"))
           }
-          .buttonStyle(.plain)
+          .buttonStyle(.openUIHover)
         case .toggle:
           // The switch leads and the text follows, as in react-ui's SwitchItem.
           HStack(alignment: .top, spacing: 8) {
@@ -340,10 +340,22 @@ private struct OptionRow: View {
   let label: String
   let description: String
   @Environment(\.openUITheme) private var theme
+  @Environment(\.openUIHovered) private var hovered
 
   var body: some View {
+    let radio = symbol.contains("circle")
+    let empty = symbol == "circle" || symbol == "square"
     HStack(alignment: .firstTextBaseline, spacing: 8) {
-      Image(systemName: symbol).foregroundStyle(theme.accent)
+      Image(systemName: symbol)
+        .foregroundStyle(theme.accent)
+        // react-ui fills an empty radio or check box under the pointer.
+        .background {
+          if hovered && empty {
+            RoundedRectangle(cornerRadius: radio ? 10 : 3)
+              .fill(radio ? theme.interactiveBorder : theme.sunkSurface)
+              .padding(2)
+          }
+        }
       VStack(alignment: .leading, spacing: 2) {
         Text(label)
         if !description.isEmpty {
