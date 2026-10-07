@@ -427,17 +427,24 @@ struct DatePickerView: View {
 
   private func rangePicker(_ label: String, key: String, _ state: FieldContext) -> some View {
     let range = state.field.value.objectValue ?? OpenUIObject()
-    return DatePicker(
-      label,
-      selection: Binding(
-        get: { range[key]?.stringValue.flatMap(dayFormatter.date(from:)) ?? Date() },
-        set: { date in
-          var next = range
-          next[key] = .string(dayFormatter.string(from: date))
-          set(state, .object(next))
-        }),
-      displayedComponents: .date
-    )
+    let day = { (key: String) in range[key]?.stringValue.flatMap(dayFormatter.date(from:)) }
+    let selection = Binding(
+      get: { day(key) ?? Date() },
+      set: { (date: Date) in
+        var next = range
+        next[key] = .string(dayFormatter.string(from: date))
+        set(state, .object(next))
+      })
+    // The ends can't cross, as in react-ui's range calendar.
+    return Group {
+      if key == "from", let to = day("to") {
+        DatePicker(label, selection: selection, in: ...to, displayedComponents: .date)
+      } else if key == "to", let from = day("from") {
+        DatePicker(label, selection: selection, in: from..., displayedComponents: .date)
+      } else {
+        DatePicker(label, selection: selection, displayedComponents: .date)
+      }
+    }
     .disabled(context.isStreaming)
   }
 
