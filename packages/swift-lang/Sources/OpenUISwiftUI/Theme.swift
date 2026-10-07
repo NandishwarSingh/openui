@@ -31,6 +31,21 @@ public struct OpenUITheme: Sendable {
   /// that charts pick from the middle outwards. `nil` uses react-ui's default
   /// blue ramp.
   public var chartPalette: [Color]?
+  /// A palette for one kind of chart, like react-ui's `barChartPalette` and
+  /// the rest. A chart uses its own, then `chartPalette`, then the default.
+  public var barChartPalette: [Color]?
+  public var horizontalBarChartPalette: [Color]?
+  public var lineChartPalette: [Color]?
+  public var areaChartPalette: [Color]?
+  public var pieChartPalette: [Color]?
+  public var radialChartPalette: [Color]?
+  public var radarChartPalette: [Color]?
+  /// Status colors (react-ui's info, success, alert and danger text): callouts,
+  /// tags, trends, form errors and confirmations.
+  public var info: Color = .blue
+  public var success: Color = .green
+  public var alert: Color = .orange
+  public var danger: Color = .red
 
   public init() {}
 
@@ -59,14 +74,22 @@ extension Color {
   }
 }
 
-/// Status colors shared by callouts, tags and form errors.
-func statusColor(_ variant: String?) -> Color {
-  switch variant {
-  case "info": return .blue
-  case "warning": return .orange
-  case "error", "danger": return .red
-  case "success": return .green
-  default: return .secondary
+extension OpenUITheme {
+  /// The color for a status variant of a callout, tag or icon.
+  func status(_ variant: String?) -> Color {
+    switch variant {
+    case "info": info
+    case "warning": alert
+    case "error", "danger": danger
+    case "success": success
+    default: .secondary
+    }
+  }
+
+  /// The colors a chart picks from: its own palette, then `chartPalette`
+  /// (nil leaves react-ui's default ramp), like react-ui's `resolvePalette`.
+  func chartRamp(_ own: [Color]?) -> [Color]? {
+    [own, chartPalette].first { $0?.isEmpty == false } ?? nil
   }
 }
 

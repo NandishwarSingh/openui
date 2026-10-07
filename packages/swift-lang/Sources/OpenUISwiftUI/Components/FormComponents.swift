@@ -21,6 +21,7 @@ struct FormView: View {
 struct FormControlView: View {
   let props: ComponentProps
   @Environment(FormValidation.self) private var validation: FormValidation?
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let input = props.children("input").first
@@ -30,7 +31,8 @@ struct FormControlView: View {
       Text(props.text("label") + (required ? "*" : "")).font(.subheadline.weight(.medium))
       OpenUINode(props["input"])
       if let fieldName, let error = validation?.error(for: fieldName) {
-        Label(error, systemImage: "exclamationmark.circle").font(.caption).foregroundStyle(.red)
+        Label(error, systemImage: "exclamationmark.circle").font(.caption).foregroundStyle(
+          theme.danger)
       } else if let hint = props.string("hint"), !hint.isEmpty {
         Text(hint).font(.caption).foregroundStyle(.secondary)
       }
@@ -444,6 +446,7 @@ struct SliderView: View {
   @Environment(OpenUIContext.self) private var context
   @Environment(\.openUIFormName) private var form
   @Environment(FormValidation.self) private var validation: FormValidation?
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let state = FieldContext(props, context: context, form: form)
@@ -475,7 +478,7 @@ struct SliderView: View {
       }
       if !context.isStreaming, let error = errors.first(where: { !$0.isEmpty }) {
         Label(error, systemImage: "exclamationmark.circle")
-          .font(.caption).foregroundStyle(.red)
+          .font(.caption).foregroundStyle(theme.danger)
       }
       if current.count > 1 {
         RangeSlider(
@@ -594,6 +597,7 @@ private struct SliderValueField: View {
   let onChange: @MainActor (Double) -> Void
   @State private var text = ""
   @FocusState private var focused: Bool
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     TextField("Value", text: $text)
@@ -605,7 +609,7 @@ private struct SliderValueField: View {
       .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
       .overlay(
         RoundedRectangle(cornerRadius: 6)
-          .strokeBorder(hasError ? Color.red : Color.primary.opacity(0.1))
+          .strokeBorder(hasError ? theme.danger : Color.primary.opacity(0.1))
       )
       .focused($focused)
       #if os(iOS)

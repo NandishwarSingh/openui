@@ -194,7 +194,7 @@ private struct Banner: View {
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    let color = statusColor(variant)
+    let color = theme.status(variant)
     HStack(alignment: .top, spacing: 10) {
       Image(systemName: symbol).foregroundStyle(color)
       VStack(alignment: .leading, spacing: 2) {
@@ -241,6 +241,7 @@ struct CodeBlockContent: View {
   let theme: SyntaxHighlighter.Theme
   @State private var copied = false
   @State private var hovering = false
+  @Environment(\.openUITheme) private var openUITheme
 
   var body: some View {
     ScrollView(.horizontal, showsIndicators: false) {
@@ -282,10 +283,10 @@ struct CodeBlockContent: View {
       Image(systemName: copied ? "checkmark" : "doc.on.doc")
         .font(.caption.weight(.semibold))
         .contentTransition(.symbolEffect(.replace))
-        .foregroundStyle(copied ? Color.green : Color.primary)
+        .foregroundStyle(copied ? openUITheme.success : Color.primary)
         .frame(width: 26, height: 26)
         .background(
-          copied ? Color.green.opacity(0.15) : Color.platformElevatedBackground,
+          copied ? openUITheme.success.opacity(0.15) : Color.platformElevatedBackground,
           in: RoundedRectangle(cornerRadius: 6)
         )
         .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.primary.opacity(0.12)))

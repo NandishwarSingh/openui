@@ -401,10 +401,11 @@ struct TagLabel: View {
   let size: String?
   let variant: String?
   @Environment(\.openUITagOnImage) private var onImage
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let neutral = variant == nil || variant == "neutral"
-    let color = neutral ? Color.secondary : statusColor(variant)
+    let color = neutral ? Color.secondary : theme.status(variant)
     HStack(spacing: 4) {
       if let symbol { Image(systemName: symbol) }
       Text(text)

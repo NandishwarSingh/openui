@@ -582,6 +582,7 @@ struct TextLineView: View {
   let props: ComponentProps
   let bold: Bool
   @Environment(\.openUITextAlignment) private var alignment
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     VStack(alignment: alignment == .trailing ? .trailing : .leading, spacing: 2) {
@@ -608,8 +609,8 @@ struct TextLineView: View {
 
   private func subtextColor(_ subtext: String) -> Color {
     guard props.string("subtextVariant") == "metric" else { return .secondary }
-    if subtext.hasPrefix("+") { return .green }
-    if subtext.hasPrefix("-") || subtext.hasPrefix("−") { return .red }
+    if subtext.hasPrefix("+") { return theme.success }
+    if subtext.hasPrefix("-") || subtext.hasPrefix("−") { return theme.danger }
     return .secondary
   }
 }
@@ -667,7 +668,7 @@ private struct IconBadge: View {
   private var colors: (Color, Color) {
     switch variant {
     case "info", "success", "warning", "danger":
-      let color = statusColor(variant)
+      let color = theme.status(variant)
       return (color, color.opacity(0.14))
     case "inverted": return (Color(white: 0.98), Color.primary)
     case "filled": return (theme.onAccent, theme.accent)
@@ -757,9 +758,11 @@ struct MetricIndicatorWithStrikethroughView: View {
   }
 }
 
-/// `{ direction, value }` as an arrow and percentage, green up, red down.
+/// `{ direction, value }` as an arrow and percentage, in the success color
+/// going up and the danger color going down.
 private struct TrendLabel: View {
   let trend: OpenUIValue
+  @Environment(\.openUITheme) private var theme
 
   var body: some View {
     if let value = trend["value"].numberValue {
@@ -769,7 +772,7 @@ private struct TrendLabel: View {
         Text("\(jsNumberToString(value))%")
       }
       .font(.caption.weight(.medium).monospacedDigit())
-      .foregroundStyle(up ? .green : .red)
+      .foregroundStyle(up ? theme.success : theme.danger)
     }
   }
 }

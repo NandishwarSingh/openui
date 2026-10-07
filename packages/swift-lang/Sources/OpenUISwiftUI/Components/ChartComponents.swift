@@ -217,7 +217,7 @@ struct BarChartView: View {
   var body: some View {
     let all = seriesPoints(props)
     let points = all.filter { !hidden.contains($0.series) }
-    let series = SeriesColors(seriesNames(props), theme.chartPalette)
+    let series = SeriesColors(seriesNames(props), theme.chartRamp(theme.barChartPalette))
     let labels = labelOrder(props)
     let stacked = props.string("variant") == "stacked"
     ChartFrame(props, isEmpty: all.isEmpty, legend: series.legend, hidden: $hidden) {
@@ -258,7 +258,7 @@ struct HorizontalBarChartView: View {
   var body: some View {
     let all = seriesPoints(props)
     let points = all.filter { !hidden.contains($0.series) }
-    let series = SeriesColors(seriesNames(props), theme.chartPalette)
+    let series = SeriesColors(seriesNames(props), theme.chartRamp(theme.horizontalBarChartPalette))
     let stacked = props.string("variant") == "stacked"
     let labels = labelOrder(props)
     ChartFrame(props, isEmpty: all.isEmpty, legend: series.legend, hidden: $hidden) {
@@ -312,7 +312,7 @@ struct LineChartView: View {
     let method = interpolation(props.string("variant"))
     let all = seriesPoints(props)
     let points = all.filter { !hidden.contains($0.series) }
-    let series = SeriesColors(seriesNames(props), theme.chartPalette)
+    let series = SeriesColors(seriesNames(props), theme.chartRamp(theme.lineChartPalette))
     ChartFrame(props, isEmpty: all.isEmpty, legend: series.legend, hidden: $hidden) {
       Chart(points) { point in
         LineMark(x: .value("Label", point.label), y: .value("Value", point.value))
@@ -356,7 +356,7 @@ struct AreaChartView: View {
 
   var body: some View {
     let method = interpolation(props.string("variant"))
-    let series = SeriesColors(seriesNames(props), theme.chartPalette)
+    let series = SeriesColors(seriesNames(props), theme.chartRamp(theme.areaChartPalette))
     let all = seriesPoints(props)
     let points = all.filter { !hidden.contains($0.series) }
     ChartFrame(props, isEmpty: all.isEmpty, legend: series.legend, hidden: $hidden) {
@@ -454,7 +454,7 @@ struct PieChartView: View {
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    let all = sortedSlices(slices(props), theme.chartPalette)
+    let all = sortedSlices(slices(props), theme.chartRamp(theme.pieChartPalette))
     let visible = all.filter { !hidden.contains(String($0.slice.id)) }
     let donut = props.string("variant") == "donut"
     let semi = props.string("appearance") == "semiCircular"
@@ -524,7 +524,7 @@ struct RadialChartView: View {
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
-    let all = sortedSlices(slices(props), theme.chartPalette)
+    let all = sortedSlices(slices(props), theme.chartRamp(theme.radialChartPalette))
     let visible = all.filter { !hidden.contains(String($0.slice.id)) }
     let maximum = max(visible.map(\.slice.value).max() ?? 1, 1)
     VStack(spacing: 12) {
@@ -569,7 +569,7 @@ struct SingleStackedBarChartView: View {
 
   var body: some View {
     let data = slices(props)
-    let ramp = theme.chartPalette.flatMap { $0.isEmpty ? nil : $0 } ?? ChartPalette.ocean
+    let ramp = theme.chartRamp(theme.barChartPalette) ?? ChartPalette.ocean
     let total = data.reduce(0) { $0 + $1.value }
     let share = { (slice: Slice) in total > 0 ? slice.value / total : 0 }
     let color = { (slice: Slice) in ramp[slice.id % ramp.count] }
@@ -735,7 +735,7 @@ struct RadarChartView: View {
     let all = props.children("series").map { series in
       (name: series.text("category"), values: series.array("values").map { $0.numberValue ?? 0 })
     }
-    let colors = SeriesColors(all.map(\.name), theme.chartPalette)
+    let colors = SeriesColors(all.map(\.name), theme.chartRamp(theme.radarChartPalette))
     let series = all.filter { !hidden.contains($0.name) }
     let maximum = max(series.flatMap(\.values).max() ?? 1, 1)
     VStack(spacing: 12) {

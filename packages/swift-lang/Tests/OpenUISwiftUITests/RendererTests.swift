@@ -487,6 +487,31 @@ let globalTestLibrary = SwiftUILibrary(
 
 /// Mirrors react-ui's paletteUtils tests.
 @Suite struct ChartPaletteTests {
+  /// react-ui's `resolvePalette`: the chart's own palette, then the default
+  /// one, then the built-in ramp; an empty palette counts as none.
+  @Test func chartsUseTheirOwnPaletteFirst() {
+    var theme = OpenUITheme()
+    #expect(theme.chartRamp(theme.barChartPalette) == nil)
+    theme.chartPalette = [.red, .blue]
+    #expect(theme.chartRamp(theme.barChartPalette) == [.red, .blue])
+    theme.barChartPalette = [.green]
+    #expect(theme.chartRamp(theme.barChartPalette) == [.green])
+    #expect(theme.chartRamp(theme.lineChartPalette) == [.red, .blue])
+    theme.barChartPalette = []
+    #expect(theme.chartRamp(theme.barChartPalette) == [.red, .blue])
+  }
+
+  @Test func statusVariantsUseTheThemeColors() {
+    var theme = OpenUITheme()
+    theme.info = .cyan
+    theme.success = .mint
+    theme.alert = .yellow
+    theme.danger = .pink
+    let variants: [String?] = ["info", "success", "warning", "error", "danger", "neutral", nil]
+    let colors: [Color] = [.cyan, .mint, .yellow, .pink, .pink, .secondary, .secondary]
+    #expect(variants.map(theme.status) == colors)
+  }
+
   let ramp = ChartPalette.ocean
 
   @Test func picksFromTheMiddleOutwards() {
