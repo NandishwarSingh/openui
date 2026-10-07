@@ -801,9 +801,23 @@ private struct ButtonVariant: ViewModifier {
 /// A filled button in the theme's accent, with its `onAccent` label.
 struct ProminentButton: ViewModifier {
   @Environment(\.openUITheme) private var theme
+  @Environment(\.isEnabled) private var isEnabled
+  #if os(macOS)
+    @Environment(\.controlActiveState) private var activeState
+  #endif
 
   func body(content: Content) -> some View {
-    content.buttonStyle(.borderedProminent).foregroundStyle(theme.onAccent)
+    content.buttonStyle(.borderedProminent).foregroundStyle(labelColor)
+  }
+
+  /// The system draws a disabled button, or any prominent button in an
+  /// inactive Mac window, gray instead of in the accent. The accent's label
+  /// color would be unreadable on that, so those keep the system's.
+  private var labelColor: Color {
+    #if os(macOS)
+      if activeState == .inactive { return .primary }
+    #endif
+    return isEnabled ? theme.onAccent : .secondary
   }
 }
 
