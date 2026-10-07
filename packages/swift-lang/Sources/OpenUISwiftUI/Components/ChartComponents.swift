@@ -117,13 +117,10 @@ private func seriesTooltip(
 
 extension View {
   /// Horizontal grid lines only, as react-ui's cartesian charts draw them.
-  fileprivate func categoryAxisWithoutGrid() -> some View {
-    chartXAxis {
-      AxisMarks { _ in
-        AxisTick()
-        AxisValueLabel()
-      }
-    }
+  /// The category axis: ticks, no grid lines, and react-ui's condensed
+  /// labels (see `CategoryLabels`).
+  fileprivate func categoryAxisWithoutGrid(_ labels: [String]) -> some View {
+    modifier(CategoryAxis(labels: labels))
   }
 
   /// react-ui's value axis: on the leading side, with grid lines and its tick
@@ -138,6 +135,93 @@ extension View {
     return Group {
       if axis == .vertical { chartYAxis { marks } } else { chartXAxis { marks } }
     }
+  }
+}
+
+/// react-ui's condensed x-axis labels (`layoutXAxisLabels`): every category
+/// shares the width, so when one is narrower than its label (counting at most
+/// 40pt of it) plus an 8pt gap, only every n-th label is drawn, each truncated
+/// to the room it then has. Without this, every label truncates to a letter or
+/// two ("Mum…", "Kolk…") and similar ones ("Sprint 1", "Sprint 2") all read
+/// the same.
+enum CategoryLabels {
+  static let gap: CGFloat = 8
+  static let minWidth: CGFloat = 40
+
+  /// Draw every `interval`-th label, each up to `width` wide.
+  static func layout(widest: CGFloat, slot: CGFloat, count: Int) -> (interval: Int, width: CGFloat)
+  {
+    guard slot > 0, count > 0 else { return (1, slot) }
+    let needed = min(widest, minWidth) + gap
+    let interval = min(count, max(1, Int((needed / slot).rounded(.up))))
+    return (interval, slot * CGFloat(interval) - gap)
+  }
+
+  /// Where a label goes, as react-ui's CondensedXAxis draws it: in a box
+  /// `width` wide centered on its category, cut at the ends of the plot, with
+  /// the text truncated to the box and moved inside it. Returns the text's
+  /// width and its offset from the category's center.
+  static func place(
+    text: CGFloat, center: CGFloat, width: CGFloat, plot: CGFloat
+  ) -> (width: CGFloat, offset: CGFloat) {
+    let left = max(0, center - width / 2)
+    let right = min(plot, center + width / 2)
+    let shown = min(text, max(right - left, 0))
+    let x = min(max(center, left + shown / 2), right - shown / 2)
+    return (shown, x - center)
+  }
+}
+
+private struct CategoryAxis: ViewModifier {
+  let labels: [String]
+  @State private var width: CGFloat = 0
+  @State private var plotWidth: CGFloat = 0
+
+  func body(content: Content) -> some View {
+    // Until the plot is measured, it's the chart less its value axis, about
+    // 36pt of labels.
+    let plot = plotWidth > 0 ? plotWidth : max(width - 36, 0)
+    let slot = labels.isEmpty ? 0 : plot / CGFloat(labels.count)
+    let widest = labels.map { ChartLegend.textWidth($0, style: .caption2) }.max() ?? 0
+    let (interval, labelWidth) = CategoryLabels.layout(
+      widest: widest, slot: slot, count: labels.count)
+    let shown = labels.enumerated().filter { $0.offset % interval == 0 }.map(\.element)
+    content
+      .chartXAxis {
+        AxisMarks(values: width > 0 ? shown : labels) { value in
+          AxisTick()
+          // Swift Charts would fit each label to one category's width and
+          // center it there even past the ends of the chart. Each label gets
+          // the room left by the labels skipped instead, kept inside the plot.
+          AxisValueLabel(collisionResolution: .disabled) {
+            if let label = value.as(String.self) {
+              let text = ChartLegend.textWidth(label, style: .caption2) + 2
+              let center = slot * (CGFloat(labels.firstIndex(of: label) ?? 0) + 0.5)
+              let (size, offset) =
+                width > 0
+                ? CategoryLabels.place(text: text, center: center, width: labelWidth, plot: plot)
+                : (text, 0)
+              Text(label)
+                .lineLimit(1)
+                .frame(width: size)
+                .fixedSize()
+                .offset(x: offset)
+            }
+          }
+        }
+      }
+      .chartPlotStyle { area in
+        area.onGeometryChange(for: CGFloat.self) {
+          $0.size.width
+        } action: {
+          plotWidth = $0
+        }
+      }
+      .onGeometryChange(for: CGFloat.self) {
+        $0.size.width
+      } action: {
+        width = $0
+      }
   }
 }
 
@@ -238,7 +322,7 @@ struct BarChartView: View {
       }
       .chartXScale(domain: labels)
       .chartForegroundStyleScale(domain: series.names, range: series.colors)
-      .categoryAxisWithoutGrid()
+      .categoryAxisWithoutGrid(labelOrder(props))
       .valueAxis()
       .categoryPicker(
         $selection, crosshairBehind: true, tooltip: { seriesTooltip($0, points, series) }
@@ -330,7 +414,7 @@ struct LineChartView: View {
       }
       .chartXScale(domain: labelOrder(props))
       .chartForegroundStyleScale(domain: series.names, range: series.colors)
-      .categoryAxisWithoutGrid()
+      .categoryAxisWithoutGrid(labelOrder(props))
       .valueAxis()
       .categoryPicker($selection, tooltip: { seriesTooltip($0, points, series) }) {
         proxy, plot, label in
@@ -387,7 +471,7 @@ struct AreaChartView: View {
       }
       .chartXScale(domain: labelOrder(props))
       .chartForegroundStyleScale(domain: series.names, range: series.colors)
-      .categoryAxisWithoutGrid()
+      .categoryAxisWithoutGrid(labelOrder(props))
       .valueAxis()
       .categoryPicker($selection, tooltip: { seriesTooltip($0, points, series) }) {
         proxy, plot, label in

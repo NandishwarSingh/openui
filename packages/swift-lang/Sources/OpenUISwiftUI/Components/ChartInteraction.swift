@@ -187,11 +187,11 @@ struct ChartLegend: View {
     textWidth("\(count) more") + 20
   }
 
-  private static func textWidth(_ text: String) -> CGFloat {
+  static func textWidth(_ text: String, style: Font.TextStyle = .caption) -> CGFloat {
     #if os(macOS)
-      let font = NSFont.preferredFont(forTextStyle: .caption1)
+      let font = NSFont.preferredFont(forTextStyle: style == .caption2 ? .caption2 : .caption1)
     #else
-      let font = UIFont.preferredFont(forTextStyle: .caption1)
+      let font = UIFont.preferredFont(forTextStyle: style == .caption2 ? .caption2 : .caption1)
     #endif
     return ceil((text as NSString).size(withAttributes: [.font: font]).width)
   }

@@ -904,3 +904,39 @@ let globalTestLibrary = SwiftUILibrary(
     #expect(columns(10, responsive: false, min: 196) == 1)
   }
 }
+
+/// react-ui's condensed x-axis labels: crowded categories label every n-th
+/// one, each truncated to the room it then has.
+@Suite struct CategoryLabelsTests {
+  @Test func labelsEveryCategoryWhenTheyFit() {
+    let layout = CategoryLabels.layout(widest: 30, slot: 40, count: 6)
+    #expect(layout.interval == 1)
+    #expect(layout.width == 32)
+  }
+
+  /// Eight cities on a phone: every second one, with room for "Mumbai".
+  @Test func thinsCrowdedLabels() {
+    let layout = CategoryLabels.layout(widest: 70, slot: 40, count: 8)
+    #expect(layout.interval == 2)
+    #expect(layout.width == 72)
+    // Only up to 40pt of a long label counts, as in react-ui.
+    #expect(CategoryLabels.layout(widest: 300, slot: 10, count: 20).interval == 5)
+  }
+
+  @Test func neverSkipsPastTheLastCategory() {
+    #expect(CategoryLabels.layout(widest: 100, slot: 2, count: 3).interval == 3)
+    #expect(CategoryLabels.layout(widest: 100, slot: 0, count: 3).interval == 1)
+  }
+
+  /// Labels center on their category and stay inside the plot, as react-ui's
+  /// CondensedXAxis keeps them.
+  @Test func keepsLabelsInsideThePlot() {
+    // In the middle: centered, truncated to its box when it's too long.
+    #expect(CategoryLabels.place(text: 30, center: 100, width: 72, plot: 300) == (30, 0))
+    #expect(CategoryLabels.place(text: 100, center: 150, width: 72, plot: 300) == (72, 0))
+    // The first label's box is cut at the start, and the label moves in.
+    #expect(CategoryLabels.place(text: 60, center: 20, width: 72, plot: 300) == (56, 8))
+    // The last one is cut at the end and moves back.
+    #expect(CategoryLabels.place(text: 50, center: 290, width: 72, plot: 300) == (46, -13))
+  }
+}
