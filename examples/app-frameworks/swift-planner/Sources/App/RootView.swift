@@ -68,9 +68,13 @@ struct RootView: View {
     }
   }
 
+  /// Opens an empty plan, reusing one that's still empty instead of adding
+  /// another.
   private func newConversation() {
-    if let current = selection, let model = models[current], model.messages.isEmpty { return }
-    selection = store.newConversation().id
+    let empty = store.conversations.first { conversation in
+      models[conversation.id].map(\.messages.isEmpty) ?? conversation.messages.isEmpty
+    }
+    selection = empty?.id ?? store.newConversation().id
   }
 
   private func delete(_ id: Conversation.ID) {

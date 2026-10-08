@@ -50,7 +50,8 @@ final class ConversationStore {
     if let data = try? Data(contentsOf: Self.file),
       let saved = try? JSONDecoder().decode([Conversation].self, from: data)
     {
-      conversations = saved.sorted { $0.updated > $1.updated }
+      // A plan nothing was sent in isn't worth keeping (every launch starts one).
+      conversations = saved.filter { !$0.messages.isEmpty }.sorted { $0.updated > $1.updated }
     }
   }
 
