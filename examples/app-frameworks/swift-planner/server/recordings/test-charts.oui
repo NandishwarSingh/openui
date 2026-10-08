@@ -1,0 +1,7 @@
+root = Card([bar, line, pie, stack, radial, area])
+bar = BarChart(["Mon", "Tue", "Wed", "Thu", "Fri"], [Series("Coffee", [1250, 980, 1620, 1400, 2100]), Series("Tea", [600, 720, 540, 810, 950]), Series("Juice", [300, 260, 410, 380, 520])], "grouped", "Day", "Cups")
+line = LineChart(["Jan", "Feb", "Mar", "Apr", "May", "Jun"], [Series("Revenue", [120000, 135000, 128000, 160000, 175000, 190000]), Series("Costs", [90000, 95000, 99000, 101000, 110000, 118000])])
+pie = PieChart(["Rent", "Food", "Travel", "Fun", "Savings", "Utilities", "Insurance", "Gifts"], [1200, 450, 300, 220, 800, 150, 120, 60], "donut")
+stack = SingleStackedBarChart(["Done", "In review", "Blocked", "To do"], [12, 5, 2, 9])
+radial = RadialChart(["Sleep", "Steps", "Water"], [7, 9, 5])
+area = AreaChart(["W1", "W2", "W3", "W4"], [Series("Visitors", [3200, 4100, 3900, 5200])])

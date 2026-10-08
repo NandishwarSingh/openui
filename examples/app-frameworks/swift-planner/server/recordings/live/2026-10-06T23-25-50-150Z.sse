@@ -1,0 +1,103 @@
+
+id: 1
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"placeData = Query(\"search_places\", {query: \"Bangalore Palace\"},"}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" {places: []})\nnearbyData = Query(\"explore_nearby\", {latitude: 12.99"}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"88, longitude: 77.5921}, {places: []})\n\nroot = Card("}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[header, tags, intro, infoGrid, mapBlock, nearbyHeader, nearbyCards, actions, followUps])\n\nheader = CardHeader"}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"Bangalore Palace\", \"Tudor-style royal residence · Bengaluru, Karnataka\")\ntags = TagBlock([\"Historical"}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Landmark\", \"Tudor Architecture\", \"Wodeyar Dynasty\"])\n\nintro = TextContent(\"That's **Bangalore Palace"}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"** in Bengaluru, Karnataka — built in 1878 by Chamarajendra Wadiyar X in the Tudor"}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Revival architectural style, heavily inspired by England's Windsor Castle.\")\n\ninfoGrid = SnippetCardBlock("}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[s1, s2, s3, s4], \"grid\", true)\n\ns1 = SnippetCardItem(\""}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"built-year\", s1lhs, s1rhs)\ns1lhs = IconText(s1icon, \""}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"neutral\", \"m\", \"Built In\", \"Construction start\", false, \"horizontal\")\ns1icon = Icon(\"calendar\","}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"time\")\ns1rhs = BoldText(\"text\", \"1878 AD\")\n\ns2 = SnippetCard"}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Item(\"arch-style\", s2lhs, s2rhs)\ns2lhs = IconText(s2"}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"icon, \"neutral\", \"m\", \"Architecture\", \"Design inspiration\", false, \"horizontal\")\ns2icon = Icon"}}]}
+
+id: 15
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"castle\", \"buildings\")\ns2rhs = BoldText(\"text\", \"Tudor Revival\")\n\ns3"}}]}
+
+id: 16
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" = SnippetCardItem(\"location-city\", s3lhs, s3rhs)\ns3lhs = Icon"}}]}
+
+id: 17
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Text(s3icon, \"neutral\", \"m\", \"Location\", \"City & State\", false, \"horizontal\")"}}]}
+
+id: 18
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\ns3icon = Icon(\"map-pin\", \"travel\")\ns3rhs = BoldText(\"text\", \""}}]}
+
+id: 19
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Bengaluru, KA\")\n\ns4 = SnippetCardItem(\"highlights\", s4lhs, s4rhs)"}}]}
+
+id: 20
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\ns4lhs = IconText(s4icon, \"neutral\", \"m\", \"Key Feature\", \"Interior"}}]}
+
+id: 21
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" attraction\", false, \"horizontal\")\ns4icon = Icon(\"sparkles\", \"shapes\")\ns4rhs ="}}]}
+
+id: 22
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" BoldText(\"text\", \"Woodcarvings & Art\")\n\nmapBlock = Map(placeData.places)"}}]}
+
+id: 23
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\n\nnearbyHeader = InlineHeader(\"Nearby Places to Explore\", \"Sights and attractions close to Bangalore Palace\")\nnearbyCards = Visual"}}]}
+
+id: 24
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"CardBlock(\n  @Each(nearbyData.places, \"p\", VisualCardItem(BoldText(\"text\","}}]}
+
+id: 25
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" p.name, p.description), p.name, p.image, Tag(p.distanceKm + \""}}]}
+
+id: 26
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" km\"))),\n  \"carousel\"\n)\n\nactions = Buttons([btnPlan, btnAddCalendar], \"row\")"}}]}
+
+id: 27
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\nbtnPlan = Button(\"Plan a Visit\", { type: \"continue_conversation\", context: \"Help me plan"}}]}
+
+id: 28
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" a visit to Bangalore Palace including timing and entry tickets\" }, \"primary\")\nbtnAddCalendar = Button(\"Explore Bengaluru\", { type:"}}]}
+
+id: 29
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"continue_conversation\", context: \"What else should I visit near Bangalore Palace?\" }, \"secondary\")\n\nfollowUps = Follow"}}]}
+
+id: 30
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"UpBlock([\n  FollowUpItem(\"What are the entry fees and timings for Bangalore Palace?\"),\n  FollowUpItem"}}]}
+
+id: 31
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"Tell me about the history of the Wodeyar dynasty\"),\n  FollowUpItem(\"What other places can I visit"}}]}
+
+id: 32
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" nearby?\")\n])"}}]}
+
+id: 33
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 34
+data: {"id":"chatcmpl-1791329145297-dFtnCxFbmdeBr6jl9i8pr","object":"chat.completion.chunk","created":1791329145,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":20804,"completion_tokens":772,"total_tokens":21576,"prompt_tokens_details":{"cached_tokens":18387,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+

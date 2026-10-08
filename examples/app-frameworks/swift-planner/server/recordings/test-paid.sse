@@ -1,0 +1,10 @@
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"root = Card([header, done])\nheader = CardHeader("}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"\"You're booked\", \"Lakeside Jazz Brunch, Saturday"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" 11:00\")\ndone = TextContent(\"Payment received. Y"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"our table for two is held.\")\n"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+

@@ -1,0 +1,77 @@
+
+id: 1
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"```openui\nsat = Query(\"calendar_events\", {date: \"2"}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"026-10-10\"}, {date: \"2026-10-10\", weekday"}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":": \"Saturday\", events: []})\nweather = Query(\"weather_forecast\", {date: \"202"}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"6-10-10\"}, {place: \"Current Location\", summary: \"Clear\", high: 22, low"}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":": 14, rainChance: 10, hours: []})\n\nroot = Card("}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[header, summaryText, timeline, weatherHeader, weatherStats, tempChart, followUps])\n\nheader = CardHeader(\"Saturday Schedule &"}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Weather\", \"October 10, 2026\")\nsummaryText = TextContent(\"Here is your schedule for Saturday"}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" along with the forecasted weather.\")\n\ntimeline = DayTimeline(\"Schedule for Saturday\", sat.events)\n\nweatherHeader = InlineHeader"}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"Weather Forecast\", \"Overview for Saturday\")\nweatherStats = OverviewCardBlock([ov1, ov2, ov3],"}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"grid\", true)\n\nov1 = OverviewCardItem(\"temp-range\", ov1top, ov1metric"}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":")\nov1top = IconText(ov1icon, \"info\", \"m\", \"Temperature\", \"High /"}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Low\", false, \"vertical\")\nov1icon = Icon(\"thermometer\", \"weather\")\nov1metric = Metric"}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"IndicatorInline(weather.high + \"° / \" + weather.low + \"°\", \"Celsius\")\n\nov2"}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" = OverviewCardItem(\"rain-chance\", ov2top, ov2metric)\nov2top = IconText"}}]}
+
+id: 15
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(ov2icon, \"info\", \"m\", \"Precipitation\", \"Rain Chance\", false, \"vertical\")\nov"}}]}
+
+id: 16
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"2icon = Icon(\"cloud-rain\", \"weather\")\nov2metric = MetricIndicatorInline(weather.rain"}}]}
+
+id: 17
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Chance + \"%\", \"Chance of rain\")\n\nov3 = OverviewCardItem(\"summary\", ov3top, ov"}}]}
+
+id: 18
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"3metric)\nov3top = IconText(ov3icon, \"info\", \"m\", \"Conditions\","}}]}
+
+id: 19
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"Overall\", false, \"vertical\")\nov3icon = Icon(\"sun\", \"weather\")\nov3metric = MetricIndicator"}}]}
+
+id: 20
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Inline(weather.summary)\n\ntempChart = LineChart(weather.hours.time, [tempSeries], \"natural"}}]}
+
+id: 21
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", \"Time\", \"Temperature (°C)\")\ntempSeries = Series(\"Temperature (°C)\", weather.hours.temp)\n\n"}}]}
+
+id: 22
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"followUps = FollowUpBlock([fu1, fu2])\nfu1 = FollowUpItem(\"Find brunch spots nearby"}}]}
+
+id: 23
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" for Saturday\")\nfu2 = FollowUpItem(\"Add an event to Saturday's schedule\")\n```"}}]}
+
+id: 24
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 25
+data: {"id":"chatcmpl-1791323598197-9_m8SdBZ__GpfmI8mmnoe","object":"chat.completion.chunk","created":1791323598,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":18816,"completion_tokens":570,"total_tokens":19386,"prompt_tokens_details":{"cached_tokens":16350,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+
+

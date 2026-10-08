@@ -1,0 +1,61 @@
+
+id: 1
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"```openui\nsatWeather = Query(\"weather_forecast\", {\"date\": \"2"}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"026-10-10\"}, {\"high\": 0, \"hours\": [], \"low\": 0, \""}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"place\": \"\", \"rainChance\": 0, \"summary\": \"\"})\n\nroot = Card("}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[header, summaryText, statsCards, followUp])\n\nheader = CardHeader(\"Weather Forecast\", \"Saturday, 10 October 20"}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"26\")\n\nsummaryText = TextContent(\"Here is the expected forecast for Saturday based on your current location.\")\n\n"}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"statsCards = OverviewCardBlock([ovSummary, ovHighLow, ovRain], \"grid\", false)\n\novSummary"}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" = OverviewCardItem(\"summary\", ovSumTop, ovSumMetric)\novSumTop = IconText(ovSum"}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Icon, \"info\", \"m\", \"Condition\", \"Overall Sky\", false, \"vertical\")\novSumIcon = Icon"}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"cloud-sun\", \"weather\")\novSumMetric = MetricIndicatorInline(satWeather.summary)\n\novHighLow"}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" = OverviewCardItem(\"temp-range\", ovTempTop, ovTempMetric)\novTempTop = IconText(ovTemp"}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Icon, \"warning\", \"m\", \"High / Low\", \"Temperature\", false, \"vertical\")\novTempIcon = Icon"}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"thermometer\", \"weather\")\novTempMetric = MetricIndicatorInline(satWeather.high + \"°C"}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", \"Low: \" + satWeather.low + \"°C\")\n\novRain = OverviewCardItem(\"rain-chance"}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", ovRainTop, ovRainMetric)\novRainTop = IconText(ovRainIcon, \"info\","}}]}
+
+id: 15
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"m\", \"Precipitation\", \"Rain Probability\", false, \"vertical\")\novRainIcon = Icon(\"cloud-rain"}}]}
+
+id: 16
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", \"weather\")\novRainMetric = MetricIndicatorInline(satWeather.rainChance + \"%\", \"Chance of rain\")\n\n"}}]}
+
+id: 17
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"followUp = FollowUpBlock([fu1])\nfu1 = FollowUpItem(\"Show the hourly forecast\")\n"}}]}
+
+id: 18
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"```"}}]}
+
+id: 19
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 20
+data: {"id":"chatcmpl-1791342147684-pH8Mgq2kL-HwnL_tvurPn","object":"chat.completion.chunk","created":1791342147,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":19689,"completion_tokens":428,"total_tokens":20117,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+

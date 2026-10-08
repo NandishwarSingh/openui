@@ -1,0 +1,133 @@
+
+id: 1
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"```openui\nroot = Card("}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[header, intro, tags, weatherCallout, itinerary, map, detailsHeader, detailsList, actionBtns, followUps])\n\npalacePlaces = Query(\"search_places\", {"}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"query: \"Bengaluru Palace\"}, {\"places\": [{\"name\": \"Bengaluru Palace\", \"latitude\": 12"}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":".9988, \"longitude\": 77.5921, \"address\": \"Vasanth Nagar,"}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Bengaluru, Karnataka 560052\"}]})\nweather = Query(\"weather_forecast\", {date"}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":": \"2026-10-10\", latitude: 12.9988, longitude:"}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" 77.5921}, {\"high\": 28, \"low\": 19, \"summary"}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\": \"Partly Cloudy\", \"rainChance\": 20})\ncalEvents = Query(\"calendar_events\","}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" {date: \"2026-10-10\"}, {\"date\": \"2026-10-"}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"10\", \"weekday\": \"Saturday\", \"events\": []})\n\nheader = CardHeader(\"Bengaluru Palace\","}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"Vasanth Nagar, Bengaluru · Tudor-Style Royal Residence\")\n\nintro = TextContent(\"This is **Bengaluru Palace**,"}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" a grand 19th-century royal palace located in central Bengaluru, Karnataka. Built in 1878 by"}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Rev. J. Garrett and inspired by England's Windsor Castle, it features Tudor-style architecture, fortified towers, wooden carvings,"}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" and manicured royal grounds.\")\n\ntags = TagBlock([\"Heritage & History\", \"Royal Architecture\", \"3–4 Hours Visit\"])"}}]}
+
+id: 15
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\n\nweatherCallout = TextCallout(\"info\", \"Saturday Forecast\", \"Pleasant weather expected (High: "}}]}
+
+id: 16
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"28°C / Low: 19°C) with low chance of rain — great for exploring the gardens and palace"}}]}
+
+id: 17
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" grounds.\")\n\nitinerary = DayTimeline(\"Recommended Saturday Schedule\", [\n    {title: \"Arrive at Bengaluru"}}]}
+
+id: 18
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Palace Grounds\", start: \"10:00\", end: \"10:15\", kind: \"travel\", location"}}]}
+
+id: 19
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":": \"Main Gate, Vasanth Nagar\"},\n    {title: \"Audio Tour of Palace Interiors & Royal Collections"}}]}
+
+id: 20
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", start: \"10:15\", end: \"12:15\", kind: \"plan\","}}]}
+
+id: 21
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" location: \"Palace Main Building\"},\n    {title: \"Stroll Gardens & Photo Spot at Central Lawn\", start: \""}}]}
+
+id: 22
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"12:15\", end: \"13:00\", kind: \"plan\", location: \"Pal"}}]}
+
+id: 23
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"ace Grounds\"},\n    {title: \"Lunch nearby in Vasanth Nagar / Sadashivanagar\", start:"}}]}
+
+id: 24
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"13:00\", end: \"14:30\", kind: \"plan\", location: \""}}]}
+
+id: 25
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Vasanth Nagar\"}\n])\n\nmap = Map(palacePlaces.places, 260)\n\ndetails"}}]}
+
+id: 26
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Header = InlineHeader(\"Visitor Details & Costs\", \"Essential information for your visit\")\n\ndetailsList = EntityList("}}]}
+
+id: 27
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[\n    {left: \"Opening Hours\", right: \"10:00 AM – 5:30"}}]}
+
+id: 28
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" PM (Daily)\", rightVariant: \"text\"},\n    {left: \"Indian Nationals Entry\", right: \"₹23"}}]}
+
+id: 29
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"0 approx.\", rightVariant: \"number\"},\n    {left: \"Foreign Nationals Entry\", right: \"₹460"}}]}
+
+id: 30
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" approx.\", rightVariant: \"number\"},\n    {left: \"Camera / Mobile Stills Fee\", right: \"₹3"}}]}
+
+id: 31
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"00 approx.\", rightVariant: \"number\"},\n    {left: \"Recommended Duration\", right: \"2 to"}}]}
+
+id: 32
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" 3 hours\", rightVariant: \"text\"}\n], \"default\")\n\ncreatePalaceEvent = Mutation(\"create_event"}}]}
+
+id: 33
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", {\n    title: \"Visit Bengaluru Palace\",\n    date: \"2026-10-1"}}]}
+
+id: 34
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"0\",\n    start: \"10:00\",\n    end: \"13:00\","}}]}
+
+id: 35
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\n    location: \"Bengaluru Palace, Vasanth Nagar\",\n    notes: \"Audio tour of interiors and royal"}}]}
+
+id: 36
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" grounds walk.\"\n})\n\nactionBtns = Buttons([\n    Button(\"Add Visit to Calendar\", Action("}}]}
+
+id: 37
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[@Run(createPalaceEvent), @ToAssistant(\"Added 'Visit Bengaluru Palace' to your calendar for Saturday, Oct 10,"}}]}
+
+id: 38
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" 2026 at 10:00 AM.\")]), \"primary\"),\n    Button(\"Find Nearby Restaurants\","}}]}
+
+id: 39
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" {type: \"continue_conversation\", context: \"Recommend top lunch spots near Bengaluru Palace in Vasanth Nagar\"}, \"secondary\")"}}]}
+
+id: 40
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\n], \"row\")\n\nfollowUps = FollowUpBlock([\n    FollowUpItem(\"What other places can I visit near Bengaluru"}}]}
+
+id: 41
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Palace on Saturday?\"),\n    FollowUpItem(\"Tell me about the history of Bengaluru Palace and the Wadiyar dynasty"}}]}
+
+id: 42
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\")\n])\n```"}}]}
+
+id: 43
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 44
+data: {"id":"chatcmpl-1791325399349-UFGJNBQatRkXt5jq2S6L_","object":"chat.completion.chunk","created":1791325399,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":20648,"completion_tokens":1036,"total_tokens":21684,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+

@@ -1,0 +1,38 @@
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"root = Card([bar, line, pie, stack, radial, area"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"])\nbar = BarChart([\"Mon\", \"Tue\", \"Wed\", \"Thu\", \""}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Fri\"], [Series(\"Coffee\", [1250, 980, 1620, 1400,"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" 2100]), Series(\"Tea\", [600, 720, 540, 810, 950]"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"), Series(\"Juice\", [300, 260, 410, 380, 520])], "}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"\"grouped\", \"Day\", \"Cups\")\nline = LineChart([\"Jan"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\"], [Series(\""}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Revenue\", [120000, 135000, 128000, 160000, 17500"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"0, 190000]), Series(\"Costs\", [90000, 95000, 9900"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"0, 101000, 110000, 118000])])\npie = PieChart([\"R"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"ent\", \"Food\", \"Travel\", \"Fun\", \"Savings\", \"Utili"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"ties\", \"Insurance\", \"Gifts\"], [1200, 450, 300, 2"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"20, 800, 150, 120, 60], \"donut\")\nstack = SingleS"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"tackedBarChart([\"Done\", \"In review\", \"Blocked\", "}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"\"To do\"], [12, 5, 2, 9])\nradial = RadialChart([\""}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Sleep\", \"Steps\", \"Water\"], [7, 9, 5])\narea = Are"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"aChart([\"W1\", \"W2\", \"W3\", \"W4\"], [Series(\"Visito"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"rs\", [3200, 4100, 3900, 5200])])\n"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+

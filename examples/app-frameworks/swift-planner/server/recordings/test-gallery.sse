@@ -1,0 +1,36 @@
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"root = Card([intro, gallery])\nintro = TextConten"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"t(\"Here are a few spots worth a look this weeken"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"d.\")\ngallery = ImageGallery([{\"src\": \"https://pi"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"csum.photos/id/1015/1200/800\", \"alt\": \"Photo 1\","}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" \"details\": \"Picture 1 of 7\"}, {\"src\": \"https://"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"picsum.photos/id/1016/1200/800\", \"alt\": \"Photo 2"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"\", \"details\": \"Picture 2 of 7\"}, {\"src\": \"https:"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"//picsum.photos/id/1018/1200/800\", \"alt\": \"Photo"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" 3\", \"details\": \"Picture 3 of 7\"}, {\"src\": \"http"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"s://picsum.photos/id/1019/1200/800\", \"alt\": \"Pho"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"to 4\", \"details\": \"Picture 4 of 7\"}, {\"src\": \"ht"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"tps://picsum.photos/id/1025/1200/800\", \"alt\": \"P"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"hoto 5\", \"details\": \"Picture 5 of 7\"}, {\"src\": \""}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"https://picsum.photos/id/1036/1200/800\", \"alt\": "}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"\"Photo 6\", \"details\": \"Picture 6 of 7\"}, {\"src\":"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" \"https://picsum.photos/id/1039/1200/800\", \"alt\""}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":": \"Photo 7\", \"details\": \"Picture 7 of 7\"}])\n"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+

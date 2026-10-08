@@ -1,0 +1,43 @@
+
+id: 1
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"```openui\nsatWeather = Query(\"weather_forecast\", {\"date\":"}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"2026-10-10\"}, {\"high\": 0, \"hours\": [], \"low"}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\": 0, \"place\": \"\", \"rainChance\": 0, \"summary\": \"\"})\n\nroot = Card"}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"([header, chartHeader, tempChart, tableHeader, hourlyTable, followUp])\n\nheader = CardHeader(\"Hourly Forecast\","}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"Saturday, 10 October 2026\")\n\nchartHeader = InlineHeader(\"Temperature Trend\", \""}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Expected °C throughout Saturday\")\n\ntempChart = LineChart(satWeather.hours.time, [tempSeries], \""}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"natural\", \"Time of Day\", \"Temperature (°C)\")\ntempSeries = Series(\"Temperature (°C)\", satWeather."}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"hours.temp)\n\ntableHeader = InlineHeader(\"Detailed hourly breakdown\", \"Temperature and precipitation chance by hour\")\n\nhourly"}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Table = Table([colTime, colTemp, colRain])\ncolTime = Col(\"Time\", satWeather."}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"hours.time, \"string\")\ncolTemp = Col(\"Temp (°C)\", satWeather.hours.temp, \"number"}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\")\ncolRain = Col(\"Rain Chance (%)\", satWeather.hours.rain, \"number\")\n\nfollowUp"}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" = FollowUpBlock([fu1])\nfu1 = FollowUpItem(\"Show Saturday's calendar schedule\")\n```"}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791342160157-apWXVVnZ3JvFB_KR5NR_-","object":"chat.completion.chunk","created":1791342160,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":20146,"completion_tokens":289,"total_tokens":20435,"prompt_tokens_details":{"cached_tokens":16345,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+

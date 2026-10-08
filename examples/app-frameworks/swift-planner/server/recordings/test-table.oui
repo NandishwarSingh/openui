@@ -1,0 +1,2 @@
+root = Card([t])
+t = EditableTable("roster", [{type: "text", key: "name", header: "Name"}, {type: "text", key: "role", header: "Role"}], [{id: "1", values: ["Alex", "Design"]}, {id: "2", values: ["Jamie", "Ops"]}, {id: "3", values: ["Sam", "Eng"]}])

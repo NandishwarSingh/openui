@@ -1,0 +1,3 @@
+root = Card([header, done])
+header = CardHeader("You're booked", "Lakeside Jazz Brunch, Saturday 11:00")
+done = TextContent("Payment received. Your table for two is held.")

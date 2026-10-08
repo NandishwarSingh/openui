@@ -1,0 +1,223 @@
+
+id: 1
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"```openui\nsights = Query(\"explore_nearby\", {place:"}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"Kathmandu\"}, {places: []})\nhotels = Query(\"search_places\", {place: \"Kathmandu\", query:"}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"hotel\"}, {places: []})\nfoodPhotos = Query(\"find_photos\", {count: 4,"}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" query: \"Nepali momo dal bhat food\"}, {photos: []})\nweather = Query(\"weather_forecast\", {"}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"date: \"2026-10-09\", place: \"Kathmandu\"}, {high: "}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"0, hours: [], low: 0, place: \"\", rainChance: 0, summary: \"\"})\n\n"}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"root = Card("}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[header, weatherBanner, sections, inspirationHeader, sightsCarousel, mapHeader, placesMap, foodHeader, foodGallery, tripForm, followUps])\n\nheader = CardHeader(\"Explore Kathmandu, Nepal\", \"Ancient temples,"}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" vibrant bazaars, and Himalayan gateways\")\n\nweatherBanner = Callout(\"info\", \"Forecast for Kathmandu\", weather.summary + \""}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" · High of \" + weather.high + \"°C / Low of \" + weather.low + \"°C ·"}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Rain chance: \" + weather.rainChance + \"%\")\n\nsections = SectionBlock("}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[secOverview, secItinerary, secStay], false)\n\nsecOverview = SectionItem(\"overview\", \"Trip Highlights\","}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [overviewText, vibeTags])\noverviewText = TextContent(\"Kathmandu is a living museum of UNESCO World Heritage sites, bustling street markets in Thamel"}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":", and ancient square plazas filled with Newari architecture.\")\nvibeTags = TagBlock([\"Culture & Heritage\", \"Mountain Gateway"}}]}
+
+id: 15
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", \"Budget-Friendly\"])\n\nsecItinerary = SectionItem(\"itinerary\", \"Suggested 3-Day Itinerary\","}}]}
+
+id: 16
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [itineraryTabs])\nitineraryTabs = Tabs([tabDay1, tabDay2, tabDay3])\n\n"}}]}
+
+id: 17
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"tabDay1 = TabItem(\"day1\", \"Day 1: Heart of the City\","}}]}
+
+id: 18
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [day1List])\nday1List = ListBlock([d1i1, d1i2, d1i3],"}}]}
+
+id: 19
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"number\")\nd1i1 = ListItem(\"Kathmandu Durbar Square\", \"Explore ancient royal palaces and temples\","}}]}
+
+id: 20
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" null, null, { type: \"continue_conversation\", context: \"Tell me more about visiting Kathmandu Durbar Square"}}]}
+
+id: 21
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\" })\nd1i2 = ListItem(\"Swayambhunath (Monkey Temple)\", \"Climb the steps"}}]}
+
+id: 22
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" for panoramic valley views\", null, null, { type: \"continue_conversation\", context: \"Tell me about Swayambhunath"}}]}
+
+id: 23
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Monkey Temple\" })\nd1i3 = ListItem(\"Evening in Thamel\", \"Browse handicraft shops and dine"}}]}
+
+id: 24
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" at local Newari eateries\", null, null, { type: \"continue_conversation\", context: \"What are the best places"}}]}
+
+id: 25
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" to visit in Thamel?\" })\n\ntabDay2 = TabItem(\"day2\", \"Day 2: Sacred Heritage"}}]}
+
+id: 26
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", [day2List])\nday2List = ListBlock("}}]}
+
+id: 27
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[d2i1, d2i2, d2i3], \"number\")\nd2i1 = ListItem(\"Pashupatinath Temple\", \""}}]}
+
+id: 28
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Sacred Hindu temple complex on the Bagmati River\", null, null, { type: \"continue_conversation\", context"}}]}
+
+id: 29
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":": \"Tell me about Pashupatinath Temple etiquette and tips\" })\nd2i2 = ListItem(\"B"}}]}
+
+id: 30
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"oudhanath Stupa\", \"Walk around one of the world's largest spherical stupas\", null, null, {"}}]}
+
+id: 31
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" type: \"continue_conversation\", context: \"Tell me about Boudhanath Stupa and nearby rooftop cafes\" })\n"}}]}
+
+id: 32
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"d2i3 = ListItem(\"Butter Lamp Lighting\", \"Experience serene evening prayers at Boudhanath\", null, null"}}]}
+
+id: 33
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":", { type: \"continue_conversation\", context: \"Tell me about evening rituals at Boudhanath Stupa\" })\n\n"}}]}
+
+id: 34
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"tabDay3 = TabItem(\"day3\", \"Day 3: Ancient Kingdom\", [day3List])\nday"}}]}
+
+id: 35
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"3List = ListBlock([d3i1, d3i2, d3i3], \"number\")"}}]}
+
+id: 36
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\nd3i1 = ListItem(\"Patan Durbar Square\", \"Renowned for exquisite Newari metalwork and architecture\","}}]}
+
+id: 37
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" null, null, { type: \"continue_conversation\", context: \"Tell me about Patan Durbar Square day"}}]}
+
+id: 38
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" trip\" })\nd3i2 = ListItem(\"Patan Museum\", \"One of South Asia's finest traditional art collections\","}}]}
+
+id: 39
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" null, null, { type: \"continue_conversation\", context: \"Tell me about Patan Museum exhibits\" })"}}]}
+
+id: 40
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\nd3i3 = ListItem(\"Sunset at Nagarkot\", \"Drive to the ridge for views of the Himalayan range\", null"}}]}
+
+id: 41
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":", null, { type: \"continue_conversation\", context: \"How to organize a Nagarkot trip from Kathmandu\" })\n\n"}}]}
+
+id: 42
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"secStay = SectionItem(\"stay\", \"Where to Stay\", [stayList])\nstayList = ListBlock(@"}}]}
+
+id: 43
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Each(hotels.places, \"h\", ListItem(h.name, h.address + \" · \" + h"}}]}
+
+id: 44
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":".distanceKm + \" km from center\")))\n\ninspirationHeader = InlineHeader(\"Top Sights Nearby\", \"Key attractions"}}]}
+
+id: 45
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" around the Kathmandu valley\")\nsightsCarousel = VisualCardBlock(@Each(sights.places, \"p\", Visual"}}]}
+
+id: 46
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"CardItem(BoldText(\"text\", p.name, p.description), p.name, p.image,"}}]}
+
+id: 47
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Tag(p.distanceKm + \" km\", iconDist, \"sm\", \"info\"))), \"carousel\")\n"}}]}
+
+id: 48
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"iconDist = Icon(\"map-pin\", \"navigation\")\n\nmapHeader = InlineHeader(\"Interactive Map\", \"Explore"}}]}
+
+id: 49
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" key sights across the city\")\nplacesMap = Map(sights.places)\n\nfoodHeader = InlineHeader(\"Local"}}]}
+
+id: 50
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Cuisine\", \"Must-try flavors in Kathmandu\")\nfoodGallery = ImageGallery(foodPhotos.photos)\n\ntripForm = Form"}}]}
+
+id: 51
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"ktm-customize\", formBtns, [fcDuration, fcStyle, fcPace])\nformBtns = Buttons("}}]}
+
+id: 52
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[btnSubmit], \"row\")\nbtnSubmit = Button(\"Customize My Kathmandu Trip\", { type: \"continue_conversation"}}]}
+
+id: 53
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", context: \"Help me customize my Kathmandu itinerary based on my preferences\" }, \"primary\")\n\nfcDuration = FormControl"}}]}
+
+id: 54
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"Trip Duration\", selectDuration, \"How many days will you stay?\")\nselectDuration = Select(\"duration\","}}]}
+
+id: 55
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [opt1, opt2, opt3], \"Select duration\", { required: true })\nopt1 = SelectItem"}}]}
+
+id: 56
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"3-days\", \"3 Days (Classic)\")\nopt2 = SelectItem(\"5-days\", \"5 Days"}}]}
+
+id: 57
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" (Valleys & Ridges)\")\nopt3 = SelectItem(\"7-days\", \"7 Days (Full Trek & Culture)\")"}}]}
+
+id: 58
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\n\nfcStyle = FormControl(\"Travel Style\", styleCards, \"Choose your main focus\")\nstyleCards = OptionCards(\"style"}}]}
+
+id: 59
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", \"single\", [ocCulture, ocTrek, ocRelax], { required: true })\nocCulture = OptionCard"}}]}
+
+id: 60
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"culture\", \"Heritage & Temples\", \"Focus on UNESCO sites & history\", iconCulture)\niconCulture = Icon(\""}}]}
+
+id: 61
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"landmark\", \"buildings\")\nocTrek = OptionCard(\"trek\", \"Adventure & Hiking\", \"Day hikes,"}}]}
+
+id: 62
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" ridges & mountain views\", iconTrek)\niconTrek = Icon(\"mountain\", \"nature\")\nocRelax = OptionCard"}}]}
+
+id: 63
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"relax\", \"Relaxed & Foodie\", \"Rooftop cafes, spas & culinary tours\", iconRelax)"}}]}
+
+id: 64
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\niconRelax = Icon(\"utensils\", \"food\")\n\nfcPace = FormControl(\"Pace\", pace"}}]}
+
+id: 65
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Chips, \"How fast do you want to move?\")\npaceChips = Chips(\"pace\", \"single\","}}]}
+
+id: 66
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [chipRelaxed, chipBalanced, chipFast], {}, \"balanced\")\nchipRelaxed = ChipItem(\"relaxed\", \"Relaxed\","}}]}
+
+id: 67
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" iconRelaxed)\niconRelaxed = Icon(\"coffee\", \"food\")\nchipBalanced = ChipItem(\"balanced\", \"Balanced"}}]}
+
+id: 68
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", iconBalanced)\niconBalanced = Icon(\"footprints\", \"navigation\")\nchipFast = ChipItem(\"packed"}}]}
+
+id: 69
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", \"Action Packed\", iconFast)\niconFast = Icon(\"zap\", \"actions\")\n\nfollowUps = FollowUpBlock"}}]}
+
+id: 70
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"([fu1, fu2, fu3])\nfu1 = FollowUpItem(\"What are the best day trips"}}]}
+
+id: 71
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" from Kathmandu?\")\nfu2 = FollowUpItem(\"Recommend local food and best places to try momos\")\nfu3 = Follow"}}]}
+
+id: 72
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"UpItem(\"What is the best time of year to visit Kathmandu?\")\n```"}}]}
+
+id: 73
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 74
+data: {"id":"chatcmpl-1791399220619-n5t8ueS2mTv0_hz8vO3zI","object":"chat.completion.chunk","created":1791399220,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":19957,"completion_tokens":1785,"total_tokens":21742,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+

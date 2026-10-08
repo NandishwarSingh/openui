@@ -1,0 +1,64 @@
+
+id: 1
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"nearbyPlaces = Query(\"search_places\", {query: \"Bengaluru Palace\"}, {"}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"places: []})\nfoodPlaces = Query(\"search_places\", {query: \"restaurants near Bengaluru Palace\"}, {places: []"}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"})\n\nroot = Card([header, intro, detailsBlock, placesHeader, map, actions, followUps])\n\n"}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"header = CardHeader(\"Bengaluru Palace\", \"Vasanth Nagar, Bengaluru, Karnataka\")\n\nintro = TextContent(\"This photo"}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" shows **Bengaluru Palace**, a landmark royal palace in Bengaluru built in the Tudor Revival style with fortified towers, battlements, and manic"}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"ured grounds.\")\n\ndetailsBlock = ContextCardBlock([card1, card2, card3], \"grid\", false"}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":")\ncard1 = ContextCardItem(\"architecture\", \"Architecture\", \"Inspired by Windsor Castle in England, featuring Tudor"}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"-style woodwork, turrets, and gothic windows.\", \"gray\")\ncard2 = ContextCardItem(\"built\", \"History"}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" & Origins\", \"Built in 1878 by Chamarajendra Wadiyar X; owned by the Royal"}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Family of Mysore.\", \"gray\")\ncard3 = ContextCardItem(\"visitor-info\", \"Visitor Highlights\", \"Wood"}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"carvings, royal portraits, vintage photographs, and expansive grounds often hosting concerts and events.\", \"gray\")\n\nplaces"}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Header = InlineHeader(\"Location & Nearby Places\", \"Map view of Bengaluru Palace and surroundings\")\nmap = Map("}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"nearbyPlaces.places)\n\nactions = Buttons([btnExplore, btnEvent], \"row\")\nbtnExplore = Button"}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"Explore more nearby attractions\", { type: \"continue_conversation\", context: \"Show me more attractions near Bengaluru Palace\""}}]}
+
+id: 15
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" }, \"primary\")\nbtnEvent = Button(\"Add visit to calendar\", { type: \"continue_conversation\", context"}}]}
+
+id: 16
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":": \"Add a visit to Bengaluru Palace to my calendar today at 3:00 PM\" }, \"secondary\")"}}]}
+
+id: 17
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\n\nfollowUps = FollowUpBlock([fu1, fu2, fu3])\nfu1 = FollowUpItem"}}]}
+
+id: 18
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"What are the timings and entry fee for Bangalore Palace?\")\nfu2 = FollowUpItem(\"Find good food and"}}]}
+
+id: 19
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" cafes nearby\")\nfu3 = FollowUpItem(\"How far is Bangalore Palace from my current location?\")"}}]}
+
+id: 20
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 21
+data: {"id":"chatcmpl-1791370122875-ZFK7CN59WVOsQQdNFV3K0","object":"chat.completion.chunk","created":1791370122,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":21207,"completion_tokens":460,"total_tokens":21667,"prompt_tokens_details":{"cached_tokens":18379,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+

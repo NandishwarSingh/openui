@@ -1,0 +1,49 @@
+{
+  "worth seeing": [
+    "recordings/live/2026-10-06T22-17-02-923Z.sse"
+  ],
+  "jazz brunch": [
+    "recordings/test-pay.sse",
+    "recordings/test-paid.sse"
+  ],
+  "live after paying": [
+    "recordings/test-pay.sse",
+    "live"
+  ],
+  "saturday look like": [
+    "recordings/saturday.sse"
+  ],
+  "where is this": [
+    "recordings/live/2026-10-06T22-23-26-280Z.sse"
+  ],
+  "send you a photo": [
+    "recordings/live/2026-10-06T23-25-50-150Z.sse",
+    "recordings/live/2026-10-07T02-49-48-958Z.sse"
+  ],
+  "about to tell you about a place": [
+    "recordings/live/2026-10-07T02-49-35-115Z.sse",
+    "recordings/live/2026-10-07T02-49-48-958Z.sse"
+  ],
+  "forecast where I am this Saturday": [
+    "recordings/live/2026-10-07T03-02-30-684Z.sse",
+    "recordings/live/2026-10-07T03-02-42-315Z.sse"
+  ],
+  "gallery test": [
+    "recordings/test-gallery.sse"
+  ],
+  "chart test": [
+    "recordings/test-charts.sse"
+  ],
+  "table test": [
+    "recordings/test-table.sse"
+  ],
+  "slider test": [
+    "recordings/test-slider.sse"
+  ],
+  "palace test": [
+    "recordings/live/2026-10-07T10-48-46-881Z.sse"
+  ],
+  "trip to kathmandu": [
+    "recordings/live/2026-10-07T18-53-49-508Z.sse"
+  ]
+}

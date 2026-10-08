@@ -1,0 +1,10 @@
+
+id: 1
+data: {"id":"chatcmpl-1791341373933-1KO4BvcirDn1Gshy4wqeK","object":"chat.completion.chunk","created":1791341373,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"I'm ready—tell me about the place!"}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791341373933-1KO4BvcirDn1Gshy4wqeK","object":"chat.completion.chunk","created":1791341373,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791341373933-1KO4BvcirDn1Gshy4wqeK","object":"chat.completion.chunk","created":1791341373,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":19684,"completion_tokens":11,"total_tokens":19695,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+

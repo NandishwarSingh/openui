@@ -1,0 +1,18 @@
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"root = Card([header, info, cam, pay])\nheader = C"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"ardHeader(\"Lakeside Jazz Brunch\", \"Saturday 10 O"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"ct, 11:00 to 13:00\")\ninfo = TextContent(\"A table"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" for two by the lake with a live trio. The depos"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"it holds the table and comes off your bill.\")\nca"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"m = CameraField(\"Snap the event poster\", \"Here's"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" the poster\")\npay = PayButton(\"Book a table for "}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"2\", 499, \"Jazz brunch table for 2\")\n"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+

@@ -1,0 +1,5 @@
+root = Card([header, info, cam, pay])
+header = CardHeader("Lakeside Jazz Brunch", "Saturday 10 Oct, 11:00 to 13:00")
+info = TextContent("A table for two by the lake with a live trio. The deposit holds the table and comes off your bill.")
+cam = CameraField("Snap the event poster", "Here's the poster")
+pay = PayButton("Book a table for 2", 499, "Jazz brunch table for 2")

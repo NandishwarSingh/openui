@@ -1,0 +1,151 @@
+
+id: 1
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"```openui\nloc = Query(\"current_location\", {}, {\"area\":"}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"Bengaluru\", \"city\": \"Bengaluru\", \"latitude\": 12.9716, \"longitude"}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\": 77.5946})\nsights = Query(\"explore_nearby\", {\"latitude\": loc"}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":".latitude, \"longitude\": loc.longitude}, {\"places\": []})\nweatherSat = Query(\"weather_forecast"}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", {\"date\": \"2026-10-10\", \"latitude\": loc.latitude, \""}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"longitude\": loc.longitude}, {\"high\": 28, \"low\": 19, \"rainChance\": 2"}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"0, \"summary\": \"Partly cloudy with pleasant breezes\"})\nweatherSun = Query(\"weather_forecast\", {\"date\": \""}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"2026-10-11\", \"latitude\": loc.latitude, \"longitude\": loc.longitude"}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"}, {\"high\": 29, \"low\": 20, \"rainChance\": 10, \"summary"}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\": \"Mostly sunny\"})\n\nroot = Card("}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[header, quickVibe, secBlock, mapHeader, sightsMap, weekendPlannerHeader, weekendTabs, actions, followUps])\n\nheader = CardHeader(\"Weekend Explorations Near You\", \"Popular"}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" sights, parks, and historic spots nearby\")\n\nquickVibe = TagBlock([\"Great Outdoors\", \"Weekend Escape\", \"Local Heritage"}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\"])\n\nsecBlock = SectionBlock([secSights], false)\nsecSights = SectionItem(\"sights-list"}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", \"Top Nearby Destinations\", [sightsCarousel])\n\nsightsCarousel = VisualCardBlock(@Each(sights."}}]}
+
+id: 15
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"places, \"p\", VisualCardItem(BoldText(\"text\", p.name, p.description), p."}}]}
+
+id: 16
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"name, p.image, Tag(p.distanceKm + \" km away\", tagIcon, \"sm\", \"info\"),"}}]}
+
+id: 17
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" p.name)), \"carousel\", true, { type: \"continue_conversation\", context: \"Tell me more about visiting"}}]}
+
+id: 18
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" this place\" })\ntagIcon = Icon(\"navigation\", \"travel\")\n\nmapHeader = InlineHeader(\"Interactive Map\", \"Explore"}}]}
+
+id: 19
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" the location of top sights around your area\")\nsightsMap = Map(sights.places, 320)"}}]}
+
+id: 20
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\n\nweekendPlannerHeader = InlineHeader(\"Weekend Forecast & Schedule Ideas\", \"Plan your Saturday and Sunday based on the local"}}]}
+
+id: 21
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" weather\")\n\nweekendTabs = Tabs([tabSat, tabSun])\n\ntabSat = TabItem(\"sat\", \"Saturday, "}}]}
+
+id: 22
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"10 Oct\", [satWeatherCallout, satPlanList])\nsatWeatherCallout = TextCallout(\""}}]}
+
+id: 23
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"info\", \"Saturday Forecast\", weatherSat.summary + \" · High: \" + weatherSat.high + \"°C /"}}]}
+
+id: 24
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Low: \" + weatherSat.low + \"°C · Rain chance: \" + weatherSat.rainChance +"}}]}
+
+id: 25
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"%\")\nsatPlanList = ListBlock([satItem1, satItem2, satItem3], \"number"}}]}
+
+id: 26
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", \"default\")\nsatItem1 = ListItem(\"Morning Park Walk & Breakfast\", \"Head out early while the temperature"}}]}
+
+id: 27
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" is cool around 19°C–22°C\", null, \"View details\", { type: \"continue"}}]}
+
+id: 28
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"_conversation\", context: \"Suggest a morning walk and breakfast itinerary for Saturday\" })\nsatItem2 = ListItem(\"Explore Nearby"}}]}
+
+id: 29
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Sight & Heritage\", \"Visit one of the top historic or cultural locations on the map\", null, \"View details\", {"}}]}
+
+id: 30
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" type: \"continue_conversation\", context: \"Plan a mid-day visit to a nearby museum or heritage sight\" })\n"}}]}
+
+id: 31
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"satItem3 = ListItem(\"Evening Cafe Break & Sunset\", \"Relax outdoors as the weather cools down in the evening\", null"}}]}
+
+id: 32
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":", \"View details\", { type: \"continue_conversation\", context: \"Recommend nice evening cafes near these spots\" })\n\n"}}]}
+
+id: 33
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"tabSun = TabItem(\"sun\", \"Sunday, 11 Oct\","}}]}
+
+id: 34
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [sunWeatherCallout, sunPlanList])\nsunWeatherCallout = TextCallout(\"success\", \"Sunday Forecast\", weatherSun.summary + \""}}]}
+
+id: 35
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" · High: \" + weatherSun.high + \"°C / Low: \" + weatherSun.low + \""}}]}
+
+id: 36
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"°C · Rain chance: \" + weatherSun.rainChance + \"%\")\nsunPlanList = ListBlock("}}]}
+
+id: 37
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[sunItem1, sunItem2], \"number\", \"default\")\nsunItem1 = ListItem(\"Sunday Morning Outdoor"}}]}
+
+id: 38
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Photography\", \"Great sunlight for capturing landscapes and architecture\", null, \"View details\", { type: \"continue_conversation\", context"}}]}
+
+id: 39
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":": \"Give me photography tips for local sights\" })\nsunItem2 = ListItem(\"Lazy Brunch & Botanical Garden St"}}]}
+
+id: 40
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"roll\", \"Unwind before the upcoming work week\", null, \"View details\", { type: \"continue_conversation\","}}]}
+
+id: 41
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" context: \"Suggest a Sunday brunch and garden walk plan\" })\n\nactions = Buttons([btnPlan, btnPhotos], \"row\")"}}]}
+
+id: 42
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\nbtnPlan = Button(\"Create a Full Weekend Itinerary\", { type: \"continue_conversation\", context: \""}}]}
+
+id: 43
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Create a detailed 2-day weekend itinerary with timings and route maps for these sights\" }, \"primary\")\nbtn"}}]}
+
+id: 44
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Photos = Button(\"Find Food Spots Nearby\", { type: \"continue_conversation\", context: \"Show me great food"}}]}
+
+id: 45
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" and coffee spots near these attractions\" }, \"secondary\")\n\nfollowUps = FollowUpBlock("}}]}
+
+id: 46
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[fu1, fu2, fu3])\nfu1 = FollowUpItem(\"How far is the nearest park from me?\")\nfu2"}}]}
+
+id: 47
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" = FollowUpItem(\"Suggest a 2-hour walking route covering the top 2 sights\")\nfu3 = Follow"}}]}
+
+id: 48
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"UpItem(\"What are the opening hours and entry fees for these places?\")\n```"}}]}
+
+id: 49
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 50
+data: {"id":"chatcmpl-1791325015994-s7BaaoiGrnih4OUE8j3lL","object":"chat.completion.chunk","created":1791325015,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":19571,"completion_tokens":1182,"total_tokens":20753,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+

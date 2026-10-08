@@ -1,0 +1,10 @@
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"root = Card([h, s])\nh = CardHeader(\"Budg"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"et\", \"Drag either end\")\ns = Slider(\"budg"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"et\", \"continuous\", 0, 100, 1, [20, 80], "}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"\"Budget per day\")\n"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+

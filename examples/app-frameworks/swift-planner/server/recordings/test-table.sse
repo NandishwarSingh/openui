@@ -1,0 +1,14 @@
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"root = Card([t])\nt = EditableTable(\"roster\", [{t"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"ype: \"text\", key: \"name\", header: \"Name\"}, {type"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":": \"text\", key: \"role\", header: \"Role\"}], [{id: \""}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"1\", values: [\"Alex\", \"Design\"]}, {id: \"2\", value"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"s: [\"Jamie\", \"Ops\"]}, {id: \"3\", values: [\"Sam\", "}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"\"Eng\"]}])\n"}}]}
+
+data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
