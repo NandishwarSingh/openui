@@ -1,0 +1,43 @@
+
+id: 1
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"```openui\nsights = Query(\"explore_nearby\", {place: \""}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Rome\"}, {places: []})\n\nroot = Card("}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[header, intro, vibeTags, cards, map, followUp])\n\nheader = CardHeader(\"The Eternal Beauty of Rome\", \"Iconic landmarks, ancient marvels & scenic views"}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\")\nintro = TextContent(\"Rome is a living museum of ancient monuments, Baroque fountains, and grand plazas. Here are"}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" the city's most breathtaking sights to explore.\")\nvibeTags = TagBlock([\"Must-See Landmarks\", \"Ancient"}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Architecture\", \"Scenic Rome\"])\n\ncards = VisualCardBlock(@Each(sights.places, \"p\", Visual"}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"CardItem(BoldText(\"text\", p.name, p.description), p.name, p.image,"}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Tag(p.distanceKm + \" km\", null, \"sm\", \"info\"), p.name)), \"grid"}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\")\n\nmap = Map(sights.places)\n\nfollowUp = FollowUpBlock("}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[fu1, fu2, fu3])\nfu1 = FollowUpItem(\"Plan a 3-day Rome itinerary around these sights\")\n"}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"fu2 = FollowUpItem(\"Find the best food spots near the Colosseum\")\nfu3 = FollowUpItem(\"Check"}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" the weather forecast for Rome\")\n```"}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791450727249-gf_42s6Oy1M1Duj_hF9vw","object":"chat.completion.chunk","created":1791450727,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":20058,"completion_tokens":271,"total_tokens":20329,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+

@@ -1,0 +1,94 @@
+
+id: 1
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"```openui\ncafes = Query(\"search_places\", {query: \""}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"cafe brunch\", place: \"Indiranagar, Bengaluru\"}, {places: []})\n\nroot = Card("}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[header, intro, cafeList, depositHeader, depositSection, followUp])\n\nheader = CardHeader(\"Saturday Brunch in Indiranagar\", \"Top"}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" cafes & direct table reservation deposit\")\n\nintro = TextContent(\"Here are highly-rated brunch spots in **Indiranagar"}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"**. Select a cafe below to reserve a table by paying a nominal deposit directly.\")\n\ncafeList = CompositeCardBlock(@Each"}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(cafes.places, \"c\", CompositeCardItem(\n  c.name,\n  IconText(cafe"}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Icon, \"neutral\", \"m\", c.name, c.address, true, \"horizontal\"),\n "}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [\n    Text(\"text\", c.distanceKm + \" km away · \" + c.category, \"Indiranagar\"),\n"}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"    TagBlock([\"Brunch Favorite\", \"Outdoor Seating\"])\n  ]\n)), \"grid\", true)\n\n"}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"cafeIcon = Icon(\"coffee\", \"food\")\n\ndepositHeader = InlineHeader(\"Reserve Your Table\", \"Pay a"}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" deposit to guarantee your Saturday brunch slot\")\n\ndepositSection = Form(\"brunch-deposit\", formBtns,"}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [fcCafe, fcTime, fcGuests, fcPay])\n\nfcCafe = FormControl(\"Select Cafe\", cafeSelect, \"Choose from"}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" top Indiranagar spots\")\ncafeSelect = Select(\"cafe_name\", [\n  SelectItem(\"Glen's Bake"}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"house\", \"Glen's Bakehouse — Indiranagar\"),\n  SelectItem(\"The Hole in the Wall Cafe\", \"The Hole"}}]}
+
+id: 15
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" in the Wall Cafe — Indiranagar\"),\n  SelectItem(\"Lazy Suzy\", \"Lazy Suzy — Indiranagar\"),"}}]}
+
+id: 16
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\n  SelectItem(\"Habitate\", \"Habitate — Indiranagar\")\n], \"Select a cafe\")\n\nfcTime ="}}]}
+
+id: 17
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" FormControl(\"Preferred Time (Saturday)\", timeSelect)\ntimeSelect = Select(\"brunch_time\", [\n  SelectItem"}}]}
+
+id: 18
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"(\"10:00\", \"10:00 AM\"),\n  SelectItem(\"11:30"}}]}
+
+id: 19
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", \"11:30 AM\"),\n  SelectItem(\"13:00\", \"01:0"}}]}
+
+id: 20
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"0 PM\"),\n  SelectItem(\"14:30\", \"02:30 PM\")\n], \""}}]}
+
+id: 21
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Select time\")\n\nfcGuests = FormControl(\"Party Size\", guestSelect)\nguestSelect = Select(\"guests\", [\n  "}}]}
+
+id: 22
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"SelectItem(\"2\", \"2 Guests\"),\n  SelectItem(\"4\", \"4 Guests\"),\n  SelectItem(\"6\", \""}}]}
+
+id: 23
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"6 Guests\")\n], \"Select number of guests\")\n\nfcPay = FormControl(\"Table Deposit\", payBtn, \"Refund"}}]}
+
+id: 24
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"able against your final bill\")\npayBtn = PayButton(\"Pay ₹500 Deposit\", 500"}}]}
+
+id: 25
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":", \"Saturday Brunch Table Deposit - Indiranagar Cafe\")\n\nformBtns = Buttons([submitBtn], \"row\")\nsubmitBtn"}}]}
+
+id: 26
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" = Button(\"Confirm Table & Deposit\", Action([@ToAssistant(\"I want to confirm my Saturday brunch deposit reservation\")]), \"primary\")"}}]}
+
+id: 27
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\n\nfollowUp = FollowUpBlock([\n  FollowUpItem(\"Show these cafes on a map\"),\n  Follow"}}]}
+
+id: 28
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"UpItem(\"Add Saturday brunch to my calendar\"),\n  FollowUpItem(\"Find cafes with outdoor garden seating\")\n])\n"}}]}
+
+id: 29
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"```"}}]}
+
+id: 30
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 31
+data: {"id":"chatcmpl-1791450802999-SK_a79bS2EWuO1rbxTi5C","object":"chat.completion.chunk","created":1791450802,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":20064,"completion_tokens":698,"total_tokens":20762,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+

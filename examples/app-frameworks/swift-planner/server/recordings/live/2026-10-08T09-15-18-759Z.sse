@@ -1,0 +1,157 @@
+
+id: 1
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"role":"assistant","content":"```openui-lang\nwKathmandu = Query(\"weather_forecast\","}}]}
+
+id: 2
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" {date: \"2026-10-10\", place: \"Kathmandu\"}, {high:"}}]}
+
+id: 3
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" 0, low: 0, rainChance: 0, hours: [], place: \"Kathmandu\", summary: \"\""}}]}
+
+id: 4
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"})\nwPokhara = Query(\"weather_forecast\", {date: \"2026-10-"}}]}
+
+id: 5
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"10\", place: \"Pokhara\"}, {high: 0, low: 0, rainChance: "}}]}
+
+id: 6
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"0, hours: [], place: \"Pokhara\", summary: \"\"})\nwDelhi = Query(\"weather_forecast"}}]}
+
+id: 7
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", {date: \"2026-10-10\", place: \"Delhi\"}, {high:"}}]}
+
+id: 8
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" 0, low: 0, rainChance: 0, hours: [], place: \"Delhi\", summary: \"\""}}]}
+
+id: 9
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"})\n\n$selectedMetric = \"temp\"\n\nroot = Card("}}]}
+
+id: 10
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[header, kpis, filterControl, mainTabs, summarySection, followUp])\n\nheader = CardHeader(\"Saturday Weather Comparison\", \"Saturday, 10 October 2"}}]}
+
+id: 11
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"026 · Kathmandu vs. Pokhara vs. Delhi\")\n\nkpis = OverviewCardBlock("}}]}
+
+id: 12
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[kpiKtmd, kpiPokhara, kpiDelhi], \"grid\", true)\n\nkpiKtmd = OverviewCardItem(\"kt"}}]}
+
+id: 13
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"m\", kpiKtmdTop, kpiKtmdMetric)\nkpiKtmdTop = IconText(ktmIcon"}}]}
+
+id: 14
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":", \"neutral\", \"m\", \"Kathmandu\", wKathmandu.summary, false, \"vertical\")\nkt"}}]}
+
+id: 15
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"mIcon = Icon(\"cloud-sun\", \"weather\")\nkpiKtmdMetric = MetricIndicatorInline(wKathmandu."}}]}
+
+id: 16
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"high + \"°C\", \"Low: \" + wKathmandu.low + \"°C · \" + w"}}]}
+
+id: 17
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Kathmandu.rainChance + \"% rain\")\n\nkpiPokhara = OverviewCardItem(\"pokhara\", kpiPok"}}]}
+
+id: 18
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"haraTop, kpiPokharaMetric)\nkpiPokharaTop = IconText(pokharaIcon, \""}}]}
+
+id: 19
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"neutral\", \"m\", \"Pokhara\", wPokhara.summary, false, \"vertical\")\npokharaIcon"}}]}
+
+id: 20
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" = Icon(\"cloud-rain\", \"weather\")\nkpiPokharaMetric = MetricIndicatorInline(wPokhara"}}]}
+
+id: 21
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":".high + \"°C\", \"Low: \" + wPokhara.low + \"°C · \" +"}}]}
+
+id: 22
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" wPokhara.rainChance + \"% rain\")\n\nkpiDelhi = OverviewCardItem(\"delhi\", kpi"}}]}
+
+id: 23
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"DelhiTop, kpiDelhiMetric)\nkpiDelhiTop = IconText(delhiIcon, \"neutral\","}}]}
+
+id: 24
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" \"m\", \"Delhi\", wDelhi.summary, false, \"vertical\")\ndelhiIcon = Icon(\"sun"}}]}
+
+id: 25
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", \"weather\")\nkpiDelhiMetric = MetricIndicatorInline(wDelhi.high + \"°C\", \""}}]}
+
+id: 26
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Low: \" + wDelhi.low + \"°C · \" + wDelhi.rainChance + \"% rain\")"}}]}
+
+id: 27
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\n\nfilterControl = InlineHeader(\"Hourly Comparison Views\", \"Switch between temperature curves and rain probabilities across cities\")\n\nmainTabs"}}]}
+
+id: 28
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" = Tabs([tabTemp, tabRain, tabSummaryTable])\n\ntabTemp = TabItem(\"temp-chart\", \"Hourly Temperature"}}]}
+
+id: 29
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" (°C)\", [tempChart])\ntempChart = LineChart(wKathmandu.hours.time,"}}]}
+
+id: 30
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [seriesTempKtm, seriesTempPokhara, seriesTempDelhi], \"natural\", \"Time of Day\", \"Temperature (°C)\","}}]}
+
+id: 31
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" 280)\nseriesTempKtm = Series(\"Kathmandu\", wKathmandu.hours.temp)\nseries"}}]}
+
+id: 32
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"TempPokhara = Series(\"Pokhara\", wPokhara.hours.temp)\nseriesTempDelhi = Series(\""}}]}
+
+id: 33
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Delhi\", wDelhi.hours.temp)\n\ntabRain = TabItem(\"rain-chart\", \"Rain Chance (%)\","}}]}
+
+id: 34
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [rainChart])\nrainChart = BarChart(wKathmandu.hours.time,"}}]}
+
+id: 35
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [seriesRainKtm, seriesRainPokhara, seriesRainDelhi], \"grouped\", \"Time of Day\", \"Rain Chance (%)\", 2"}}]}
+
+id: 36
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"80)\nseriesRainKtm = Series(\"Kathmandu\", wKathmandu.hours.rain)\nseries"}}]}
+
+id: 37
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"RainPokhara = Series(\"Pokhara\", wPokhara.hours.rain)\nseriesRainDelhi = Series(\""}}]}
+
+id: 38
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Delhi\", wDelhi.hours.rain)\n\ntabSummaryTable = TabItem(\"data-table\", \"City Overview Table"}}]}
+
+id: 39
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"\", [dataTable])\ndataTable = Table([colCity, colHigh, colLow, colRain])\ncolCity = Col(\""}}]}
+
+id: 40
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"City\", [\"Kathmandu\", \"Pokhara\", \"Delhi\"], \"string\")\ncolHigh = Col(\"High (°"}}]}
+
+id: 41
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"C)\", [wKathmandu.high, wPokhara.high, wDelhi.high], \"number\")\n"}}]}
+
+id: 42
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"colLow = Col(\"Low (°C)\","}}]}
+
+id: 43
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [wKathmandu.low, wPokhara.low, wDelhi.low], \"number\")\ncolRain = Col(\"Rain Chance (%)\","}}]}
+
+id: 44
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" [wKathmandu.rainChance, wPokhara.rainChance, wDelhi.rainChance], \"number\")\n\nsummarySection = SectionBlock("}}]}
+
+id: 45
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[secNotes], false)\nsecNotes = SectionItem(\"notes\", \"Quick Forecast Insights\", [secContent])\nsecContent = Text"}}]}
+
+id: 46
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"Content(\"Compare the hourly forecast trends above to plan outdoor activities for Saturday. Delhi typically experiences warmer temperatures, while Pokhara and"}}]}
+
+id: 47
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Kathmandu show distinct valley and mountain temperature profiles alongside localized rain likelihoods.\")\n\nfollowUp = FollowUpBlock("}}]}
+
+id: 48
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"[fu1, fu2, fu3])\nfu1 = FollowUpItem(\"What should I pack for Saturday in Kathmandu?\")\n"}}]}
+
+id: 49
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":"fu2 = FollowUpItem(\"Show me outdoor sights in Pokhara for Saturday\")\nfu3 = FollowUpItem(\"Check the"}}]}
+
+id: 50
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{"content":" Sunday forecast for these cities\")\n```"}}]}
+
+id: 51
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{}}]}
+
+id: 52
+data: {"id":"chatcmpl-1791450912104-8cLCPR1fg5LAoLUa7wM3l","object":"chat.completion.chunk","created":1791450912,"model":"google/gemini-3.6-flash-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":20122,"completion_tokens":1213,"total_tokens":21335,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+
