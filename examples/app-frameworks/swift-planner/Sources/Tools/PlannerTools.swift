@@ -285,9 +285,12 @@ final class ToolRunner {
     }
   }
 
-  /// Asks for location access and gets a fix while an answer streams, so the
-  /// permission prompt doesn't hold up the tools that need it.
+  /// Gets a fix while an answer streams, when Planner may already use the
+  /// location, so the tools that need it don't wait for one. Asking for
+  /// access is left to the first tool that needs it: a question about
+  /// somewhere else never shows the prompt.
   func prepareLocation() {
+    guard location.isAuthorized else { return }
     Task { _ = try? await location.current() }
   }
 
@@ -691,6 +694,14 @@ final class LocationFetcher: NSObject, @preconcurrency CLLocationManagerDelegate
       case .denied, .restricted: finish(.failure(ToolFailure(errorDescription: Self.accessOff)))
       default: startFix()
       }
+    }
+  }
+
+  /// Whether Planner may use the location already, without asking.
+  var isAuthorized: Bool {
+    switch manager.authorizationStatus {
+    case .notDetermined, .denied, .restricted: false
+    default: true
     }
   }
 

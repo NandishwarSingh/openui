@@ -114,7 +114,7 @@ final class ChatModel {
 
   private func respond(to message: StoredMessage) {
     guard !isStreaming else { return }
-    // Most answers need the user's location; ask for it while this one streams.
+    // Most answers need the user's location; get a fix while this one streams.
     ToolRunner.shared.prepareLocation()
     messages.append(ChatMessage(stored: message))
     if !message.hidden { sentCount += 1 }
