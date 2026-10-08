@@ -4,6 +4,19 @@ A planning assistant for iPhone, iPad and Mac built on [`packages/swift-lang`](.
 
 It's here to show the Swift package in a real app, so it uses more than an example needs: tools, native components, payments, persistence and UI tests.
 
+<img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/kathmandu.gif" width="300" alt="Planning a trip to Kathmandu: the answer streams in, then photos, hotels, sights and the map">
+
+A real answer to "Plan me a trip to Kathmandu" (iPhone simulator, sped up). The forecast, hotels, sights and photos come from the tools on the device.
+
+| | | | |
+|---|---|---|---|
+| <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/light-answer.jpg" width="200" alt="Forecast and itinerary"> | <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/light-hotels.jpg" width="200" alt="Hotels from Apple Maps"> | <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/light-sights-map.jpg" width="200" alt="Sights from Wikipedia and a map"> | <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/light-map.jpg" width="200" alt="The map full screen"> |
+| Forecast and itinerary | Hotels from Apple Maps | Sights from Wikipedia, with a map | The map, full screen |
+| <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/light-food.jpg" width="200" alt="Food photos from Wikimedia Commons"> | <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/dark-answer.jpg" width="200" alt="Dark mode"> | <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/dark-sights-map.jpg" width="200" alt="Dark mode sights and map"> | <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/dark-food.jpg" width="200" alt="Dark mode food photos"> |
+| Food photos from Commons | Dark mode | | |
+| <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/pay-checkout.jpg" width="200" alt="Razorpay checkout"> | <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/pay-bank.jpg" width="200" alt="Razorpay test bank"> | <img src="https://raw.githubusercontent.com/NandishwarSingh/openui/8bcc47d7775de145c0e23afb7b8c04d9c9852bea/planner/ipad.jpg" width="330" alt="iPad"> | |
+| Razorpay checkout (test mode) | Its test bank | iPad | |
+
 ## Prerequisites
 
 - Xcode 16 or later, and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
