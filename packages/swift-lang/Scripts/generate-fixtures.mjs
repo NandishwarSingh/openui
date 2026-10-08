@@ -766,14 +766,29 @@ const chartFormatCases = [
 }));
 Number.prototype.toLocaleString = toLocaleString;
 
-function write(name, data, indent = 1) {
-  mkdirSync(fixtures, { recursive: true });
-  writeFileSync(join(fixtures, name), JSON.stringify(data, null, indent) + "\n");
+// One case per line: still JSON and still diffable case by case, without a
+// line for every value. Pretty-printed, the fixtures were most of the
+// package's lines.
+function fixtureJSON(data) {
+  const array = Array.isArray(data);
+  const lines = array
+    ? data.map((item) => JSON.stringify(item))
+    : Object.entries(data).map(
+        ([key, value]) => `${JSON.stringify(key)}: ${JSON.stringify(value)}`,
+      );
+  return `${array ? "[" : "{"}\n${lines.join(",\n")}\n${array ? "]" : "}"}\n`;
+}
+
+const swiftUIFixtures = join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures");
+
+function write(name, data, folder = fixtures) {
+  mkdirSync(folder, { recursive: true });
+  writeFileSync(join(folder, name), fixtureJSON(data));
 }
 
 write("schemas.json", Object.fromEntries(Object.entries(schemas)));
 write("parser.json", parserCases);
-write("streaming.json", streamingCases, 0);
+write("streaming.json", streamingCases);
 write("stream-set.json", setCases);
 write("evaluation.json", evalFixtures);
 write("prompts.json", promptCases);
@@ -781,31 +796,21 @@ write("merge.json", mergeCases);
 write("errors.json", errorCases);
 write("cloud.json", { cases: cloudCases, chat: chatCloud });
 write("messages.json", messageCases);
-
-// The chat examples, for the SwiftUI renderer's end-to-end render tests.
-mkdirSync(join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures"), { recursive: true });
-writeFileSync(
-  join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures", "chat-examples.json"),
-  JSON.stringify(
-    chatExamples.map(({ name, input }) => ({ name, input })),
-    null,
-    1,
-  ) + "\n",
-);
 write("chat-spec.json", chatComponentSpecs);
 write("openui-spec.json", openuiSpec);
-writeFileSync(
-  join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures", "openui-examples.json"),
-  JSON.stringify(
-    openuiExamples.map(({ name, input }) => ({ name, input })),
-    null,
-    1,
-  ) + "\n",
+// The libraries' examples, for the SwiftUI renderer's end-to-end render
+// tests, and react-ui's chart number formats.
+write(
+  "chat-examples.json",
+  chatExamples.map(({ name, input }) => ({ name, input })),
+  swiftUIFixtures,
 );
-writeFileSync(
-  join(here, "..", "Tests", "OpenUISwiftUITests", "Fixtures", "chart-formats.json"),
-  JSON.stringify(chartFormatCases, null, 1) + "\n",
+write(
+  "openui-examples.json",
+  openuiExamples.map(({ name, input }) => ({ name, input })),
+  swiftUIFixtures,
 );
+write("chart-formats.json", chartFormatCases, swiftUIFixtures);
 
 console.log(
   `wrote ${parserCases.length} parser, ${streamingCases.length} streaming, ${setCases.length} set, ${evalFixtures.length} evaluation, ${promptCases.length} prompt, ${mergeCases.length} merge, ${errorCases.length} error, ${cloudCases.length} cloud, ${messageCases.separate.length} message, ${chartFormatCases.length} chart format fixtures`,
