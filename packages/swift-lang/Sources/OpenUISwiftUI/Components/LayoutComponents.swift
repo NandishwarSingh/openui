@@ -510,15 +510,19 @@ struct CarouselView: View {
 }
 
 /// A horizontal row that scrolls like react-ui's carousels: items snap to the
-/// leading edge, an edge fades out where there's more to scroll, and optional
-/// buttons step one item at a time. Whether it can scroll only drives the
-/// fades and buttons, never a size, so it can't feed back into layout.
+/// leading edge, an edge fades out where there's more to scroll, and buttons
+/// step one item at a time. Whether it can scroll only drives the fades and
+/// buttons, never a size, so it can't feed back into layout.
 struct CarouselScroller<Item: View>: View {
   let count: Int
   var spacing: CGFloat
   /// How far an edge fades out: 40 for react-ui's Carousel, its `space-3xl`
   /// (48) for card blocks.
   var fade: CGFloat
+  /// Shows the buttons all the time, as react-ui's Carousel does. Card blocks
+  /// show them only while a pointer is over the row: a mouse wheel scrolls
+  /// up and down, so without them a mouse can't reach the cards past the
+  /// edge (a browser has shift-scrolling and a scrollbar for that).
   var showsButtons = false
   /// Stretches items to the tallest one, as a flex row does.
   var equalHeights = false
@@ -527,11 +531,16 @@ struct CarouselScroller<Item: View>: View {
   @State private var position: Int?
   @State private var content = CGRect.zero
   @State private var visibleWidth: CGFloat = 0
+  @State private var hoveringRow = false
+  /// The buttons hang half outside the row, so the pointer can be on one
+  /// without being over the row.
+  @State private var hoveringButton = false
   @Environment(\.openUITheme) private var theme
 
   var body: some View {
     let canScrollBack = content.minX < -1
     let canScrollOn = content.maxX > visibleWidth + 1
+    let buttons = showsButtons || hoveringRow || hoveringButton
     ScrollView(.horizontal, showsIndicators: false) {
       HStack(alignment: .top, spacing: spacing) {
         ForEach(0..<count, id: \.self) { item($0).id($0) }
@@ -564,12 +573,14 @@ struct CarouselScroller<Item: View>: View {
           .frame(width: canScrollOn ? fade : 0)
       }
     }
+    .onHover { hoveringRow = $0 }
     .overlay(alignment: .leading) {
-      if showsButtons && canScrollBack { stepButton(-1) }
+      if buttons && canScrollBack { stepButton(-1) }
     }
     .overlay(alignment: .trailing) {
-      if showsButtons && canScrollOn { stepButton(1) }
+      if buttons && canScrollOn { stepButton(1) }
     }
+    .animation(.easeOut(duration: 0.15), value: buttons)
   }
 
   /// react-ui's small square secondary button, half over the edge.
@@ -590,6 +601,10 @@ struct CarouselScroller<Item: View>: View {
         .shadow(color: .black.opacity(0.08), radius: 3, y: 1)
     }
     .buttonStyle(.plain)
+    .onHover { hoveringButton = $0 }
+    // A button that goes away under the pointer (the row reached its end)
+    // never hears the pointer leave.
+    .onDisappear { hoveringButton = false }
     .accessibilityLabel(step < 0 ? "Previous" : "Next")
     .offset(x: step < 0 ? -12 : 12)
   }

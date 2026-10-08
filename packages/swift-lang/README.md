@@ -245,6 +245,7 @@ Conform your own type to `ToolProvider` for other backends.
 - `$$` math in text content shows as source; there's no native TeX renderer.
 - Code is highlighted with Prism's `vscDarkPlus` and `oneLight` colors by a small built-in tokenizer covering common languages (C-family, JSON, markup, Python, Ruby, shell, YAML, SQL), not by Prism's grammars.
 - Touch has no hover, so a chart's tooltip opens on a tap and stays until the same spot is tapped again (or another chart's opens), where react-ui shows it while a finger moves. Hover states need a pointer: the Mac, or an iPad with a trackpad.
+- Card blocks laid out as a carousel show the Carousel's step buttons while a pointer is over them. A mouse wheel only scrolls up and down, and there's no shift-scrolling or scrollbar to fall back on like in a browser, so react-ui's button-less card carousels can't be scrolled with a mouse otherwise.
 - Editable table cells are always text fields, which suits touch, rather than react-ui's select-then-edit cells. With a keyboard, Up and Down move between rows and Enter moves down; Escape doesn't undo an edit.
 - Crowded chart axes keep thinning their labels until the longest fits, down to three labels. react-ui stops thinning once each label has 40px and truncates the rest.
 - A visual card whose text block came out empty (say, a loop variable used outside its `@Each`) shows just its photo, where react-ui draws an empty panel over it.
