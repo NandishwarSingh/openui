@@ -22,6 +22,26 @@ import Testing
   }
 }
 
+/// A card's text block counts as content only when it has text: one whose
+/// values came out empty doesn't get an empty panel over the photo.
+@Suite struct CardTextContentTests {
+  func block(_ type: String, _ props: OpenUIObject) -> OpenUIValue {
+    .element(ElementNode(typeName: type, props: props, partial: false))
+  }
+
+  @Test func emptyTextBlocksHaveNoContent() {
+    #expect(!textBlockHasContent(block("BoldText", ["value": "", "subtext": ""])))
+    #expect(!textBlockHasContent(block("Text", ["value": .null])))
+    #expect(!textBlockHasContent(.null))
+  }
+
+  @Test func textOrOtherComponentsAreContent() {
+    #expect(textBlockHasContent(block("BoldText", ["value": "", "subtext": "Temple"])))
+    #expect(textBlockHasContent(block("Text", ["value": 0])))
+    #expect(textBlockHasContent(block("TagBlock", ["tags": []])))
+  }
+}
+
 @Suite struct CardActionTests {
   let item: OpenUIObject = ["itemIndex": 1, "itemId": "a", "itemTitle": .undefined]
 

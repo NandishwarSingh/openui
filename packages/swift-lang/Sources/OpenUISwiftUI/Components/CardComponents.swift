@@ -571,7 +571,7 @@ private struct VisualCard: View {
       .frame(minHeight: 24, alignment: .top)
       .padding(12)
       Spacer(minLength: 0)
-      if !item["body"].isNullish {
+      if textBlockHasContent(item["body"]) {
         OpenUINode(item["body"])
           .padding(.vertical, 8)
           .padding(.horizontal, 10)
@@ -597,6 +597,16 @@ private struct VisualCard: View {
 }
 
 // MARK: - Building blocks
+
+/// Whether a card's text block (`Text`, `BoldText`) has anything to show. A
+/// response can bind one to values that come out empty (a loop variable used
+/// outside its `@Each`), and its panel would then float empty over the photo.
+func textBlockHasContent(_ value: OpenUIValue) -> Bool {
+  guard let element = value.elementValue, ["Text", "BoldText"].contains(element.typeName) else {
+    return !value.isNullish
+  }
+  return ["value", "subtext"].contains { !displayText(element.props[$0] ?? .undefined).isEmpty }
+}
 
 /// `Text` / `BoldText`: a value line with optional subtext. `variant "number"`
 /// uses tabular digits; `subtextVariant "metric"` colors a leading +/- green/red.

@@ -247,6 +247,7 @@ Conform your own type to `ToolProvider` for other backends.
 - Touch has no hover, so a chart's tooltip opens on a tap and stays until the same spot is tapped again (or another chart's opens), where react-ui shows it while a finger moves. Hover states need a pointer: the Mac, or an iPad with a trackpad.
 - Editable table cells are always text fields, which suits touch, rather than react-ui's select-then-edit cells. With a keyboard, Up and Down move between rows and Enter moves down; Escape doesn't undo an edit.
 - Crowded chart axes keep thinning their labels until the longest fits, down to three labels. react-ui stops thinning once each label has 40px and truncates the rest.
+- A visual card whose text block came out empty (say, a loop variable used outside its `@Each`) shows just its photo, where react-ui draws an empty panel over it.
 - The image gallery's mosaic has fixed proportions instead of taking its height from the loaded images, so it doesn't jump when they arrive, and the viewer shows each image's `details`.
 - Not ported: `jsonToOpenUI`, the deprecated `enrichErrors` (its hints are in `onError`), and the server-side `artifactTool` from `@openuidev/lang-core/cloud`.
 
