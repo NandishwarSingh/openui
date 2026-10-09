@@ -879,34 +879,36 @@ let globalTestLibrary = SwiftUILibrary(
   }
 }
 
-/// Wrapping rows (tags, chips, legends) never let a child spill past the
-/// container: one wider than a row gets the row's width.
-@MainActor
-@Suite struct FlowLayoutTests {
-  @Test func capsWideChildrenAtTheRowWidth() {
-    final class Box { var width: CGFloat = 0 }
-    let box = Box()
-    let host = NSHostingView(
-      rootView: FlowLayout {
-        Text("Short")
-        Text(String(repeating: "wide ", count: 60))
-          .lineLimit(1)
-          .onGeometryChange(for: CGFloat.self) {
-            $0.size.width
-          } action: {
-            box.width = $0
-          }
-      }
-      .frame(width: 200))
-    let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 200, height: 200), styleMask: [.borderless],
-      backing: .buffered, defer: false)
-    window.contentView = host
-    RunLoop.main.run(until: Date().addingTimeInterval(0.2))
-    #expect(box.width > 150)
-    #expect(box.width <= 200)
+#if canImport(AppKit)
+  /// Wrapping rows (tags, chips, legends) never let a child spill past the
+  /// container: one wider than a row gets the row's width.
+  @MainActor
+  @Suite struct FlowLayoutTests {
+    @Test func capsWideChildrenAtTheRowWidth() {
+      final class Box { var width: CGFloat = 0 }
+      let box = Box()
+      let host = NSHostingView(
+        rootView: FlowLayout {
+          Text("Short")
+          Text(String(repeating: "wide ", count: 60))
+            .lineLimit(1)
+            .onGeometryChange(for: CGFloat.self) {
+              $0.size.width
+            } action: {
+              box.width = $0
+            }
+        }
+        .frame(width: 200))
+      let window = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 200, height: 200), styleMask: [.borderless],
+        backing: .buffered, defer: false)
+      window.contentView = host
+      RunLoop.main.run(until: Date().addingTimeInterval(0.2))
+      #expect(box.width > 150)
+      #expect(box.width <= 200)
+    }
   }
-}
+#endif
 
 /// The flex layout behind openuiLibrary's Stack and Card, against what CSS
 /// flexbox does with react-ui's styles.
