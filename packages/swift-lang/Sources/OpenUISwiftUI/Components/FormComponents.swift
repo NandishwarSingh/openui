@@ -507,6 +507,12 @@ struct SliderView: View {
           upper: RangeSlider.clamp(max(current[0], current[1]), to: minimum...maximum),
           bounds: minimum...maximum, step: step
         ) { set([$0, $1]) }
+      } else if maximum - minimum < step {
+        // SwiftUI's Slider traps unless its range holds a whole step. Mid-stream
+        // `max` can be cut short below `min` ("8000" arrives as "800"), and a
+        // response can give a step wider than the range, so the track stays
+        // idle until there's a range to move in.
+        Slider(value: .constant(0), in: 0...1).disabled(true)
       } else if (maximum - minimum) / step <= 100 {
         Slider(
           value: Binding(

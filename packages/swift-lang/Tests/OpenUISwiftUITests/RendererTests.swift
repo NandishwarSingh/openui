@@ -220,6 +220,10 @@ import Testing
       #"Slider("s", "discrete", 0, 1000000, 0.001)"#,
       #"Slider("s", "continuous", 0/0, 10, 1)"#,
       #"Slider("s", "continuous", 0, 100, 1, [10, 1e999])"#,
+      // Mid-stream, `max` can be cut short below `min` ("8000" arrives as "800").
+      #"Slider("s", "discrete", 2000, 800)"#,
+      #"Slider("s", "continuous", 5, 5)"#,
+      #"Slider("s", "discrete", 0, 10, 50)"#,
       #"BarChart(["A"], [Series("S", [1])], "grouped", "x", "y", 1e999)"#,
       #"RadarChart(["A", "B", "C"], [Series("S", [1, 1e999, 3])])"#,
       #"ScatterChart([ScatterSeries("S", [Point(1, 2), Point(0/0, 1)])])"#,
